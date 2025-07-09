@@ -7,8 +7,8 @@ export const registerValidator = vine.compile(
       .email()
       .normalizeEmail()
       .unique(async (db, value) => {
-        const user = await db.query().from('users').select('id').where('email', value).first()
-        return !user
+        const student = await db.query().from('students').select('id').where('email', value).first()
+        return !student
       }),
     password: vine.string().minLength(8),
   })

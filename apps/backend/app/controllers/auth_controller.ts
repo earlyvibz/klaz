@@ -1,23 +1,23 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { registerValidator, loginValidator } from '#validators/auth'
-import User from '#models/user'
+import Student from '#models/student'
 
 export default class AuthController {
   async register({ request }: HttpContext) {
     const { email, password } = await request.validateUsing(registerValidator)
-    const user = await User.create({ email, password })
-    return User.accessTokens.create(user)
+    const student = await Student.create({ email, password })
+    return Student.accessTokens.create(student)
   }
 
   async login({ request }: HttpContext) {
     const { email, password } = await request.validateUsing(loginValidator)
-    const user = await User.verifyCredentials(email, password)
-    return User.accessTokens.create(user)
+    const student = await Student.verifyCredentials(email, password)
+    return Student.accessTokens.create(student)
   }
 
   async logout({ auth }: HttpContext) {
-    const user = auth.user!
-    await User.accessTokens.delete(user, user.currentAccessToken.identifier)
+    const student = auth.user!
+    await Student.accessTokens.delete(student, student.currentAccessToken.identifier)
     return { message: 'Logged out successfully' }
   }
 
@@ -25,7 +25,7 @@ export default class AuthController {
     await auth.check()
 
     return {
-      user: auth.user,
+      student: auth.user,
     }
   }
 }
