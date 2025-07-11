@@ -426,7 +426,7 @@ test.group('Auth', (group) => {
     loginResponse.assertStatus(200)
   })
 
-  test('logout from all devices', async ({ client, assert }) => {
+  test('logout from all devices', async ({ client }) => {
     const user = await User.create({
       email: 'logoutall@test.com',
       password: 'Password123!',
