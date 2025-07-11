@@ -2,7 +2,7 @@ import { DateTime } from 'luxon'
 import { BaseModel, beforeCreate, belongsTo, column } from '@adonisjs/lucid/orm'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import Quest from '#models/quest'
-import Student from '#models/student'
+import User from '#models/user'
 import { v4 as uuidv4 } from 'uuid'
 
 export default class QuestSubmission extends BaseModel {
@@ -10,7 +10,7 @@ export default class QuestSubmission extends BaseModel {
   declare id: string
 
   @column()
-  declare studentId: string
+  declare userId: string
 
   @column()
   declare questId: string
@@ -24,8 +24,8 @@ export default class QuestSubmission extends BaseModel {
   @column.dateTime()
   declare submittedAt: DateTime
 
-  @belongsTo(() => Student)
-  declare student: BelongsTo<typeof Student>
+  @belongsTo(() => User)
+  declare user: BelongsTo<typeof User>
 
   @belongsTo(() => Quest)
   declare quest: BelongsTo<typeof Quest>

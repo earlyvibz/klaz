@@ -2,7 +2,7 @@ import { DateTime } from 'luxon'
 import { BaseModel, beforeCreate, column, hasMany } from '@adonisjs/lucid/orm'
 import type { HasMany } from '@adonisjs/lucid/types/relations'
 import Quest from '#models/quest'
-import Student from '#models/student'
+import User from '#models/user'
 import Group from '#models/group'
 import Reward from '#models/reward'
 import { v4 as uuidv4 } from 'uuid'
@@ -20,8 +20,8 @@ export default class School extends BaseModel {
   @hasMany(() => Group)
   declare groups: HasMany<typeof Group>
 
-  @hasMany(() => Student)
-  declare students: HasMany<typeof Student>
+  @hasMany(() => User)
+  declare users: HasMany<typeof User>
 
   @hasMany(() => Quest)
   declare quests: HasMany<typeof Quest>
