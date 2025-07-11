@@ -98,15 +98,20 @@ export default class AuthController {
 
     const resetToken = await user.generatePasswordResetToken()
 
-    await mail.send((message) => {
-      message.to(email)
-      message.subject('Password Reset Request')
-      message.html(`
-        <p>Hello,</p>
-        <p>You have requested a password reset. Please click the link below to reset your password:</p>
-        <a href="${env.get('FRONTEND_URL', 'http://localhost:3000')}/reset-password?token=${resetToken}">Reset Password</a>
-      `)
-    })
+    try {
+      await mail.send((message) => {
+        message.to(email)
+        message.subject('Password Reset Request')
+        message.html(`
+          <p>Hello,</p>
+          <p>You have requested a password reset. Please click the link below to reset your password:</p>
+          <a href="${env.get('FRONTEND_URL', 'http://localhost:3000')}/reset-password?token=${resetToken}">Reset Password</a>
+        `)
+      })
+    } catch (error) {
+      // Log error but don't reveal if email exists
+      console.error('Failed to send password reset email:', error)
+    }
 
     return response.ok({ message: 'If the email exists, a reset link has been sent' })
   }
