@@ -1,12 +1,14 @@
-import type { HttpContext } from '@adonisjs/core/http'
-import {
-  registerValidator,
-  loginValidator,
-  signupValidator,
-  forgotPasswordValidator,
-  resetPasswordValidator,
-} from '#validators/auth'
 import User from '#models/user'
+import env from '#start/env'
+import {
+  forgotPasswordValidator,
+  loginValidator,
+  registerValidator,
+  resetPasswordValidator,
+  signupValidator,
+} from '#validators/auth'
+import type { HttpContext } from '@adonisjs/core/http'
+import mail from '@adonisjs/mail/services/main'
 import { v4 as uuidv4 } from 'uuid'
 
 export default class AuthController {
@@ -44,6 +46,7 @@ export default class AuthController {
       await User.verifyCredentials(email, password)
       await user.resetFailedAttempts()
       return User.accessTokens.create(user)
+      // eslint-disable-next-line unused-imports/no-unused-vars
     } catch (error) {
       await user.incrementFailedAttempts()
       return response.badRequest({ message: 'Invalid credentials' })
@@ -95,8 +98,15 @@ export default class AuthController {
 
     const resetToken = await user.generatePasswordResetToken()
 
-    // TODO: Send email with reset link containing resetToken
-    console.log(`Password reset token for ${email}: ${resetToken}`)
+    await mail.send((message) => {
+      message.to(email)
+      message.subject('Password Reset Request')
+      message.html(`
+        <p>Hello,</p>
+        <p>You have requested a password reset. Please click the link below to reset your password:</p>
+        <a href="${env.get('FRONTEND_URL', 'http://localhost:3000')}/reset-password?token=${resetToken}">Reset Password</a>
+      `)
+    })
 
     return response.ok({ message: 'If the email exists, a reset link has been sent' })
   }
