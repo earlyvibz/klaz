@@ -2,7 +2,7 @@ import { DateTime } from 'luxon'
 import { BaseModel, beforeCreate, column, belongsTo, hasMany } from '@adonisjs/lucid/orm'
 import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import School from '#models/school'
-import Student from '#models/student'
+import User from '#models/user'
 import { v4 as uuidv4 } from 'uuid'
 
 export default class Group extends BaseModel {
@@ -18,8 +18,8 @@ export default class Group extends BaseModel {
   @belongsTo(() => School)
   declare school: BelongsTo<typeof School>
 
-  @hasMany(() => Student)
-  declare students: HasMany<typeof Student>
+  @hasMany(() => User)
+  declare users: HasMany<typeof User>
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime

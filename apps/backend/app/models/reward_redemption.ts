@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon'
 import { BaseModel, beforeCreate, belongsTo, column } from '@adonisjs/lucid/orm'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
-import Student from '#models/student'
+import User from '#models/user'
 import Reward from '#models/reward'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -13,7 +13,7 @@ export default class RewardRedemption extends BaseModel {
   declare rewardId: string
 
   @column()
-  declare studentId: string
+  declare userId: string
 
   @column()
   declare status: 'PENDING' | 'VALIDATED' | 'CANCELED'
@@ -24,8 +24,8 @@ export default class RewardRedemption extends BaseModel {
   @belongsTo(() => Reward)
   declare reward: BelongsTo<typeof Reward>
 
-  @belongsTo(() => Student)
-  declare student: BelongsTo<typeof Student>
+  @belongsTo(() => User)
+  declare user: BelongsTo<typeof User>
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime

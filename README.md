@@ -1,5 +1,8 @@
 # Schooling Monorepo
 
+[![CI](https://github.com/earlyvibz/klaz/workflows/CI/badge.svg)](https://github.com/earlyvibz/klaz/actions)
+[![codecov](https://codecov.io/gh/earlyvibz/klaz/branch/main/graph/badge.svg)](https://codecov.io/gh/earlyvibz/klaz)
+
 pnpm workspace monorepo setup.
 
 ## Structure

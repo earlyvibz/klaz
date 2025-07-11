@@ -1,0 +1,88 @@
+name: CI
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    env:
+      NODE_ENV: test
+      PORT: 3333
+      APP_KEY: test-key-that-is-32-characters-
+      HOST: 0.0.0.0
+      LOG_LEVEL: info
+      SESSION_DRIVER: memory
+      DB_HOST: 127.0.0.1
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_DATABASE: klaz_test
+      LIMITER_STORE: memory
+      GOOGLE_CLIENT_ID: test-google-client-id
+      GOOGLE_CLIENT_SECRET: test-google-client-secret
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: klaz_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: latest
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Generate APP_KEY
+        working-directory: ./apps/backend
+        run: node ace generate:key
+
+      - name: Run migrations
+        working-directory: ./apps/backend
+        run: node ace migration:run
+
+      - name: Run tests with coverage
+        working-directory: ./apps/backend
+        run: pnpm test:coverage
+
+      - name: Upload coverage reports
+        if: github.event_name == 'push'
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./apps/backend/coverage/lcov.info
+          flags: backend
+          name: backend-coverage
+          fail_ci_if_error: false
+
+      - name: Run linter
+        working-directory: ./apps/backend
+        run: pnpm lint
+
+      - name: Check TypeScript
+        working-directory: ./apps/backend
+        run: pnpm typecheck
