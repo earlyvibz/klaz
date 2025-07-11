@@ -10,6 +10,12 @@ test.group('Students Imports', (group) => {
   let admin: User
 
   group.setup(async () => {
+    const fs = await import('node:fs/promises')
+    const tmpDir = app.makePath('tmp')
+    try {
+      await fs.mkdir(tmpDir, { recursive: true })
+    } catch {}
+
     school = await School.create({
       name: 'Test School',
       slug: 'test-school',
@@ -32,6 +38,18 @@ test.group('Students Imports', (group) => {
     await School.query().delete()
     // Nettoyer le rate limiting entre les tests
     await limiter.clear(['memory'])
+
+    // Nettoyer les fichiers temporaires
+    const fs = await import('node:fs/promises')
+    const tmpDir = app.makePath('tmp')
+    try {
+      const files = await fs.readdir(tmpDir)
+      for (const file of files) {
+        if (file.endsWith('.csv') || file.endsWith('.txt')) {
+          await fs.unlink(join(tmpDir, file))
+        }
+      }
+    } catch {}
   })
 
   test('import students from valid CSV', async ({ client, assert }) => {
