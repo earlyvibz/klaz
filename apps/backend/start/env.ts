@@ -43,4 +43,12 @@ export default await Env.create(new URL('../', import.meta.url), {
   |----------------------------------------------------------
   */
   LIMITER_STORE: Env.schema.enum(['database', 'memory'] as const),
+
+  /*
+  |----------------------------------------------------------
+  | Variables for configuring the mail package
+  |----------------------------------------------------------
+  */
+  RESEND_API_KEY: Env.schema.string.optional(),
+  FRONTEND_URL: Env.schema.string.optional(),
 })
