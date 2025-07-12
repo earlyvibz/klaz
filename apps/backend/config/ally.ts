@@ -1,9 +1,9 @@
-import { defineConfig } from '@adonisjs/ally'
+import { defineConfig } from "@adonisjs/ally";
 
-const allyConfig = defineConfig({})
+const allyConfig = defineConfig({});
 
-export default allyConfig
+export default allyConfig;
 
-declare module '@adonisjs/ally/types' {
-  interface SocialProviders extends InferSocialProviders<typeof allyConfig> {}
+declare module "@adonisjs/ally/types" {
+	interface SocialProviders extends InferSocialProviders<typeof allyConfig> {}
 }

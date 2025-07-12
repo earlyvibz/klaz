@@ -1,0 +1,11 @@
+apps/backend/.adonisjs/**
+apps/front/src/routeTree.gen.ts
+coverage/
+node_modules/
+dist/
+build/
+*.log
+.env
+.env.local
+.env.production
+.env.test
