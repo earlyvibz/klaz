@@ -11,19 +11,17 @@ export default class InvitationsController {
 
 		const invitations = await Invitation.query()
 			.where("schoolId", user.schoolId)
-			.preload("user", (userQuery) => {
-				userQuery.select("id", "email", "fullName");
-			})
 			.orderBy("createdAt", "desc");
 
 		return response.ok({
 			invitations: invitations.map((invitation) => ({
 				id: invitation.id,
 				schoolEmail: invitation.schoolEmail,
-				fullName: invitation.fullName,
+				firstName: invitation.firstName,
+				lastName: invitation.lastName,
+				displayName: invitation.displayName,
 				invitationCode: invitation.invitationCode,
 				isUsed: invitation.isUsed,
-				user: invitation.user,
 				expiresAt: invitation.expiresAt,
 				createdAt: invitation.createdAt,
 			})),
@@ -39,7 +37,6 @@ export default class InvitationsController {
 		const invitation = await Invitation.query()
 			.where("id", params.id)
 			.where("schoolId", user.schoolId)
-			.preload("user")
 			.first();
 
 		if (!invitation) {

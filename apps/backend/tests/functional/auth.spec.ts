@@ -133,7 +133,7 @@ test.group("Auth", (group) => {
 
 		response.assertStatus(400);
 		response.assertBodyContains({
-			message: "Invalid credentials",
+			message: "Adresse e-mail ou mot de passe incorrect.",
 		});
 	});
 

@@ -7,6 +7,17 @@ import Invitation from "#models/invitation";
 import School from "#models/school";
 import User from "#models/user";
 
+// Helper function to split fullName into firstName and lastName
+function _splitName(fullName: string): {
+	firstName: string;
+	lastName: string | null;
+} {
+	const parts = fullName.trim().split(" ");
+	const firstName = parts[0];
+	const lastName = parts.length > 1 ? parts.slice(1).join(" ") : null;
+	return { firstName, lastName };
+}
+
 test.group("Invitations", (group) => {
 	let school: School;
 	let admin: User;
@@ -54,10 +65,13 @@ test.group("Invitations", (group) => {
 
 	test("list invitations for admin", async ({ client, assert }) => {
 		// Créer des invitations
+		const student1Name = _splitName("Student 1");
+		const student2Name = _splitName("Student 2");
 		await Invitation.createMany([
 			{
 				schoolEmail: "student1@school.com",
-				fullName: "Student 1",
+				firstName: student1Name.firstName,
+				lastName: student1Name.lastName,
 				invitationCode: crypto.randomUUID(),
 				schoolId: school.id,
 				isUsed: false,
@@ -65,7 +79,8 @@ test.group("Invitations", (group) => {
 			},
 			{
 				schoolEmail: "student2@school.com",
-				fullName: "Student 2",
+				firstName: student2Name.firstName,
+				lastName: student2Name.lastName,
 				invitationCode: crypto.randomUUID(),
 				schoolId: school.id,
 				isUsed: false,
@@ -86,9 +101,11 @@ test.group("Invitations", (group) => {
 	});
 
 	test("delete unused invitation", async ({ client, assert }) => {
+		const toDeleteName = _splitName("To Delete");
 		const invitation = await Invitation.create({
 			schoolEmail: "todelete@school.com",
-			fullName: "To Delete",
+			firstName: toDeleteName.firstName,
+			lastName: toDeleteName.lastName,
 			invitationCode: crypto.randomUUID(),
 			schoolId: school.id,
 			isUsed: false,
@@ -110,9 +127,11 @@ test.group("Invitations", (group) => {
 	});
 
 	test("cannot delete used invitation", async ({ client }) => {
+		const usedName = _splitName("Used");
 		const invitation = await Invitation.create({
 			schoolEmail: "used@school.com",
-			fullName: "Used",
+			firstName: usedName.firstName,
+			lastName: usedName.lastName,
 			invitationCode: crypto.randomUUID(),
 			schoolId: school.id,
 			isUsed: true,
@@ -153,9 +172,11 @@ test.group("Invitations", (group) => {
 	});
 
 	test("signup with valid invitation code", async ({ client, assert }) => {
+		const newStudentName = _splitName("New Student");
 		const invitation = await Invitation.create({
 			schoolEmail: "signup@school.com",
-			fullName: "New Student",
+			firstName: newStudentName.firstName,
+			lastName: newStudentName.lastName,
 			invitationCode: crypto.randomUUID(),
 			schoolId: school.id,
 			isUsed: false,
@@ -176,20 +197,22 @@ test.group("Invitations", (group) => {
 		// Vérifier que l'utilisateur a été créé
 		const user = await User.findBy("email", "mystudent@personal.com");
 		assert.isNotNull(user);
-		assert.equal(user?.fullName, "New Student");
+		assert.equal(user?.firstName, "New");
+		assert.equal(user?.lastName, "Student");
 		assert.equal(user?.schoolId, school.id);
 		assert.isTrue(user?.isActive);
 
 		// Vérifier que l'invitation est marquée comme utilisée
 		await invitation.refresh();
 		assert.isTrue(invitation.isUsed);
-		assert.equal(invitation.userId, user?.id);
 	});
 
 	test("cannot signup with expired invitation", async ({ client }) => {
+		const expiredName = _splitName("Expired");
 		const invitation = await Invitation.create({
 			schoolEmail: "expired@school.com",
-			fullName: "Expired",
+			firstName: expiredName.firstName,
+			lastName: expiredName.lastName,
 			invitationCode: crypto.randomUUID(),
 			schoolId: school.id,
 			isUsed: false,
@@ -209,9 +232,11 @@ test.group("Invitations", (group) => {
 	});
 
 	test("cannot signup with already used invitation", async ({ client }) => {
+		const usedName2 = _splitName("Used");
 		const invitation = await Invitation.create({
 			schoolEmail: "used@school.com",
-			fullName: "Used",
+			firstName: usedName2.firstName,
+			lastName: usedName2.lastName,
 			invitationCode: crypto.randomUUID(),
 			schoolId: school.id,
 			isUsed: true,
@@ -231,9 +256,11 @@ test.group("Invitations", (group) => {
 	});
 
 	test("cannot signup with existing email", async ({ client }) => {
+		const newName = _splitName("New");
 		const invitation = await Invitation.create({
 			schoolEmail: "new@school.com",
-			fullName: "New",
+			firstName: newName.firstName,
+			lastName: newName.lastName,
 			invitationCode: crypto.randomUUID(),
 			schoolId: school.id,
 			isUsed: false,

@@ -14,6 +14,7 @@ export default function TableUsers({ users }: { users: Student[] }) {
 			<TableHeader className="bg-muted sticky top-0 z-10">
 				<TableRow>
 					<TableHead>Nom</TableHead>
+					<TableHead>Prénom</TableHead>
 					<TableHead>Email</TableHead>
 					<TableHead>Level</TableHead>
 					<TableHead>Points</TableHead>
@@ -25,7 +26,10 @@ export default function TableUsers({ users }: { users: Student[] }) {
 					users.map((user) => (
 						<TableRow key={user.id}>
 							<TableCell className="font-medium">
-								{user.fullName || "N/A"}
+								{user.lastName || "N/A"}
+							</TableCell>
+							<TableCell className="font-medium">
+								{user.firstName || "N/A"}
 							</TableCell>
 							<TableCell>{user.email}</TableCell>
 							<TableCell>{user.level}</TableCell>

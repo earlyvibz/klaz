@@ -15,12 +15,7 @@ export function SignupForm({
 	const [error, setError] = useState<string | null>(null);
 
 	const form = useAppForm({
-		defaultValues: {
-			email: "",
-			password: "",
-			confirmPassword: "",
-			code: "",
-		},
+		defaultValues: { email: "", password: "", confirmPassword: "", code: "" },
 		validators: {
 			onBlur: signupSchema,
 		},

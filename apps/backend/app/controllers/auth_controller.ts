@@ -111,7 +111,8 @@ export default class AuthController {
 		const user = await User.create({
 			email,
 			password,
-			fullName: invitation.fullName,
+			firstName: invitation.firstName,
+			lastName: invitation.lastName,
 			schoolId: invitation.schoolId,
 			groupId: invitation.groupId,
 			role: "STUDENT",
@@ -122,7 +123,7 @@ export default class AuthController {
 		});
 
 		// Marquer l'invitation comme utilisée
-		await invitation.markAsUsed(user.id);
+		await invitation.markAsUsed();
 
 		return User.accessTokens.create(user);
 	}

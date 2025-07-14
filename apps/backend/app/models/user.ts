@@ -29,7 +29,10 @@ export default class User extends compose(BaseModel, AuthFinder) {
 	declare id: string;
 
 	@column()
-	declare fullName: string | null;
+	declare firstName: string | null;
+
+	@column()
+	declare lastName: string | null;
 
 	@column()
 	declare email: string;
@@ -81,6 +84,22 @@ export default class User extends compose(BaseModel, AuthFinder) {
 
 	@column.dateTime({ autoCreate: true, autoUpdate: true })
 	declare updatedAt: DateTime | null;
+
+	// Helper methods for name handling
+	get displayName(): string {
+		if (this.firstName && this.lastName) {
+			return `${this.firstName} ${this.lastName}`;
+		}
+		return this.firstName || this.lastName || this.email;
+	}
+
+	get initials(): string {
+		const firstInitial = this.firstName?.charAt(0)?.toUpperCase() || "";
+		const lastInitial = this.lastName?.charAt(0)?.toUpperCase() || "";
+		return (
+			`${firstInitial}${lastInitial}` || this.email.charAt(0).toUpperCase()
+		);
+	}
 
 	@belongsTo(() => School)
 	declare school: BelongsTo<typeof School>;

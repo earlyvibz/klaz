@@ -6,6 +6,17 @@ import Invitation from "#models/invitation";
 import School from "#models/school";
 import User from "#models/user";
 
+// Helper function to split fullName into firstName and lastName
+function splitName(fullName: string): {
+	firstName: string;
+	lastName: string | null;
+} {
+	const parts = fullName.trim().split(" ");
+	const firstName = parts[0];
+	const lastName = parts.length > 1 ? parts.slice(1).join(" ") : null;
+	return { firstName, lastName };
+}
+
 test.group("Students Imports", (group) => {
 	let school: School;
 	let admin: User;
@@ -152,9 +163,11 @@ bob.wilson@example.com,Bob Wilson`;
 
 	test("skip duplicate emails in CSV", async ({ client, assert }) => {
 		// Créer une invitation existante
+		const existingUserName = splitName("Existing User");
 		await Invitation.create({
 			schoolEmail: "existing@example.com",
-			fullName: "Existing User",
+			firstName: existingUserName.firstName,
+			lastName: existingUserName.lastName,
 			invitationCode: crypto.randomUUID(),
 			schoolId: school.id,
 			isUsed: false,

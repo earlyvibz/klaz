@@ -1,6 +1,6 @@
 import type { HttpContext } from "@adonisjs/core/http";
 import User from "#models/user";
-import { StudentDto } from "../dtos/student_dto.js";
+import StudentDto from "../dtos/student_dto.js";
 
 export default class StudentsController {
 	async index({ params, request, auth, response }: HttpContext) {
@@ -27,7 +27,8 @@ export default class StudentsController {
 			.preload("group")
 			.select([
 				"id",
-				"fullName",
+				"firstName",
+				"lastName",
 				"email",
 				"level",
 				"points",
@@ -40,7 +41,9 @@ export default class StudentsController {
 
 		// Utiliser le DTO pour sérialiser les données
 		const paginationMeta = students.getMeta();
-		const studentsData = StudentDto.fromUsers(students.all());
+		const studentsData = students
+			.all()
+			.map((student) => new StudentDto(student));
 
 		return response.ok({
 			data: studentsData,

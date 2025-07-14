@@ -8,6 +8,7 @@ export default class extends BaseSchema {
 			table.uuid("id").primary();
 			table.string("name").notNullable();
 			table.string("slug").notNullable().unique();
+			table.string("address").nullable();
 			table.timestamps(true);
 		});
 	}

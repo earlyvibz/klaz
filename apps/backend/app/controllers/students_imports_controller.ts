@@ -7,6 +7,18 @@ import InvitationService from "#services/invitation_service";
 import { importStudentsValidator } from "#validators/students_import";
 
 export default class StudentsImportsController {
+	// Helper function to split fullName into firstName and lastName
+	private splitName(fullName: string | null): {
+		firstName: string | null;
+		lastName: string | null;
+	} {
+		if (!fullName) return { firstName: null, lastName: null };
+		const parts = fullName.trim().split(" ");
+		const firstName = parts[0] || null;
+		const lastName = parts.length > 1 ? parts.slice(1).join(" ") : null;
+		return { firstName, lastName };
+	}
+
 	async import({ request, auth, response }: HttpContext) {
 		const { csv_file: csvFile } = await request.validateUsing(
 			importStudentsValidator,
@@ -63,6 +75,7 @@ export default class StudentsImportsController {
 
 				const schoolEmail = values[emailIndex];
 				const fullName = nameIndex !== -1 ? values[nameIndex] : null;
+				const { firstName, lastName } = this.splitName(fullName);
 
 				if (!schoolEmail || !schoolEmail.includes("@")) {
 					errors.push(`Line ${i + 1}: Invalid email "${schoolEmail}"`);
@@ -82,7 +95,8 @@ export default class StudentsImportsController {
 
 				invitationsData.push({
 					schoolEmail,
-					fullName,
+					firstName,
+					lastName,
 					invitationCode: uuidv4(),
 					schoolId,
 					isUsed: false,
@@ -112,7 +126,9 @@ export default class StudentsImportsController {
 				invitations: createdInvitations.map((invitation) => ({
 					id: invitation.id,
 					schoolEmail: invitation.schoolEmail,
-					fullName: invitation.fullName,
+					firstName: invitation.firstName,
+					lastName: invitation.lastName,
+					displayName: invitation.displayName,
 					invitationCode: invitation.invitationCode,
 					expiresAt: invitation.expiresAt,
 				})),

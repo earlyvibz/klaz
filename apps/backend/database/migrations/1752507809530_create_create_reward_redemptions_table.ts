@@ -1,26 +1,25 @@
 import { BaseSchema } from "@adonisjs/lucid/schema";
 
 export default class extends BaseSchema {
-	protected tableName = "quest_submissions";
+	protected tableName = "reward_redemptions";
 
 	async up() {
 		this.schema.createTable(this.tableName, (table) => {
 			table.uuid("id").primary();
 			table
-				.uuid("student_id")
+				.uuid("user_id")
 				.references("id")
-				.inTable("students")
+				.inTable("users")
 				.onDelete("CASCADE");
 			table
-				.uuid("quest_id")
+				.uuid("reward_id")
 				.references("id")
-				.inTable("quests")
+				.inTable("rewards")
 				.onDelete("CASCADE");
-			table.text("proof_url").nullable();
+			table.integer("points_spent").notNullable();
 			table
-				.enum("status", ["PENDING", "APPROVED", "REJECTED"])
+				.enum("status", ["PENDING", "FULFILLED", "CANCELLED"])
 				.defaultTo("PENDING");
-			table.timestamp("submitted_at", { useTz: true }).defaultTo(this.now());
 			table.timestamps(true);
 		});
 	}

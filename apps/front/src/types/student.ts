@@ -1,10 +1,13 @@
 export interface Student {
 	id: string;
-	fullName: string | null;
+	firstName: string | null;
+	lastName: string | null;
+	displayName: string;
 	email: string;
-	role: "STUDENT" | "ADMIN" | "SUPERADMIN";
 	level: number;
 	points: number;
+	isActive: boolean;
+	role: string;
 	groupId: string | null;
 	createdAt: string;
 	lastLoginAt: string | null;

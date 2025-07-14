@@ -2,6 +2,17 @@ import { test } from "@japa/runner";
 import School from "#models/school";
 import User from "#models/user";
 
+// Helper function to split fullName into firstName and lastName
+function _splitName(fullName: string): {
+	firstName: string;
+	lastName: string | null;
+} {
+	const parts = fullName.trim().split(" ");
+	const firstName = parts[0];
+	const lastName = parts.length > 1 ? parts.slice(1).join(" ") : null;
+	return { firstName, lastName };
+}
+
 test.group("Students", (group) => {
 	let school1: School;
 	let school2: School;
@@ -45,10 +56,12 @@ test.group("Students", (group) => {
 		});
 
 		// Créer des étudiants pour chaque école
+		const student1Name = _splitName("Student 1");
 		student1 = await User.create({
 			email: "student1@test.com",
 			password: "Password123!",
-			fullName: "Student 1",
+			firstName: student1Name.firstName,
+			lastName: student1Name.lastName,
 			schoolId: school1.id,
 			role: "STUDENT",
 			isActive: true,
@@ -56,10 +69,12 @@ test.group("Students", (group) => {
 			points: 100,
 		});
 
+		const student2Name = _splitName("Student 2");
 		_student2 = await User.create({
 			email: "student2@test.com",
 			password: "Password123!",
-			fullName: "Student 2",
+			firstName: student2Name.firstName,
+			lastName: student2Name.lastName,
 			schoolId: school1.id,
 			role: "STUDENT",
 			isActive: true,
@@ -67,10 +82,12 @@ test.group("Students", (group) => {
 			points: 200,
 		});
 
+		const student3Name = _splitName("Student 3");
 		_student3 = await User.create({
 			email: "student3@test.com",
 			password: "Password123!",
-			fullName: "Student 3",
+			firstName: student3Name.firstName,
+			lastName: student3Name.lastName,
 			schoolId: school2.id,
 			role: "STUDENT",
 			isActive: true,

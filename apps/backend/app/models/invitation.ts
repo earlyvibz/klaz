@@ -9,7 +9,6 @@ import { DateTime } from "luxon";
 import { v4 as uuidv4 } from "uuid";
 import Group from "#models/group";
 import School from "#models/school";
-import User from "#models/user";
 
 export default class Invitation extends BaseModel {
 	static table = "invitations";
@@ -21,7 +20,10 @@ export default class Invitation extends BaseModel {
 	declare schoolEmail: string;
 
 	@column()
-	declare fullName: string | null;
+	declare firstName: string | null;
+
+	@column()
+	declare lastName: string | null;
 
 	@column()
 	declare invitationCode: string;
@@ -33,13 +35,7 @@ export default class Invitation extends BaseModel {
 	declare groupId: string | null;
 
 	@column()
-	declare userId: string | null;
-
-	@column()
 	declare isUsed: boolean;
-
-	@column.dateTime()
-	declare usedAt: DateTime | null;
 
 	@column.dateTime()
 	declare expiresAt: DateTime | null;
@@ -50,14 +46,18 @@ export default class Invitation extends BaseModel {
 	@column.dateTime({ autoCreate: true, autoUpdate: true })
 	declare updatedAt: DateTime;
 
+	get displayName(): string {
+		if (this.firstName && this.lastName) {
+			return `${this.firstName} ${this.lastName}`;
+		}
+		return this.firstName || this.lastName || this.schoolEmail;
+	}
+
 	@belongsTo(() => School)
 	declare school: BelongsTo<typeof School>;
 
 	@belongsTo(() => Group)
 	declare group: BelongsTo<typeof Group>;
-
-	@belongsTo(() => User)
-	declare user: BelongsTo<typeof User>;
 
 	@beforeCreate()
 	public static async assignId(model: Invitation) {
@@ -72,10 +72,8 @@ export default class Invitation extends BaseModel {
 		return !this.isUsed && !this.isExpired();
 	}
 
-	public async markAsUsed(userId: string): Promise<void> {
+	public async markAsUsed(): Promise<void> {
 		this.isUsed = true;
-		this.userId = userId;
-		this.usedAt = DateTime.now();
 		await this.save();
 	}
 }

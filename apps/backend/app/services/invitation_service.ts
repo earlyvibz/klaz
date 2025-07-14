@@ -11,7 +11,7 @@ export default class InvitationService {
 				message.subject("Invitation à rejoindre la plateforme Klaz");
 				message.html(`
           <h2>Invitation à rejoindre Klaz</h2>
-          <p>Bonjour ${invitation.fullName || "Étudiant"},</p>
+          <p>Bonjour ${invitation.displayName || "Étudiant"},</p>
           <p>Vous avez été invité à rejoindre la plateforme Klaz.</p>
           <p>Pour créer votre compte, cliquez sur le lien suivant et utilisez le code d'invitation :</p>
           <p><strong>Code d'invitation :</strong> ${invitation.invitationCode}</p>
