@@ -1,16 +1,8 @@
-import {
-	IconCreditCard,
-	IconDotsVertical,
-	IconLogout,
-	IconNotification,
-	IconUserCircle,
-} from "@tabler/icons-react";
-
+import { IconDotsVertical, IconLogout } from "@tabler/icons-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
-	DropdownMenuGroup,
 	DropdownMenuItem,
 	DropdownMenuLabel,
 	DropdownMenuSeparator,
@@ -22,17 +14,12 @@ import {
 	SidebarMenuItem,
 	useSidebar,
 } from "@/components/ui/sidebar";
+import { useAuth } from "@/hooks/auth/context";
+import type { User } from "@/hooks/auth/types";
 
-export function NavUser({
-	user,
-}: {
-	user: {
-		name: string;
-		email: string;
-		avatar: string;
-	};
-}) {
+export function NavUser({ user }: { user: User }) {
 	const { isMobile } = useSidebar();
+	const { logout } = useAuth();
 
 	return (
 		<SidebarMenu>
@@ -44,11 +31,11 @@ export function NavUser({
 							className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
 						>
 							<Avatar className="h-8 w-8 rounded-lg grayscale">
-								<AvatarImage src={user.avatar} alt={user.name} />
+								<AvatarImage src={user.email} alt={user.email} />
 								<AvatarFallback className="rounded-lg">CN</AvatarFallback>
 							</Avatar>
 							<div className="grid flex-1 text-left text-sm leading-tight">
-								<span className="truncate font-medium">{user.name}</span>
+								<span className="truncate font-medium">{user.email}</span>
 								<span className="text-muted-foreground truncate text-xs">
 									{user.email}
 								</span>
@@ -65,11 +52,13 @@ export function NavUser({
 						<DropdownMenuLabel className="p-0 font-normal">
 							<div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
 								<Avatar className="h-8 w-8 rounded-lg">
-									<AvatarImage src={user.avatar} alt={user.name} />
-									<AvatarFallback className="rounded-lg">CN</AvatarFallback>
+									<AvatarImage src={user.email} alt={user.email} />
+									<AvatarFallback className="rounded-lg">
+										{user.email.charAt(0)}
+									</AvatarFallback>
 								</Avatar>
 								<div className="grid flex-1 text-left text-sm leading-tight">
-									<span className="truncate font-medium">{user.name}</span>
+									<span className="truncate font-medium">{user.email}</span>
 									<span className="text-muted-foreground truncate text-xs">
 										{user.email}
 									</span>
@@ -77,7 +66,7 @@ export function NavUser({
 							</div>
 						</DropdownMenuLabel>
 						<DropdownMenuSeparator />
-						<DropdownMenuGroup>
+						{/* <DropdownMenuGroup>
 							<DropdownMenuItem>
 								<IconUserCircle />
 								Account
@@ -90,11 +79,15 @@ export function NavUser({
 								<IconNotification />
 								Notifications
 							</DropdownMenuItem>
-						</DropdownMenuGroup>
-						<DropdownMenuSeparator />
-						<DropdownMenuItem>
+						</DropdownMenuGroup> */}
+						<DropdownMenuItem
+							className="cursor-pointer"
+							onClick={() => {
+								logout();
+							}}
+						>
 							<IconLogout />
-							Log out
+							Déconnexion
 						</DropdownMenuItem>
 					</DropdownMenuContent>
 				</DropdownMenu>

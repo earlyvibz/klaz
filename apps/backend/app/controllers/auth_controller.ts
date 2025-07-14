@@ -1,6 +1,6 @@
 import type { HttpContext } from "@adonisjs/core/http";
 import mail from "@adonisjs/mail/services/main";
-import { v4 as uuidv4 } from "uuid";
+import Invitation from "#models/invitation";
 import User from "#models/user";
 import env from "#start/env";
 import {
@@ -20,10 +20,10 @@ export default class AuthController {
 			password,
 			schoolId,
 			role: "STUDENT",
-			invitationCode: uuidv4(),
 			isActive: true,
 			level: 1,
 			points: 0,
+			emailVerified: true,
 		});
 		return User.accessTokens.create(user);
 	}
@@ -33,23 +33,32 @@ export default class AuthController {
 
 		const user = await User.findBy("email", email);
 		if (!user) {
-			return response.badRequest({ message: "Invalid credentials" });
-		}
-
-		// Check if account is locked
-		if (user.isAccountLocked()) {
 			return response.badRequest({
-				message: "Account temporarily locked due to too many failed attempts",
+				message: "Adresse e-mail ou mot de passe incorrect.",
 			});
 		}
 
 		try {
 			await User.verifyCredentials(email, password);
-			await user.resetFailedAttempts();
-			return User.accessTokens.create(user);
+
+			const token = await User.accessTokens.create(user, ["*"], {
+				expiresIn: "7d",
+			});
+
+			return {
+				token,
+				user: {
+					id: user.id,
+					email: user.email,
+					role: user.role,
+					schoolId: user.schoolId,
+					group: user.group,
+				},
+			};
 		} catch (_error) {
-			await user.incrementFailedAttempts();
-			return response.badRequest({ message: "Invalid credentials" });
+			return response.badRequest({
+				message: "Adresse e-mail ou mot de passe incorrect.",
+			});
 		}
 	}
 
@@ -71,24 +80,49 @@ export default class AuthController {
 	}
 
 	async signup({ request, response }: HttpContext) {
-		const { invitationCode, password } =
+		const { invitationCode, email, password } =
 			await request.validateUsing(signupValidator);
 
-		const user = await User.findBy("invitationCode", invitationCode);
-		if (!user) {
+		const invitation = await Invitation.findBy(
+			"invitationCode",
+			invitationCode,
+		);
+		if (!invitation) {
 			return response.badRequest({ message: "Invalid invitation code" });
 		}
 
-		if (user.isActive) {
+		if (!invitation.isAvailable()) {
 			return response.badRequest({
-				message: "This invitation code has already been used",
+				message: invitation.isUsed
+					? "This invitation code has already been used"
+					: "This invitation code has expired",
 			});
 		}
 
-		user.password = password;
-		user.isActive = true;
-		user.emailVerified = true; // Auto-verify email for invited users
-		await user.save();
+		// Vérifier que l'email n'est pas déjà utilisé
+		const existingUser = await User.findBy("email", email);
+		if (existingUser) {
+			return response.badRequest({
+				message: "This email is already registered",
+			});
+		}
+
+		// Créer l'utilisateur
+		const user = await User.create({
+			email,
+			password,
+			fullName: invitation.fullName,
+			schoolId: invitation.schoolId,
+			groupId: invitation.groupId,
+			role: "STUDENT",
+			isActive: true,
+			level: 1,
+			points: 0,
+			emailVerified: true,
+		});
+
+		// Marquer l'invitation comme utilisée
+		await invitation.markAsUsed(user.id);
 
 		return User.accessTokens.create(user);
 	}
@@ -98,7 +132,6 @@ export default class AuthController {
 
 		const user = await User.findBy("email", email);
 		if (!user) {
-			// Don't reveal if email exists, always return success
 			return response.ok({
 				message: "If the email exists, a reset link has been sent",
 			});
@@ -117,8 +150,9 @@ export default class AuthController {
         `);
 			});
 		} catch (error) {
-			// Log error but don't reveal if email exists
-			console.error("Failed to send password reset email:", error);
+			if (env.get("NODE_ENV") !== "test") {
+				console.error("Failed to send password reset email:", error);
+			}
 		}
 
 		return response.ok({
@@ -138,7 +172,7 @@ export default class AuthController {
 
 		user.password = password;
 		await user.clearPasswordResetToken();
-		await user.resetFailedAttempts(); // Clear any failed attempts
+		await user.resetFailedAttempts();
 
 		return response.ok({ message: "Password has been reset successfully" });
 	}

@@ -1,66 +1,86 @@
-import bg from "@/assets/img/bg.png";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { useState } from "react";
+import { useAuth } from "@/hooks/auth";
+import { useAppForm } from "@/hooks/form/form";
 import { cn } from "@/lib/utils";
+import { loginSchema } from "@/validators/auth";
 
 export function LoginForm({
 	className,
 	...props
-}: React.ComponentProps<"div">) {
+}: React.ComponentProps<"form">) {
+	const navigate = useNavigate();
+	const { login } = useAuth();
+	const state = useRouterState();
+	const [error, setError] = useState<string | null>(null);
+
+	const form = useAppForm({
+		defaultValues: {
+			password: "",
+			email: "",
+		},
+		validators: {
+			onBlur: loginSchema,
+		},
+		onSubmit: async ({ value }) => {
+			try {
+				setError(null);
+				await login(value.email, value.password);
+				navigate({ to: "/stats" });
+			} catch (error: unknown) {
+				if (error instanceof Error) {
+					setError(error.message);
+				} else {
+					setError("Une erreur inattendue est survenue");
+				}
+			}
+		},
+	});
+
 	return (
-		<div className={cn("flex flex-col gap-6", className)} {...props}>
-			<Card className="overflow-hidden p-0">
-				<CardContent className="grid p-0 md:grid-cols-2">
-					<form className="p-6 md:p-8">
-						<div className="flex flex-col gap-6">
-							<div className="flex flex-col items-center text-center">
-								<h1 className="text-2xl font-bold">Welcome back</h1>
-								<p className="text-muted-foreground text-balance">
-									Login to your schooling account
-								</p>
-							</div>
-							<div className="grid gap-3">
-								<Label htmlFor="email">Email</Label>
-								<Input
-									id="email"
-									type="email"
-									placeholder="m@example.com"
-									required
-								/>
-							</div>
-							<div className="grid gap-3">
-								<div className="flex items-center">
-									<Label htmlFor="password">Password</Label>
-									<a
-										href="/forgot-password"
-										className="ml-auto text-sm underline-offset-2 hover:underline"
-									>
-										Forgot your password?
-									</a>
-								</div>
-								<Input id="password" type="password" required />
-							</div>
-							<Button type="submit" className="w-full">
-								Login
-							</Button>
-						</div>
-					</form>
-					<div className="bg-muted relative hidden md:block">
-						<img
-							src={bg}
-							alt="Background"
-							className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
-						/>
-					</div>
-				</CardContent>
-			</Card>
-			<div className="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
-				By clicking continue, you agree to our{" "}
-				<a href="/terms-of-service">Terms of Service</a> and{" "}
-				<a href="/privacy-policy">Privacy Policy</a>.
+		<form
+			className={cn("flex flex-col gap-6", className)}
+			{...props}
+			onSubmit={(e) => {
+				e.preventDefault();
+				e.stopPropagation();
+				form.handleSubmit();
+			}}
+		>
+			<div className="flex flex-col items-center gap-2 text-center">
+				<h1 className="text-2xl font-bold">Connectez-vous à votre compte</h1>
+				<p className="text-muted-foreground text-sm text-balance">
+					Entrez votre email ci-dessous pour vous connecter à votre compte
+				</p>
 			</div>
-		</div>
+			{error && (
+				<div className="text-red-600 text-sm text-center bg-red-50 p-3 rounded-md border border-red-200">
+					{error}
+				</div>
+			)}
+			<div className="grid gap-6">
+				<div className="grid gap-3">
+					<form.AppField name="email">
+						{(field) => <field.TextField label="Email :" />}
+					</form.AppField>
+				</div>
+				<div className="grid gap-3">
+					<form.AppField name="password">
+						{(field) => (
+							<field.PasswordField label="Mot de passe :" isForgotPassword />
+						)}
+					</form.AppField>
+				</div>
+				<form.AppForm>
+					<form.SubscribeButton label="Connexion" isLoading={state.isLoading} />
+				</form.AppForm>
+			</div>
+			<div className="text-center text-sm">
+				Vous n&apos;avez pas de compte?{" "}
+				<Link to="/auth/signup" className="underline underline-offset-4">
+					Créer un compte
+				</Link>
+			</div>
+		</form>
 	);
 }

@@ -1,8 +1,9 @@
 import type { HttpContext } from "@adonisjs/core/http";
 import app from "@adonisjs/core/services/app";
+import { DateTime } from "luxon";
 import { v4 as uuidv4 } from "uuid";
-import User from "#models/user";
-import type { CreateUserData } from "#types/students";
+import Invitation from "#models/invitation";
+import InvitationService from "#services/invitation_service";
 import { importStudentsValidator } from "#validators/students_import";
 
 export default class StudentsImportsController {
@@ -52,7 +53,7 @@ export default class StudentsImportsController {
 				});
 			}
 
-			const studentsData: CreateUserData[] = [];
+			const invitationsData = [];
 			const errors: string[] = [];
 
 			for (let i = 1; i < lines.length; i++) {
@@ -60,53 +61,60 @@ export default class StudentsImportsController {
 
 				if (values.length < headers.length) continue;
 
-				const email = values[emailIndex];
+				const schoolEmail = values[emailIndex];
 				const fullName = nameIndex !== -1 ? values[nameIndex] : null;
 
-				if (!email || !email.includes("@")) {
-					errors.push(`Line ${i + 1}: Invalid email "${email}"`);
+				if (!schoolEmail || !schoolEmail.includes("@")) {
+					errors.push(`Line ${i + 1}: Invalid email "${schoolEmail}"`);
 					continue;
 				}
 
-				const existingUser = await User.findBy("email", email);
-				if (existingUser) {
+				const existingInvitation = await Invitation.findBy(
+					"schoolEmail",
+					schoolEmail,
+				);
+				if (existingInvitation) {
 					errors.push(
-						`Line ${i + 1}: User with email "${email}" already exists`,
+						`Line ${i + 1}: Invitation for email "${schoolEmail}" already exists`,
 					);
 					continue;
 				}
 
-				studentsData.push({
-					email,
+				invitationsData.push({
+					schoolEmail,
 					fullName,
-					password: crypto.randomUUID(),
 					invitationCode: uuidv4(),
 					schoolId,
-					role: "STUDENT",
-					isActive: false,
-					level: 1,
-					points: 0,
+					isUsed: false,
+					expiresAt: DateTime.now().plus({ days: 30 }),
 				});
 			}
 
-			if (studentsData.length === 0) {
+			if (invitationsData.length === 0) {
 				return response.badRequest({
-					message: "No valid students to import",
+					message: "No valid invitations to create",
 					errors,
 				});
 			}
 
-			const createdUsers = await User.createMany(studentsData);
+			const createdInvitations = await Invitation.createMany(invitationsData);
+
+			// Envoyer les emails d'invitation
+			const { sent, failed } =
+				await InvitationService.sendBulkInvitations(createdInvitations);
 
 			return response.ok({
-				message: `Successfully imported ${createdUsers.length} users`,
-				imported: createdUsers.length,
+				message: `Successfully created ${createdInvitations.length} invitations`,
+				created: createdInvitations.length,
+				emailsSent: sent,
 				errors: errors.length > 0 ? errors : null,
-				users: createdUsers.map((u: User) => ({
-					id: u.id,
-					email: u.email,
-					fullName: u.fullName,
-					invitationCode: u.invitationCode,
+				emailErrors: failed.length > 0 ? failed : null,
+				invitations: createdInvitations.map((invitation) => ({
+					id: invitation.id,
+					schoolEmail: invitation.schoolEmail,
+					fullName: invitation.fullName,
+					invitationCode: invitation.invitationCode,
+					expiresAt: invitation.expiresAt,
 				})),
 			});
 		} catch (error) {
@@ -115,19 +123,5 @@ export default class StudentsImportsController {
 				error: error.message,
 			});
 		}
-	}
-
-	async getInvitationCodes({ auth, response }: HttpContext) {
-		const user = auth.user;
-		if (!user) {
-			return response.unauthorized({ message: "User not authenticated" });
-		}
-		const users = await User.query()
-			.where("schoolId", user.schoolId)
-			.where("isActive", false)
-			.select("id", "email", "fullName", "invitationCode", "createdAt")
-			.orderBy("createdAt", "desc");
-
-		return response.ok({ users });
 	}
 }

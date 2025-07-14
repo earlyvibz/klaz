@@ -20,6 +20,9 @@ import { middleware } from "./kernel.js";
 const AuthController = () => import("#controllers/auth_controller");
 const StudentsImportsController = () =>
 	import("#controllers/students_imports_controller");
+const StudentsController = () => import("#controllers/students_controller");
+const InvitationsController = () =>
+	import("#controllers/invitations_controller");
 
 router.get("/", async () => {
 	return {
@@ -69,12 +72,24 @@ router
 			.post("/students/import", [StudentsImportsController, "import"])
 			.as("students.import")
 			.use(importThrottle);
+
 		router
-			.get("/students/invitation-codes", [
-				StudentsImportsController,
-				"getInvitationCodes",
-			])
-			.as("students.invitationCodes");
+			.get("/schools/:schoolId/students", [StudentsController, "index"])
+			.as("students.index");
+
+		// Routes pour gérer les invitations
+		router
+			.get("/invitations", [InvitationsController, "index"])
+			.as("invitations.index");
+		router
+			.get("/invitations/:id", [InvitationsController, "show"])
+			.as("invitations.show");
+		router
+			.delete("/invitations/:id", [InvitationsController, "destroy"])
+			.as("invitations.destroy");
+		router
+			.post("/invitations/:id/resend", [InvitationsController, "resend"])
+			.as("invitations.resend");
 	})
 	.use([middleware.auth(), middleware.role({ requireAdmin: true })]);
 

@@ -33,6 +33,19 @@ export const loginValidator = vine.compile(
 export const signupValidator = vine.compile(
 	vine.object({
 		invitationCode: vine.string().uuid(),
+		email: vine
+			.string()
+			.email()
+			.normalizeEmail()
+			.unique(async (db, value) => {
+				const user = await db
+					.query()
+					.from("users")
+					.select("id")
+					.where("email", value)
+					.first();
+				return !user;
+			}),
 		password: vine
 			.string()
 			.minLength(8)

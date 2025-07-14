@@ -6,15 +6,23 @@ import * as ShadcnSelect from "@/components/ui/select";
 import { Slider as ShadcnSlider } from "@/components/ui/slider";
 import { Switch as ShadcnSwitch } from "@/components/ui/switch";
 import { Textarea as ShadcnTextarea } from "@/components/ui/textarea";
-import { useFieldContext, useFormContext } from "../hooks/demo.form-context";
+import { useFieldContext, useFormContext } from "../../hooks/form/context";
+import Spinner from "../spinner/spinner";
+import { PasswordInput } from "../ui/input-password";
 
-export function SubscribeButton({ label }: { label: string }) {
+export function SubscribeButton({
+	label,
+	isLoading,
+}: {
+	label: string;
+	isLoading: boolean;
+}) {
 	const form = useFormContext();
 	return (
 		<form.Subscribe selector={(state) => state.isSubmitting}>
 			{(isSubmitting) => (
 				<Button type="submit" disabled={isSubmitting}>
-					{label}
+					{isLoading ? <Spinner /> : label}
 				</Button>
 			)}
 		</form.Subscribe>
@@ -31,7 +39,7 @@ function ErrorMessages({
 			{errors.map((error) => (
 				<div
 					key={typeof error === "string" ? error : error.message}
-					className="text-red-500 mt-1 font-bold"
+					className="text-red-500 mt-1 text-sm font-medium"
 				>
 					{typeof error === "string" ? error : error.message}
 				</div>
@@ -51,10 +59,8 @@ export function TextField({
 	const errors = useStore(field.store, (state) => state.meta.errors);
 
 	return (
-		<div>
-			<Label htmlFor={label} className="mb-2 text-xl font-bold">
-				{label}
-			</Label>
+		<>
+			<Label htmlFor={label}>{label}</Label>
 			<Input
 				value={field.state.value}
 				placeholder={placeholder}
@@ -62,7 +68,74 @@ export function TextField({
 				onChange={(e) => field.handleChange(e.target.value)}
 			/>
 			{field.state.meta.isTouched && <ErrorMessages errors={errors} />}
-		</div>
+		</>
+	);
+}
+
+export function EmailField({
+	label,
+	placeholder,
+}: {
+	label: string;
+	placeholder?: string;
+}) {
+	const field = useFieldContext<string>();
+	const errors = useStore(field.store, (state) => state.meta.errors);
+
+	return (
+		<>
+			<Label htmlFor={label}>{label}</Label>
+			<Input
+				id={label}
+				type="email"
+				value={field.state.value}
+				placeholder={placeholder}
+				onBlur={field.handleBlur}
+				onChange={(e) => field.handleChange(e.target.value)}
+			/>
+			{field.state.meta.isTouched && <ErrorMessages errors={errors} />}
+		</>
+	);
+}
+
+export function PasswordField({
+	label,
+	placeholder,
+	isForgotPassword = false,
+}: {
+	label: string;
+	placeholder?: string;
+	isForgotPassword?: boolean;
+}) {
+	const field = useFieldContext<string>();
+	const errors = useStore(field.store, (state) => state.meta.errors);
+
+	return (
+		<>
+			{isForgotPassword ? (
+				<div className="flex items-center gap-2">
+					<Label htmlFor={label}>{label}</Label>{" "}
+					<a
+						href="/forgot-password"
+						className="ml-auto text-sm underline-offset-4 hover:underline"
+					>
+						Mot de passe oublié ?
+					</a>
+				</div>
+			) : (
+				<>
+					<Label htmlFor={label}>{label}</Label>{" "}
+				</>
+			)}
+			<PasswordInput
+				id={label}
+				value={field.state.value}
+				placeholder={placeholder}
+				onBlur={field.handleBlur}
+				onChange={(e) => field.handleChange(e.target.value)}
+			/>
+			{field.state.meta.isTouched && <ErrorMessages errors={errors} />}
+		</>
 	);
 }
 
@@ -77,10 +150,8 @@ export function TextArea({
 	const errors = useStore(field.store, (state) => state.meta.errors);
 
 	return (
-		<div>
-			<Label htmlFor={label} className="mb-2 text-xl font-bold">
-				{label}
-			</Label>
+		<>
+			<Label htmlFor={label}>{label}</Label>
 			<ShadcnTextarea
 				id={label}
 				value={field.state.value}
@@ -89,7 +160,7 @@ export function TextArea({
 				onChange={(e) => field.handleChange(e.target.value)}
 			/>
 			{field.state.meta.isTouched && <ErrorMessages errors={errors} />}
-		</div>
+		</>
 	);
 }
 
@@ -106,7 +177,7 @@ export function Select({
 	const errors = useStore(field.store, (state) => state.meta.errors);
 
 	return (
-		<div>
+		<>
 			<ShadcnSelect.Select
 				name={field.name}
 				value={field.state.value}
@@ -127,7 +198,7 @@ export function Select({
 				</ShadcnSelect.SelectContent>
 			</ShadcnSelect.Select>
 			{field.state.meta.isTouched && <ErrorMessages errors={errors} />}
-		</div>
+		</>
 	);
 }
 
@@ -136,10 +207,8 @@ export function Slider({ label }: { label: string }) {
 	const errors = useStore(field.store, (state) => state.meta.errors);
 
 	return (
-		<div>
-			<Label htmlFor={label} className="mb-2 text-xl font-bold">
-				{label}
-			</Label>
+		<>
+			<Label htmlFor={label}>{label}</Label>
 			<ShadcnSlider
 				id={label}
 				onBlur={field.handleBlur}
@@ -147,7 +216,7 @@ export function Slider({ label }: { label: string }) {
 				onValueChange={(value) => field.handleChange(value[0])}
 			/>
 			{field.state.meta.isTouched && <ErrorMessages errors={errors} />}
-		</div>
+		</>
 	);
 }
 
@@ -156,7 +225,7 @@ export function Switch({ label }: { label: string }) {
 	const errors = useStore(field.store, (state) => state.meta.errors);
 
 	return (
-		<div>
+		<>
 			<div className="flex items-center gap-2">
 				<ShadcnSwitch
 					id={label}
@@ -167,6 +236,6 @@ export function Switch({ label }: { label: string }) {
 				<Label htmlFor={label}>{label}</Label>
 			</div>
 			{field.state.meta.isTouched && <ErrorMessages errors={errors} />}
-		</div>
+		</>
 	);
 }

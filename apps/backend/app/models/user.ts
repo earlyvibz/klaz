@@ -53,9 +53,6 @@ export default class User extends compose(BaseModel, AuthFinder) {
 	declare groupId: string | null;
 
 	@column()
-	declare invitationCode: string;
-
-	@column()
 	declare isActive: boolean;
 
 	@column()
@@ -102,7 +99,7 @@ export default class User extends compose(BaseModel, AuthFinder) {
 		model.id = uuidv4();
 	}
 
-	// Helper methods for roles
+	// Role helper methods
 	isStudent(): boolean {
 		return this.role === "STUDENT";
 	}
@@ -116,13 +113,13 @@ export default class User extends compose(BaseModel, AuthFinder) {
 	}
 
 	hasAdminRights(): boolean {
-		return this.role === "ADMIN" || this.role === "SUPERADMIN";
+		return this.isAdmin() || this.isSuperAdmin();
 	}
 
 	canManageSchool(schoolId: string): boolean {
-		if (this.isSuperAdmin()) return true;
-		if (this.isAdmin() && this.schoolId === schoolId) return true;
-		return false;
+		return (
+			this.isSuperAdmin() || (this.isAdmin() && this.schoolId === schoolId)
+		);
 	}
 
 	// Security helper methods
@@ -145,14 +142,13 @@ export default class User extends compose(BaseModel, AuthFinder) {
 	async resetFailedAttempts(): Promise<void> {
 		this.failedLoginAttempts = 0;
 		this.lockedUntil = null;
-		this.lastLoginAt = DateTime.now();
 		await this.save();
 	}
 
 	async generatePasswordResetToken(): Promise<string> {
 		const token = uuidv4();
 		this.resetPasswordToken = token;
-		this.resetPasswordExpires = DateTime.now().plus({ hours: 1 }); // 1 hour expiry
+		this.resetPasswordExpires = DateTime.now().plus({ hours: 2 });
 		await this.save();
 		return token;
 	}
@@ -165,8 +161,10 @@ export default class User extends compose(BaseModel, AuthFinder) {
 
 	isPasswordResetTokenValid(token: string): boolean {
 		if (!this.resetPasswordToken || !this.resetPasswordExpires) return false;
-		if (this.resetPasswordToken !== token) return false;
-		return this.resetPasswordExpires > DateTime.now();
+		return (
+			this.resetPasswordToken === token &&
+			this.resetPasswordExpires > DateTime.now()
+		);
 	}
 
 	async generateEmailVerificationToken(): Promise<string> {
