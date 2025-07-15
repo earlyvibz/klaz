@@ -9,6 +9,7 @@ import { DateTime } from "luxon";
 import { v4 as uuidv4 } from "uuid";
 import Group from "#models/group";
 import School from "#models/school";
+import User from "#models/user";
 
 export default class Invitation extends BaseModel {
 	static table = "invitations";
@@ -35,6 +36,9 @@ export default class Invitation extends BaseModel {
 	declare groupId: string | null;
 
 	@column()
+	declare userId: string | null;
+
+	@column()
 	declare isUsed: boolean;
 
 	@column.dateTime()
@@ -58,6 +62,9 @@ export default class Invitation extends BaseModel {
 
 	@belongsTo(() => Group)
 	declare group: BelongsTo<typeof Group>;
+
+	@belongsTo(() => User)
+	declare user: BelongsTo<typeof User>;
 
 	@beforeCreate()
 	public static async assignId(model: Invitation) {

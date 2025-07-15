@@ -122,7 +122,8 @@ export default class AuthController {
 			emailVerified: true,
 		});
 
-		// Marquer l'invitation comme utilisée
+		// Lier l'invitation au user créé
+		invitation.userId = user.id;
 		await invitation.markAsUsed();
 
 		return User.accessTokens.create(user);
@@ -143,7 +144,7 @@ export default class AuthController {
 		try {
 			await mail.send((message) => {
 				message.to(email);
-				message.subject("Password Reset Request");
+				message.subject("Réinitialiser le mot de passe");
 				message.html(`
           <p>Hello,</p>
           <p>You have requested a password reset. Please click the link below to reset your password:</p>
@@ -151,9 +152,7 @@ export default class AuthController {
         `);
 			});
 		} catch (error) {
-			if (env.get("NODE_ENV") !== "test") {
-				console.error("Failed to send password reset email:", error);
-			}
+			console.error("Failed to send password reset email:", error);
 		}
 
 		return response.ok({

@@ -18,8 +18,6 @@ import {
 import { middleware } from "./kernel.js";
 
 const AuthController = () => import("#controllers/auth_controller");
-const StudentsImportsController = () =>
-	import("#controllers/students_imports_controller");
 const StudentsController = () => import("#controllers/students_controller");
 const InvitationsController = () =>
 	import("#controllers/invitations_controller");
@@ -69,7 +67,7 @@ router.get("/me", [AuthController, "me"]).as("auth.me").use(middleware.auth());
 router
 	.group(() => {
 		router
-			.post("/students/import", [StudentsImportsController, "import"])
+			.post("/students/import", [InvitationsController, "import"])
 			.as("students.import")
 			.use(importThrottle);
 
@@ -77,10 +75,20 @@ router
 			.get("/schools/:schoolId/students", [StudentsController, "index"])
 			.as("students.index");
 
+		router
+			.patch("/schools/:schoolId/students/:id/detach", [
+				StudentsController,
+				"detach",
+			])
+			.as("students.detach");
+
 		// Routes pour gérer les invitations
 		router
 			.get("/invitations", [InvitationsController, "index"])
 			.as("invitations.index");
+		router
+			.get("/invitations/stats", [InvitationsController, "stats"])
+			.as("invitations.stats");
 		router
 			.get("/invitations/:id", [InvitationsController, "show"])
 			.as("invitations.show");

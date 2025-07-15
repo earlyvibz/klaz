@@ -50,7 +50,7 @@ export default class User extends compose(BaseModel, AuthFinder) {
 	declare points: number;
 
 	@column()
-	declare schoolId: string;
+	declare schoolId: string | null;
 
 	@column()
 	declare groupId: string | null;
@@ -148,7 +148,7 @@ export default class User extends compose(BaseModel, AuthFinder) {
 	}
 
 	async incrementFailedAttempts(): Promise<void> {
-		this.failedLoginAttempts += 1;
+		this.failedLoginAttempts = (this.failedLoginAttempts || 0) + 1;
 
 		// Lock account after 5 failed attempts for 30 minutes
 		if (this.failedLoginAttempts >= 5) {
@@ -199,6 +199,23 @@ export default class User extends compose(BaseModel, AuthFinder) {
 		this.emailVerificationToken = null;
 		await this.save();
 		return true;
+	}
+
+	// School attachment helper methods
+	isDetached(): boolean {
+		return this.schoolId === null;
+	}
+
+	needsSchoolAttachment(): boolean {
+		return this.isActive && this.isDetached() && this.role === "STUDENT";
+	}
+
+	async detachFromSchool(): Promise<void> {
+		this.schoolId = null;
+		this.groupId = null;
+		this.level = 1;
+		this.points = 0;
+		await this.save();
 	}
 
 	static accessTokens = DbAccessTokensProvider.forModel(User);

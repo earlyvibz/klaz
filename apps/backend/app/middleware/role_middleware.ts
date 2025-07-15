@@ -7,7 +7,6 @@ export default class RoleMiddleware {
 		next: NextFn,
 		options: { roles?: string[]; requireAdmin?: boolean },
 	) {
-		await auth.check();
 		const user = auth.user;
 		if (!user) return response.unauthorized();
 
