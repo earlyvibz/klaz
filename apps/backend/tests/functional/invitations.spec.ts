@@ -574,7 +574,7 @@ test.group("Invitations", (group) => {
 		const invitation = await Invitation.create({
 			schoolEmail: "test@example.com",
 			invitationCode: "RESEND123",
-			schoolId: admin.schoolId!,
+			schoolId: admin.schoolId || "",
 			isUsed: false,
 		});
 		cleanup(() => mail.restore());

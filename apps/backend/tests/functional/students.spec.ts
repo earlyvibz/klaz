@@ -78,7 +78,7 @@ test.group("Students", (group) => {
 		assert.equal(body.meta.total, 1);
 		assert.equal(body.data.length, 1);
 
-		const studentEmails = body.data.map((s: any) => s.email);
+		const studentEmails = body.data.map((s: { email: string }) => s.email);
 		assert.include(studentEmails, "student1@test.com");
 	});
 

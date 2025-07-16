@@ -6,7 +6,7 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 export const Route = createFileRoute("/_dashboard")({
 	beforeLoad: ({ context, location }) => {
 		if (context.auth.loading) {
-			return
+			return;
 		}
 
 		if (!context.auth.isAuthenticated) {
@@ -15,7 +15,7 @@ export const Route = createFileRoute("/_dashboard")({
 				search: {
 					redirect: location.href,
 				},
-			})
+			});
 		}
 	},
 	component: DashboardLayout,
@@ -45,5 +45,5 @@ function DashboardLayout() {
 				</div>
 			</SidebarInset>
 		</SidebarProvider>
-	)
+	);
 }

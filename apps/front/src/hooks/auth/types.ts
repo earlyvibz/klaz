@@ -11,7 +11,7 @@ export type User = {
 	email: string;
 	role: "STUDENT" | "ADMIN" | "SUPERADMIN";
 	schoolId: string;
-	group: any;
+	group: unknown;
 };
 
 export interface AuthContext {
