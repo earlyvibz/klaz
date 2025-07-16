@@ -1,182 +1,222 @@
-import { DateTime } from 'luxon'
-import hash from '@adonisjs/core/services/hash'
-import { compose } from '@adonisjs/core/helpers'
-import { BaseModel, column, belongsTo, hasMany, beforeCreate } from '@adonisjs/lucid/orm'
-import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
-import { withAuthFinder } from '@adonisjs/auth/mixins/lucid'
-import { DbAccessTokensProvider } from '@adonisjs/auth/access_tokens'
-import School from '#models/school'
-import Group from '#models/group'
-import QuestSubmission from '#models/quest_submission'
-import RewardRedemption from '#models/reward_redemption'
-import { v4 as uuidv4 } from 'uuid'
+import { DbAccessTokensProvider } from "@adonisjs/auth/access_tokens";
+import { withAuthFinder } from "@adonisjs/auth/mixins/lucid";
+import { compose } from "@adonisjs/core/helpers";
+import hash from "@adonisjs/core/services/hash";
+import {
+	BaseModel,
+	beforeCreate,
+	belongsTo,
+	column,
+	hasMany,
+} from "@adonisjs/lucid/orm";
+import type { BelongsTo, HasMany } from "@adonisjs/lucid/types/relations";
+import { DateTime } from "luxon";
+import { v4 as uuidv4 } from "uuid";
+import Group from "#models/group";
+import QuestSubmission from "#models/quest_submission";
+import RewardRedemption from "#models/reward_redemption";
+import School from "#models/school";
 
-const AuthFinder = withAuthFinder(() => hash.use('scrypt'), {
-  uids: ['email'],
-  passwordColumnName: 'password',
-})
+const AuthFinder = withAuthFinder(() => hash.use("scrypt"), {
+	uids: ["email"],
+	passwordColumnName: "password",
+});
 
 export default class User extends compose(BaseModel, AuthFinder) {
-  static table = 'users'
+	static table = "users";
 
-  @column({ isPrimary: true })
-  declare id: string
+	@column({ isPrimary: true })
+	declare id: string;
 
-  @column()
-  declare fullName: string | null
+	@column()
+	declare firstName: string | null;
 
-  @column()
-  declare email: string
+	@column()
+	declare lastName: string | null;
 
-  @column({ serializeAs: null })
-  declare password: string
+	@column()
+	declare email: string;
 
-  @column()
-  declare role: 'STUDENT' | 'ADMIN' | 'SUPERADMIN'
+	@column({ serializeAs: null })
+	declare password: string;
 
-  @column()
-  declare level: number
+	@column()
+	declare role: "STUDENT" | "ADMIN" | "SUPERADMIN";
 
-  @column()
-  declare points: number
+	@column()
+	declare level: number;
 
-  @column()
-  declare schoolId: string
+	@column()
+	declare points: number;
 
-  @column()
-  declare groupId: string | null
+	@column()
+	declare schoolId: string | null;
 
-  @column()
-  declare invitationCode: string
+	@column()
+	declare groupId: string | null;
 
-  @column()
-  declare isActive: boolean
+	@column()
+	declare isActive: boolean;
 
-  @column()
-  declare resetPasswordToken: string | null
+	@column()
+	declare resetPasswordToken: string | null;
 
-  @column.dateTime()
-  declare resetPasswordExpires: DateTime | null
+	@column.dateTime()
+	declare resetPasswordExpires: DateTime | null;
 
-  @column.dateTime()
-  declare lastLoginAt: DateTime | null
+	@column.dateTime()
+	declare lastLoginAt: DateTime | null;
 
-  @column()
-  declare failedLoginAttempts: number
+	@column()
+	declare failedLoginAttempts: number;
 
-  @column.dateTime()
-  declare lockedUntil: DateTime | null
+	@column.dateTime()
+	declare lockedUntil: DateTime | null;
 
-  @column()
-  declare emailVerified: boolean
+	@column()
+	declare emailVerified: boolean;
 
-  @column()
-  declare emailVerificationToken: string | null
+	@column()
+	declare emailVerificationToken: string | null;
 
-  @column.dateTime({ autoCreate: true })
-  declare createdAt: DateTime
+	@column.dateTime({ autoCreate: true })
+	declare createdAt: DateTime;
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
-  declare updatedAt: DateTime | null
+	@column.dateTime({ autoCreate: true, autoUpdate: true })
+	declare updatedAt: DateTime | null;
 
-  @belongsTo(() => School)
-  declare school: BelongsTo<typeof School>
+	// Helper methods for name handling
+	get displayName(): string {
+		if (this.firstName && this.lastName) {
+			return `${this.firstName} ${this.lastName}`;
+		}
+		return this.firstName || this.lastName || this.email;
+	}
 
-  @belongsTo(() => Group)
-  declare group: BelongsTo<typeof Group>
+	get initials(): string {
+		const firstInitial = this.firstName?.charAt(0)?.toUpperCase() || "";
+		const lastInitial = this.lastName?.charAt(0)?.toUpperCase() || "";
+		return (
+			`${firstInitial}${lastInitial}` || this.email.charAt(0).toUpperCase()
+		);
+	}
 
-  @hasMany(() => QuestSubmission)
-  declare questSubmissions: HasMany<typeof QuestSubmission>
+	@belongsTo(() => School)
+	declare school: BelongsTo<typeof School>;
 
-  @hasMany(() => RewardRedemption)
-  declare rewardRedemptions: HasMany<typeof RewardRedemption>
+	@belongsTo(() => Group)
+	declare group: BelongsTo<typeof Group>;
 
-  @beforeCreate()
-  public static async assignId(model: User) {
-    model.id = uuidv4()
-  }
+	@hasMany(() => QuestSubmission)
+	declare questSubmissions: HasMany<typeof QuestSubmission>;
 
-  // Helper methods for roles
-  isStudent(): boolean {
-    return this.role === 'STUDENT'
-  }
+	@hasMany(() => RewardRedemption)
+	declare rewardRedemptions: HasMany<typeof RewardRedemption>;
 
-  isAdmin(): boolean {
-    return this.role === 'ADMIN'
-  }
+	@beforeCreate()
+	public static async assignId(model: User) {
+		model.id = uuidv4();
+	}
 
-  isSuperAdmin(): boolean {
-    return this.role === 'SUPERADMIN'
-  }
+	// Role helper methods
+	isStudent(): boolean {
+		return this.role === "STUDENT";
+	}
 
-  hasAdminRights(): boolean {
-    return this.role === 'ADMIN' || this.role === 'SUPERADMIN'
-  }
+	isAdmin(): boolean {
+		return this.role === "ADMIN";
+	}
 
-  canManageSchool(schoolId: string): boolean {
-    if (this.isSuperAdmin()) return true
-    if (this.isAdmin() && this.schoolId === schoolId) return true
-    return false
-  }
+	isSuperAdmin(): boolean {
+		return this.role === "SUPERADMIN";
+	}
 
-  // Security helper methods
-  isAccountLocked(): boolean {
-    if (!this.lockedUntil) return false
-    return this.lockedUntil > DateTime.now()
-  }
+	hasAdminRights(): boolean {
+		return this.isAdmin() || this.isSuperAdmin();
+	}
 
-  async incrementFailedAttempts(): Promise<void> {
-    this.failedLoginAttempts += 1
+	canManageSchool(schoolId: string): boolean {
+		return (
+			this.isSuperAdmin() || (this.isAdmin() && this.schoolId === schoolId)
+		);
+	}
 
-    // Lock account after 5 failed attempts for 30 minutes
-    if (this.failedLoginAttempts >= 5) {
-      this.lockedUntil = DateTime.now().plus({ minutes: 30 })
-    }
+	// Security helper methods
+	isAccountLocked(): boolean {
+		if (!this.lockedUntil) return false;
+		return this.lockedUntil > DateTime.now();
+	}
 
-    await this.save()
-  }
+	async incrementFailedAttempts(): Promise<void> {
+		this.failedLoginAttempts = (this.failedLoginAttempts || 0) + 1;
 
-  async resetFailedAttempts(): Promise<void> {
-    this.failedLoginAttempts = 0
-    this.lockedUntil = null
-    this.lastLoginAt = DateTime.now()
-    await this.save()
-  }
+		// Lock account after 5 failed attempts for 30 minutes
+		if (this.failedLoginAttempts >= 5) {
+			this.lockedUntil = DateTime.now().plus({ minutes: 30 });
+		}
 
-  async generatePasswordResetToken(): Promise<string> {
-    const token = uuidv4()
-    this.resetPasswordToken = token
-    this.resetPasswordExpires = DateTime.now().plus({ hours: 1 }) // 1 hour expiry
-    await this.save()
-    return token
-  }
+		await this.save();
+	}
 
-  async clearPasswordResetToken(): Promise<void> {
-    this.resetPasswordToken = null
-    this.resetPasswordExpires = null
-    await this.save()
-  }
+	async resetFailedAttempts(): Promise<void> {
+		this.failedLoginAttempts = 0;
+		this.lockedUntil = null;
+		await this.save();
+	}
 
-  isPasswordResetTokenValid(token: string): boolean {
-    if (!this.resetPasswordToken || !this.resetPasswordExpires) return false
-    if (this.resetPasswordToken !== token) return false
-    return this.resetPasswordExpires > DateTime.now()
-  }
+	async generatePasswordResetToken(): Promise<string> {
+		const token = uuidv4();
+		this.resetPasswordToken = token;
+		this.resetPasswordExpires = DateTime.now().plus({ hours: 2 });
+		await this.save();
+		return token;
+	}
 
-  async generateEmailVerificationToken(): Promise<string> {
-    const token = uuidv4()
-    this.emailVerificationToken = token
-    await this.save()
-    return token
-  }
+	async clearPasswordResetToken(): Promise<void> {
+		this.resetPasswordToken = null;
+		this.resetPasswordExpires = null;
+		await this.save();
+	}
 
-  async verifyEmail(token: string): Promise<boolean> {
-    if (this.emailVerificationToken !== token) return false
-    this.emailVerified = true
-    this.emailVerificationToken = null
-    await this.save()
-    return true
-  }
+	isPasswordResetTokenValid(token: string): boolean {
+		if (!this.resetPasswordToken || !this.resetPasswordExpires) return false;
+		return (
+			this.resetPasswordToken === token &&
+			this.resetPasswordExpires > DateTime.now()
+		);
+	}
 
-  static accessTokens = DbAccessTokensProvider.forModel(User)
+	async generateEmailVerificationToken(): Promise<string> {
+		const token = uuidv4();
+		this.emailVerificationToken = token;
+		await this.save();
+		return token;
+	}
+
+	async verifyEmail(token: string): Promise<boolean> {
+		if (this.emailVerificationToken !== token) return false;
+		this.emailVerified = true;
+		this.emailVerificationToken = null;
+		await this.save();
+		return true;
+	}
+
+	// School attachment helper methods
+	isDetached(): boolean {
+		return this.schoolId === null;
+	}
+
+	needsSchoolAttachment(): boolean {
+		return this.isActive && this.isDetached() && this.role === "STUDENT";
+	}
+
+	async detachFromSchool(): Promise<void> {
+		this.schoolId = null;
+		this.groupId = null;
+		this.level = 1;
+		this.points = 0;
+		await this.save();
+	}
+
+	static accessTokens = DbAccessTokensProvider.forModel(User);
 }

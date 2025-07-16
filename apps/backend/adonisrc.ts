@@ -1,7 +1,7 @@
-import { defineConfig } from '@adonisjs/core/app'
+import { defineConfig } from "@adonisjs/core/app";
 
 export default defineConfig({
-  /*
+	/*
   |--------------------------------------------------------------------------
   | Experimental flags
   |--------------------------------------------------------------------------
@@ -11,12 +11,12 @@ export default defineConfig({
   | during upgrade.
   |
   */
-  experimental: {
-    mergeMultipartFieldsAndFiles: true,
-    shutdownInReverseOrder: true,
-  },
+	experimental: {
+		mergeMultipartFieldsAndFiles: true,
+		shutdownInReverseOrder: true,
+	},
 
-  /*
+	/*
   |--------------------------------------------------------------------------
   | Commands
   |--------------------------------------------------------------------------
@@ -25,13 +25,14 @@ export default defineConfig({
   | will be scanned automatically from the "./commands" directory.
   |
   */
-  commands: [
-    () => import('@adonisjs/core/commands'),
-    () => import('@adonisjs/lucid/commands'),
-    () => import('@adonisjs/mail/commands'),
-  ],
+	commands: [
+		() => import("@adonisjs/core/commands"),
+		() => import("@adonisjs/lucid/commands"),
+		() => import("@adonisjs/mail/commands"),
+		() => import("@tuyau/core/commands"),
+	],
 
-  /*
+	/*
   |--------------------------------------------------------------------------
   | Service providers
   |--------------------------------------------------------------------------
@@ -40,23 +41,24 @@ export default defineConfig({
   | application
   |
   */
-  providers: [
-    () => import('@adonisjs/core/providers/app_provider'),
-    () => import('@adonisjs/core/providers/hash_provider'),
-    {
-      file: () => import('@adonisjs/core/providers/repl_provider'),
-      environment: ['repl', 'test'],
-    },
-    () => import('@adonisjs/core/providers/vinejs_provider'),
-    () => import('@adonisjs/cors/cors_provider'),
-    () => import('@adonisjs/lucid/database_provider'),
-    () => import('@adonisjs/auth/auth_provider'),
-    () => import('@adonisjs/ally/ally_provider'),
-    () => import('@adonisjs/limiter/limiter_provider'),
-    () => import('@adonisjs/mail/mail_provider'),
-  ],
+	providers: [
+		() => import("@adonisjs/core/providers/app_provider"),
+		() => import("@adonisjs/core/providers/hash_provider"),
+		{
+			file: () => import("@adonisjs/core/providers/repl_provider"),
+			environment: ["repl", "test"],
+		},
+		() => import("@adonisjs/core/providers/vinejs_provider"),
+		() => import("@adonisjs/cors/cors_provider"),
+		() => import("@adonisjs/lucid/database_provider"),
+		() => import("@adonisjs/auth/auth_provider"),
+		() => import("@adonisjs/ally/ally_provider"),
+		() => import("@adonisjs/limiter/limiter_provider"),
+		() => import("@adonisjs/mail/mail_provider"),
+		() => import("@tuyau/core/tuyau_provider"),
+	],
 
-  /*
+	/*
   |--------------------------------------------------------------------------
   | Preloads
   |--------------------------------------------------------------------------
@@ -64,9 +66,9 @@ export default defineConfig({
   | List of modules to import before starting the application.
   |
   */
-  preloads: [() => import('#start/routes'), () => import('#start/kernel')],
+	preloads: [() => import("#start/routes"), () => import("#start/kernel")],
 
-  /*
+	/*
   |--------------------------------------------------------------------------
   | Tests
   |--------------------------------------------------------------------------
@@ -75,19 +77,19 @@ export default defineConfig({
   | and add additional suites.
   |
   */
-  tests: {
-    suites: [
-      {
-        files: ['tests/unit/**/*.spec(.ts|.js)'],
-        name: 'unit',
-        timeout: 2000,
-      },
-      {
-        files: ['tests/functional/**/*.spec(.ts|.js)'],
-        name: 'functional',
-        timeout: 30000,
-      },
-    ],
-    forceExit: false,
-  },
-})
+	tests: {
+		suites: [
+			{
+				files: ["tests/unit/**/*.spec(.ts|.js)"],
+				name: "unit",
+				timeout: 2000,
+			},
+			{
+				files: ["tests/functional/**/*.spec(.ts|.js)"],
+				name: "functional",
+				timeout: 30000,
+			},
+		],
+		forceExit: false,
+	},
+});

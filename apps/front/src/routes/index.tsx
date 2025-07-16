@@ -1,14 +1,25 @@
-import { createFileRoute, Navigate } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/")({
-  component: () => {
-    // TODO: Ajouter logique d'authentification ici
-    const isAuthenticated = false; // Remplacer par vraie logique auth
+	beforeLoad: ({ context }) => {
+		if (context.auth.loading) {
+			return;
+		}
 
-    if (isAuthenticated) {
-      return <Navigate to="/dashboard" replace />;
-    } else {
-      return <Navigate to="/login" replace />;
-    }
-  },
+		if (context.auth.isAuthenticated) {
+			throw redirect({
+				to: "/home",
+			});
+		}
+	},
+	component: Index,
 });
+
+function Index() {
+	return (
+		<div className="p-2">
+			<h3>Welcome Home!</h3>
+			<p>Page d'accueil publique</p>
+		</div>
+	);
+}

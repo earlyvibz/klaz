@@ -81,9 +81,8 @@ jobs:
           name: backend-coverage
           fail_ci_if_error: false
 
-      - name: Run linter
-        working-directory: ./apps/backend
-        run: pnpm lint
+      - name: Run Biome linter
+        run: pnpm check
 
       - name: Check TypeScript
         working-directory: ./apps/backend

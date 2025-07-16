@@ -1,49 +1,55 @@
-import { DateTime } from 'luxon'
-import { BaseModel, beforeCreate, column, belongsTo, hasMany } from '@adonisjs/lucid/orm'
-import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
-import School from '#models/school'
-import QuestSubmission from '#models/quest_submission'
-import { v4 as uuidv4 } from 'uuid'
+import {
+	BaseModel,
+	beforeCreate,
+	belongsTo,
+	column,
+	hasMany,
+} from "@adonisjs/lucid/orm";
+import type { BelongsTo, HasMany } from "@adonisjs/lucid/types/relations";
+import type { DateTime } from "luxon";
+import { v4 as uuidv4 } from "uuid";
+import QuestSubmission from "#models/quest_submission";
+import School from "#models/school";
 
 export default class Quest extends BaseModel {
-  @column({ isPrimary: true })
-  declare id: string
+	@column({ isPrimary: true })
+	declare id: string;
 
-  @column()
-  declare title: string
+	@column()
+	declare title: string;
 
-  @column()
-  declare description: string
+	@column()
+	declare description: string;
 
-  @column()
-  declare type: string // ex: 'UGC', 'SOCIAL', 'EVENT'
+	@column()
+	declare type: string; // ex: 'UGC', 'SOCIAL', 'EVENT'
 
-  @column()
-  declare points: number
+	@column()
+	declare points: number;
 
-  @column.dateTime({ autoCreate: false })
-  declare deadline?: DateTime
+	@column.dateTime({ autoCreate: false })
+	declare deadline?: DateTime;
 
-  @column()
-  declare validationType: 'MANUAL' | 'AUTO_API'
+	@column()
+	declare validationType: "MANUAL" | "AUTO_API";
 
-  @column()
-  declare schoolId: string
+	@column()
+	declare schoolId: string;
 
-  @belongsTo(() => School)
-  declare school: BelongsTo<typeof School>
+	@belongsTo(() => School)
+	declare school: BelongsTo<typeof School>;
 
-  @hasMany(() => QuestSubmission)
-  declare submissions: HasMany<typeof QuestSubmission>
+	@hasMany(() => QuestSubmission)
+	declare submissions: HasMany<typeof QuestSubmission>;
 
-  @column.dateTime({ autoCreate: true })
-  declare createdAt: DateTime
+	@column.dateTime({ autoCreate: true })
+	declare createdAt: DateTime;
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
-  declare updatedAt: DateTime
+	@column.dateTime({ autoCreate: true, autoUpdate: true })
+	declare updatedAt: DateTime;
 
-  @beforeCreate()
-  public static async assignId(model: Quest) {
-    model.id = uuidv4()
-  }
+	@beforeCreate()
+	public static async assignId(model: Quest) {
+		model.id = uuidv4();
+	}
 }
