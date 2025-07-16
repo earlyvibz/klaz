@@ -337,7 +337,7 @@ test.group("Invitations", (group) => {
 			expiresAt: DateTime.now().plus({ days: 30 }),
 		});
 
-		const _pendingInvitation = await Invitation.create({
+		await Invitation.create({
 			schoolEmail: "pending@school.com",
 			firstName: student2Name.firstName,
 			lastName: student2Name.lastName,
