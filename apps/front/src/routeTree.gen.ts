@@ -15,7 +15,10 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthSignupRouteImport } from './routes/auth/signup'
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as DashboardUsersRouteImport } from './routes/_dashboard.users'
-import { Route as DashboardStatsRouteImport } from './routes/_dashboard.stats'
+import { Route as DashboardSchoolsRouteImport } from './routes/_dashboard.schools'
+import { Route as DashboardQuestsRouteImport } from './routes/_dashboard.quests'
+import { Route as DashboardHomeRouteImport } from './routes/_dashboard.home'
+import { Route as DashboardAccountRouteImport } from './routes/_dashboard.account'
 
 const DashboardRoute = DashboardRouteImport.update({
   id: '/_dashboard',
@@ -46,16 +49,34 @@ const DashboardUsersRoute = DashboardUsersRouteImport.update({
   path: '/users',
   getParentRoute: () => DashboardRoute,
 } as any)
-const DashboardStatsRoute = DashboardStatsRouteImport.update({
-  id: '/stats',
-  path: '/stats',
+const DashboardSchoolsRoute = DashboardSchoolsRouteImport.update({
+  id: '/schools',
+  path: '/schools',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardQuestsRoute = DashboardQuestsRouteImport.update({
+  id: '/quests',
+  path: '/quests',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardHomeRoute = DashboardHomeRouteImport.update({
+  id: '/home',
+  path: '/home',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardAccountRoute = DashboardAccountRouteImport.update({
+  id: '/account',
+  path: '/account',
   getParentRoute: () => DashboardRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteRouteWithChildren
-  '/stats': typeof DashboardStatsRoute
+  '/account': typeof DashboardAccountRoute
+  '/home': typeof DashboardHomeRoute
+  '/quests': typeof DashboardQuestsRoute
+  '/schools': typeof DashboardSchoolsRoute
   '/users': typeof DashboardUsersRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/signup': typeof AuthSignupRoute
@@ -63,7 +84,10 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteRouteWithChildren
-  '/stats': typeof DashboardStatsRoute
+  '/account': typeof DashboardAccountRoute
+  '/home': typeof DashboardHomeRoute
+  '/quests': typeof DashboardQuestsRoute
+  '/schools': typeof DashboardSchoolsRoute
   '/users': typeof DashboardUsersRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/signup': typeof AuthSignupRoute
@@ -73,7 +97,10 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteRouteWithChildren
   '/_dashboard': typeof DashboardRouteWithChildren
-  '/_dashboard/stats': typeof DashboardStatsRoute
+  '/_dashboard/account': typeof DashboardAccountRoute
+  '/_dashboard/home': typeof DashboardHomeRoute
+  '/_dashboard/quests': typeof DashboardQuestsRoute
+  '/_dashboard/schools': typeof DashboardSchoolsRoute
   '/_dashboard/users': typeof DashboardUsersRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/signup': typeof AuthSignupRoute
@@ -83,18 +110,33 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
-    | '/stats'
+    | '/account'
+    | '/home'
+    | '/quests'
+    | '/schools'
     | '/users'
     | '/auth/login'
     | '/auth/signup'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/stats' | '/users' | '/auth/login' | '/auth/signup'
+  to:
+    | '/'
+    | '/auth'
+    | '/account'
+    | '/home'
+    | '/quests'
+    | '/schools'
+    | '/users'
+    | '/auth/login'
+    | '/auth/signup'
   id:
     | '__root__'
     | '/'
     | '/auth'
     | '/_dashboard'
-    | '/_dashboard/stats'
+    | '/_dashboard/account'
+    | '/_dashboard/home'
+    | '/_dashboard/quests'
+    | '/_dashboard/schools'
     | '/_dashboard/users'
     | '/auth/login'
     | '/auth/signup'
@@ -150,11 +192,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardUsersRouteImport
       parentRoute: typeof DashboardRoute
     }
-    '/_dashboard/stats': {
-      id: '/_dashboard/stats'
-      path: '/stats'
-      fullPath: '/stats'
-      preLoaderRoute: typeof DashboardStatsRouteImport
+    '/_dashboard/schools': {
+      id: '/_dashboard/schools'
+      path: '/schools'
+      fullPath: '/schools'
+      preLoaderRoute: typeof DashboardSchoolsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/_dashboard/quests': {
+      id: '/_dashboard/quests'
+      path: '/quests'
+      fullPath: '/quests'
+      preLoaderRoute: typeof DashboardQuestsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/_dashboard/home': {
+      id: '/_dashboard/home'
+      path: '/home'
+      fullPath: '/home'
+      preLoaderRoute: typeof DashboardHomeRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/_dashboard/account': {
+      id: '/_dashboard/account'
+      path: '/account'
+      fullPath: '/account'
+      preLoaderRoute: typeof DashboardAccountRouteImport
       parentRoute: typeof DashboardRoute
     }
   }
@@ -175,12 +238,18 @@ const AuthRouteRouteWithChildren = AuthRouteRoute._addFileChildren(
 )
 
 interface DashboardRouteChildren {
-  DashboardStatsRoute: typeof DashboardStatsRoute
+  DashboardAccountRoute: typeof DashboardAccountRoute
+  DashboardHomeRoute: typeof DashboardHomeRoute
+  DashboardQuestsRoute: typeof DashboardQuestsRoute
+  DashboardSchoolsRoute: typeof DashboardSchoolsRoute
   DashboardUsersRoute: typeof DashboardUsersRoute
 }
 
 const DashboardRouteChildren: DashboardRouteChildren = {
-  DashboardStatsRoute: DashboardStatsRoute,
+  DashboardAccountRoute: DashboardAccountRoute,
+  DashboardHomeRoute: DashboardHomeRoute,
+  DashboardQuestsRoute: DashboardQuestsRoute,
+  DashboardSchoolsRoute: DashboardSchoolsRoute,
   DashboardUsersRoute: DashboardUsersRoute,
 }
 

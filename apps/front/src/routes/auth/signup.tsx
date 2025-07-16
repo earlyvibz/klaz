@@ -8,7 +8,7 @@ export const Route = createFileRoute("/auth/signup")({
 		}
 
 		if (context.auth.isAuthenticated) {
-			throw redirect({ to: "/stats" });
+			throw redirect({ to: "/home" });
 		}
 	},
 	component: RouteComponent,

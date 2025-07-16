@@ -23,7 +23,7 @@ export function SignupForm({
 			try {
 				setError(null);
 				await signup(value.email, value.code, value.password);
-				navigate({ to: "/stats" });
+				navigate({ to: "/home" });
 			} catch (error) {
 				if (error instanceof Error) {
 					setError(error.message);

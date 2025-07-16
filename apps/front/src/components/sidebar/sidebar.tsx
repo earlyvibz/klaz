@@ -1,7 +1,6 @@
 import { IconInnerShadowTop } from "@tabler/icons-react";
 import { NavAdmin } from "@/components/sidebar/nav-admin";
-import { NavMain } from "@/components/sidebar/nav-main";
-import { NavSecondary } from "@/components/sidebar/nav-secondary";
+import { NavSuperAdmin } from "@/components/sidebar/nav-super-admin";
 import { NavUser } from "@/components/sidebar/nav-user";
 import {
 	Sidebar,
@@ -14,11 +13,12 @@ import {
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/hooks/auth/context";
 import { data } from "@/nav-routes/nav-routes";
+import { NavButton } from "./nav-button";
 
 export default function AppSidebar({
 	...props
 }: React.ComponentProps<typeof Sidebar>) {
-	const { user, isAdmin } = useAuth();
+	const { user, isAdmin, isSuperAdmin } = useAuth();
 
 	if (!user) {
 		return null;
@@ -42,9 +42,9 @@ export default function AppSidebar({
 				</SidebarMenu>
 			</SidebarHeader>
 			<SidebarContent>
-				<NavMain items={data.navMain} />
+				<NavButton />
+				{isSuperAdmin() && <NavSuperAdmin items={data.superAdmin} />}
 				{isAdmin() && <NavAdmin items={data.admin} />}
-				<NavSecondary items={data.navSecondary} className="mt-auto" />
 			</SidebarContent>
 			<SidebarFooter>
 				<NavUser user={user} />

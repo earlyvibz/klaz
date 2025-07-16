@@ -10,15 +10,15 @@ import type { Student } from "@/types/student";
 
 export default function TableUsers({ users }: { users: Student[] }) {
 	return (
-		<Table>
+		<Table className="text-center">
 			<TableHeader className="bg-muted sticky top-0 z-10">
 				<TableRow>
-					<TableHead>Nom</TableHead>
-					<TableHead>Prénom</TableHead>
-					<TableHead>Email</TableHead>
-					<TableHead>Level</TableHead>
-					<TableHead>Points</TableHead>
-					<TableHead>Actions</TableHead>
+					<TableHead className="text-center">Nom</TableHead>
+					<TableHead className="text-center">Prénom</TableHead>
+					<TableHead className="text-center">Email</TableHead>
+					<TableHead className="text-center">Level</TableHead>
+					<TableHead className="text-center">Points</TableHead>
+					<TableHead className="text-center">Actions</TableHead>
 				</TableRow>
 			</TableHeader>
 			<TableBody>
@@ -35,13 +35,7 @@ export default function TableUsers({ users }: { users: Student[] }) {
 							<TableCell>{user.level}</TableCell>
 							<TableCell className="font-medium">{user.points}</TableCell>
 							<TableCell>
-								<div className="flex gap-2">
-									<button
-										type="button"
-										className="text-blue-600 hover:text-blue-800 text-sm"
-									>
-										Voir
-									</button>
+								<div className="flex gap-2 justify-center">
 									<button
 										type="button"
 										className="text-red-600 hover:text-red-800 text-sm"

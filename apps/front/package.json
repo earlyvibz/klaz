@@ -7,7 +7,13 @@
 		"start": "vite --port 3000",
 		"build": "vite build && tsc",
 		"serve": "vite preview",
-		"test": "vitest run",
+		"test": "vitest",
+		"test:unit": "vitest",
+		"test:unit:ui": "vitest --ui",
+		"test:e2e": "playwright test",
+		"test:e2e:ui": "playwright test --ui",
+		"test:e2e:headed": "playwright test --headed",
+		"test:all": "npm run test:unit && npm run test:e2e",
 		"dev:front": "pnpm --filter front dev",
 		"dev:back": "pnpm --filter backend dev",
 		"dev:full": "pnpm --parallel --filter front --filter backend dev"
@@ -39,12 +45,15 @@
 		"tailwind-merge": "^3.3.1",
 		"tailwindcss": "^4.1.11",
 		"tailwindcss-animate": "^1.0.7",
+
 		"zod": "^3.25.76",
 		"zustand": "^5.0.6"
 	},
 	"devDependencies": {
+		"@playwright/test": "^1.54.1",
 		"@testing-library/dom": "^10.4.0",
 		"@testing-library/react": "^16.3.0",
+		"@types/node": "^24.0.14",
 		"@types/react": "^19.1.8",
 		"@types/react-dom": "^19.1.6",
 		"@vitejs/plugin-react": "^4.6.0",
@@ -52,6 +61,7 @@
 		"typescript": "^5.8.3",
 		"vite": "^7.0.4",
 		"vitest": "^3.2.4",
-		"web-vitals": "^5.0.3"
+		"web-vitals": "^5.0.3",
+		"vite-tsconfig-paths": "^5.1.4"
 	}
 }

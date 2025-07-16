@@ -8,7 +8,7 @@ export const Route = createFileRoute("/")({
 
 		if (context.auth.isAuthenticated) {
 			throw redirect({
-				to: "/stats",
+				to: "/home",
 			});
 		}
 	},

@@ -1,12 +1,7 @@
 import { useLocation } from "@tanstack/react-router";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-
-const pageTitles: Record<string, string> = {
-	"/users": "Utilisateurs",
-	"/stats": "Statistiques",
-	"/": "Accueil",
-};
+import { pageTitles } from "@/nav-routes/nav-routes";
 
 export default function Header() {
 	const location = useLocation();

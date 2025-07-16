@@ -26,7 +26,7 @@ export function LoginForm({
 			try {
 				setError(null);
 				await login(value.email, value.password);
-				navigate({ to: "/stats" });
+				navigate({ to: "/home" });
 			} catch (error: unknown) {
 				if (error instanceof Error) {
 					setError(error.message);

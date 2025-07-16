@@ -1,8 +1,15 @@
-import { IconDotsVertical, IconLogout } from "@tabler/icons-react";
+import {
+	IconDotsVertical,
+	IconLogout,
+	IconNotification,
+	IconUserCircle,
+} from "@tabler/icons-react";
+import { Link } from "@tanstack/react-router";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
+	DropdownMenuGroup,
 	DropdownMenuItem,
 	DropdownMenuLabel,
 	DropdownMenuSeparator,
@@ -32,10 +39,15 @@ export function NavUser({ user }: { user: User }) {
 						>
 							<Avatar className="h-8 w-8 rounded-lg grayscale">
 								<AvatarImage src={user.email} alt={user.email} />
-								<AvatarFallback className="rounded-lg">CN</AvatarFallback>
+								<AvatarFallback className="rounded-lg">
+									{user.firstName.charAt(0)}
+									{user.lastName.charAt(0)}
+								</AvatarFallback>
 							</Avatar>
 							<div className="grid flex-1 text-left text-sm leading-tight">
-								<span className="truncate font-medium">{user.email}</span>
+								<span className="truncate font-medium">
+									{user.firstName} {user.lastName}
+								</span>
 								<span className="text-muted-foreground truncate text-xs">
 									{user.email}
 								</span>
@@ -54,11 +66,14 @@ export function NavUser({ user }: { user: User }) {
 								<Avatar className="h-8 w-8 rounded-lg">
 									<AvatarImage src={user.email} alt={user.email} />
 									<AvatarFallback className="rounded-lg">
-										{user.email.charAt(0)}
+										{user.firstName.charAt(0)}
+										{user.lastName.charAt(0)}
 									</AvatarFallback>
 								</Avatar>
 								<div className="grid flex-1 text-left text-sm leading-tight">
-									<span className="truncate font-medium">{user.email}</span>
+									<span className="truncate font-medium">
+										{user.firstName} {user.lastName}
+									</span>
 									<span className="text-muted-foreground truncate text-xs">
 										{user.email}
 									</span>
@@ -66,20 +81,18 @@ export function NavUser({ user }: { user: User }) {
 							</div>
 						</DropdownMenuLabel>
 						<DropdownMenuSeparator />
-						{/* <DropdownMenuGroup>
-							<DropdownMenuItem>
-								<IconUserCircle />
-								Account
-							</DropdownMenuItem>
-							<DropdownMenuItem>
-								<IconCreditCard />
-								Billing
-							</DropdownMenuItem>
+						<DropdownMenuGroup>
+							<Link to="/account">
+								<DropdownMenuItem className="cursor-pointer">
+									<IconUserCircle />
+									Account
+								</DropdownMenuItem>
+							</Link>
 							<DropdownMenuItem>
 								<IconNotification />
 								Notifications
 							</DropdownMenuItem>
-						</DropdownMenuGroup> */}
+						</DropdownMenuGroup>
 						<DropdownMenuItem
 							className="cursor-pointer"
 							onClick={() => {
