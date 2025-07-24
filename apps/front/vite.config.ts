@@ -19,4 +19,14 @@ export default defineConfig({
 			"@": resolve(__dirname, "./src"),
 		},
 	},
+	server: {
+		host: true, // Accepte toutes les connexions (0.0.0.0)
+		port: 5173,
+		// Optionnel: configuration strictTransportSecurity pour HTTPS en local
+		// https: true,
+	},
+	preview: {
+		host: true,
+		port: 4173,
+	},
 });

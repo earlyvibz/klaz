@@ -12,6 +12,7 @@ import {
 import type { BelongsTo, HasMany } from "@adonisjs/lucid/types/relations";
 import { DateTime } from "luxon";
 import { v4 as uuidv4 } from "uuid";
+import TenantController from "#controllers/tenant_controller";
 import Group from "#models/group";
 import QuestSubmission from "#models/quest_submission";
 import RewardRedemption from "#models/reward_redemption";
@@ -219,4 +220,17 @@ export default class User extends compose(BaseModel, AuthFinder) {
 	}
 
 	static accessTokens = DbAccessTokensProvider.forModel(User);
+
+	// Méthodes helper tenant
+	static forCurrentTenant() {
+		return TenantController.scopeToTenant(User.query());
+	}
+
+	static createForCurrentTenant(data: Partial<User>) {
+		const schoolId = TenantController.getCurrentSchoolId();
+		if (schoolId && !data.schoolId) {
+			data.schoolId = schoolId;
+		}
+		return User.create(data);
+	}
 }

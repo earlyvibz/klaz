@@ -4,6 +4,7 @@ import limiter from "@adonisjs/limiter/services/main";
 import mail from "@adonisjs/mail/services/main";
 import { test } from "@japa/runner";
 import { DateTime } from "luxon";
+import TenantController from "#controllers/tenant_controller";
 import Invitation from "#models/invitation";
 import School from "#models/school";
 import User from "#models/user";
@@ -17,6 +18,26 @@ function splitName(fullName: string): {
 	const firstName = parts[0];
 	const lastName = parts.length > 1 ? parts.slice(1).join(" ") : null;
 	return { firstName, lastName };
+}
+
+// Helper function to setup tenant context for tests
+function setupTenantContext(school: School) {
+	const mockContext = {
+		tenant: {
+			school,
+			schoolId: school.id,
+			slug: school.slug,
+		},
+	} as any;
+	TenantController.setContext(mockContext);
+}
+
+// Helper function to clear tenant context for tests
+function clearTenantContext() {
+	const mockContext = {
+		tenant: null,
+	} as any;
+	TenantController.setContext(mockContext);
 }
 
 test.group("Invitations", (group) => {
@@ -477,6 +498,9 @@ test.group("Invitations", (group) => {
 	});
 
 	test("cannot access invitation from another school", async ({ client }) => {
+		// Configuration du contexte tenant pour l'école de l'admin
+		setupTenantContext(school);
+
 		const otherSchool = await School.create({
 			name: "Other School",
 			slug: "other-school",
@@ -505,14 +529,17 @@ test.group("Invitations", (group) => {
 	});
 
 	test("admin without school cannot access invitations", async ({ client }) => {
+		// Clear tenant context to test global mode
+		clearTenantContext();
+
 		const adminNoSchool = await User.create({
 			email: "admin.noschool@test.com",
 			password: "Password123!",
-			schoolId: null,
 			role: "ADMIN",
 			isActive: true,
 			level: 1,
 			points: 0,
+			schoolId: null,
 		});
 
 		const token = await User.accessTokens.create(adminNoSchool);
@@ -547,14 +574,17 @@ test.group("Invitations", (group) => {
 	});
 
 	test("admin without school cannot access stats", async ({ client }) => {
+		// Clear tenant context to test global mode
+		clearTenantContext();
+
 		const adminNoSchool = await User.create({
-			email: "admin.nostats@test.com",
+			email: "admin.noschool.stats@test.com",
 			password: "Password123!",
-			schoolId: null,
 			role: "ADMIN",
 			isActive: true,
 			level: 1,
 			points: 0,
+			schoolId: null,
 		});
 
 		const token = await User.accessTokens.create(adminNoSchool);
@@ -608,23 +638,31 @@ test.group("Invitations", (group) => {
 	test("should return 403 when user has no school for resend", async ({
 		client,
 	}) => {
-		const detachedUser = await User.create({
-			email: "detached@example.com",
-			password: "password123",
+		// Clear tenant context to test global mode
+		clearTenantContext();
+
+		const userNoSchool = await User.create({
+			email: "user.noschool@test.com",
+			password: "Password123!",
 			role: "ADMIN",
-			schoolId: null,
+			isActive: true,
 			level: 1,
 			points: 0,
-			isActive: true,
+			schoolId: null,
 		});
 
-		const token = await User.accessTokens.create(detachedUser);
+		const studentName = splitName("No School");
 		const invitation = await Invitation.create({
-			schoolEmail: "test@example.com",
+			schoolEmail: "noschool@test.com",
+			firstName: studentName.firstName,
+			lastName: studentName.lastName,
 			invitationCode: "NOSCHOOL123",
 			schoolId: school.id,
 			isUsed: false,
+			expiresAt: DateTime.now().plus({ days: 30 }),
 		});
+
+		const token = await User.accessTokens.create(userNoSchool);
 
 		const response = await client
 			.post(`/invitations/${invitation.id}/resend`)

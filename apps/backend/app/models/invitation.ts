@@ -7,6 +7,7 @@ import {
 import type { BelongsTo } from "@adonisjs/lucid/types/relations";
 import { DateTime } from "luxon";
 import { v4 as uuidv4 } from "uuid";
+import TenantController from "#controllers/tenant_controller";
 import Group from "#models/group";
 import School from "#models/school";
 import User from "#models/user";
@@ -82,5 +83,18 @@ export default class Invitation extends BaseModel {
 	public async markAsUsed(): Promise<void> {
 		this.isUsed = true;
 		await this.save();
+	}
+
+	// Méthodes helper tenant
+	static forCurrentTenant() {
+		return TenantController.scopeToTenant(Invitation.query());
+	}
+
+	static createForCurrentTenant(data: Partial<Invitation>) {
+		const schoolId = TenantController.getCurrentSchoolId();
+		if (schoolId && !data.schoolId) {
+			data.schoolId = schoolId;
+		}
+		return Invitation.create(data);
 	}
 }

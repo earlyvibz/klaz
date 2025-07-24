@@ -7,6 +7,7 @@ import reportWebVitals from "./reportWebVitals.ts";
 import { routeTree } from "./routeTree.gen";
 import "./styles.css";
 import { AuthProvider, useAuth } from "@/hooks/auth";
+import { TenantProvider, useTenant } from "@/hooks/tenant";
 import Spinner from "./components/spinner/spinner.tsx";
 
 export const tuyau = createTuyau({
@@ -30,6 +31,8 @@ const router = createRouter({
 	context: {
 		// biome-ignore lint/style/noNonNullAssertion: from tanstack router
 		auth: undefined!,
+		// biome-ignore lint/style/noNonNullAssertion: from tanstack router
+		tenant: undefined!,
 	},
 });
 
@@ -42,9 +45,10 @@ declare module "@tanstack/react-router" {
 
 function InnerApp() {
 	const auth = useAuth();
+	const tenant = useTenant();
 
-	// Show loading state while auth is being resolved
-	if (auth.loading) {
+	// Show loading state while auth or tenant is being resolved
+	if (auth.loading || tenant.isLoading) {
 		return (
 			<div className="flex min-h-screen items-center justify-center">
 				<div className="flex flex-col items-center justify-center">
@@ -55,7 +59,7 @@ function InnerApp() {
 		);
 	}
 
-	return <RouterProvider router={router} context={{ auth }} />;
+	return <RouterProvider router={router} context={{ auth, tenant }} />;
 }
 
 // Render the app
@@ -65,7 +69,9 @@ if (rootElement && !rootElement.innerHTML) {
 	root.render(
 		<StrictMode>
 			<AuthProvider>
-				<InnerApp />
+				<TenantProvider>
+					<InnerApp />
+				</TenantProvider>
 			</AuthProvider>
 		</StrictMode>,
 	);

@@ -40,13 +40,15 @@ export function NavUser({ user }: { user: User }) {
 							<Avatar className="h-8 w-8 rounded-lg grayscale">
 								<AvatarImage src={user.email} alt={user.email} />
 								<AvatarFallback className="rounded-lg">
-									{user.firstName.charAt(0)}
-									{user.lastName.charAt(0)}
+									{(user.firstName || user.email).charAt(0)}
+									{(user.lastName || user.email.charAt(1) || "").charAt(0)}
 								</AvatarFallback>
 							</Avatar>
 							<div className="grid flex-1 text-left text-sm leading-tight">
 								<span className="truncate font-medium">
-									{user.firstName} {user.lastName}
+									{user.firstName && user.lastName
+										? `${user.firstName} ${user.lastName}`
+										: user.email}
 								</span>
 								<span className="text-muted-foreground truncate text-xs">
 									{user.email}
@@ -66,13 +68,15 @@ export function NavUser({ user }: { user: User }) {
 								<Avatar className="h-8 w-8 rounded-lg">
 									<AvatarImage src={user.email} alt={user.email} />
 									<AvatarFallback className="rounded-lg">
-										{user.firstName.charAt(0)}
-										{user.lastName.charAt(0)}
+										{(user.firstName || user.email).charAt(0)}
+										{(user.lastName || user.email.charAt(1) || "").charAt(0)}
 									</AvatarFallback>
 								</Avatar>
 								<div className="grid flex-1 text-left text-sm leading-tight">
 									<span className="truncate font-medium">
-										{user.firstName} {user.lastName}
+										{user.firstName && user.lastName
+											? `${user.firstName} ${user.lastName}`
+											: user.email}
 									</span>
 									<span className="text-muted-foreground truncate text-xs">
 										{user.email}

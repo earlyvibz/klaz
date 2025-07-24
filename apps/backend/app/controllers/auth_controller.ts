@@ -1,5 +1,6 @@
 import type { HttpContext } from "@adonisjs/core/http";
 import mail from "@adonisjs/mail/services/main";
+import TenantController from "#controllers/tenant_controller";
 import Invitation from "#models/invitation";
 import User from "#models/user";
 import env from "#start/env";
@@ -12,20 +13,45 @@ import {
 } from "#validators/auth";
 
 export default class AuthController {
-	async register({ request }: HttpContext) {
-		const { email, password, schoolId } =
-			await request.validateUsing(registerValidator);
-		const user = await User.create({
-			email,
-			password,
-			schoolId,
-			role: "STUDENT",
-			isActive: true,
-			level: 1,
-			points: 0,
-			emailVerified: true,
-		});
-		return User.accessTokens.create(user);
+	async register({ request, response }: HttpContext) {
+		// En mode tenant, le schoolId est automatiquement résolu
+		const tenant = TenantController.getCurrentTenant();
+
+		if (tenant) {
+			// Mode tenant: creation avec schoolId automatique
+			const { email, password } =
+				await request.validateUsing(registerValidator);
+			const user = await User.createForCurrentTenant({
+				email,
+				password,
+				role: "STUDENT",
+				isActive: true,
+				level: 1,
+				points: 0,
+				emailVerified: true,
+			});
+			return User.accessTokens.create(user);
+		} else {
+			// Mode global: schoolId requis explicitement
+			const { email, password, schoolId } =
+				await request.validateUsing(registerValidator);
+			if (!schoolId) {
+				return response.badRequest({
+					message: "schoolId is required in global mode",
+				});
+			}
+			const user = await User.create({
+				email,
+				password,
+				schoolId,
+				role: "STUDENT",
+				isActive: true,
+				level: 1,
+				points: 0,
+				emailVerified: true,
+			});
+			return User.accessTokens.create(user);
+		}
 	}
 
 	async login({ request, response }: HttpContext) {
@@ -49,9 +75,10 @@ export default class AuthController {
 				token,
 				user: {
 					id: user.id,
+					firstName: user.firstName,
+					lastName: user.lastName,
 					email: user.email,
 					role: user.role,
-					schoolId: user.schoolId,
 					group: user.group,
 				},
 			};
@@ -83,10 +110,18 @@ export default class AuthController {
 		const { invitationCode, email, password } =
 			await request.validateUsing(signupValidator);
 
-		const invitation = await Invitation.findBy(
-			"invitationCode",
-			invitationCode,
-		);
+		// En mode tenant, chercher seulement dans les invitations du tenant
+		const tenant = TenantController.getCurrentTenant();
+		let invitation: Invitation | null = null;
+
+		if (tenant) {
+			invitation = await Invitation.forCurrentTenant()
+				.where("invitationCode", invitationCode)
+				.first();
+		} else {
+			invitation = await Invitation.findBy("invitationCode", invitationCode);
+		}
+
 		if (!invitation) {
 			return response.badRequest({ message: "Invalid invitation code" });
 		}
@@ -99,34 +134,36 @@ export default class AuthController {
 			});
 		}
 
-		// Vérifier que l'email n'est pas déjà utilisé
-		const existingUser = await User.findBy("email", email);
-		if (existingUser) {
-			return response.badRequest({
-				message: "This email is already registered",
+		try {
+			const userData = {
+				email,
+				password,
+				firstName: invitation.firstName,
+				lastName: invitation.lastName,
+				schoolId: invitation.schoolId,
+				groupId: invitation.groupId,
+				role: "STUDENT" as const,
+				isActive: true,
+				level: 1,
+				points: 0,
+				emailVerified: true,
+			};
+
+			const user = tenant
+				? await User.createForCurrentTenant(userData)
+				: await User.create(userData);
+
+			// Lier l'invitation au user créé et la marquer comme utilisée
+			invitation.userId = user.id;
+			await invitation.markAsUsed();
+
+			return User.accessTokens.create(user);
+		} catch (error) {
+			console.error("Signup error:", error);
+			return response.internalServerError({
+				message: "An error occurred during signup",
 			});
 		}
-
-		// Créer l'utilisateur
-		const user = await User.create({
-			email,
-			password,
-			firstName: invitation.firstName,
-			lastName: invitation.lastName,
-			schoolId: invitation.schoolId,
-			groupId: invitation.groupId,
-			role: "STUDENT",
-			isActive: true,
-			level: 1,
-			points: 0,
-			emailVerified: true,
-		});
-
-		// Lier l'invitation au user créé
-		invitation.userId = user.id;
-		await invitation.markAsUsed();
-
-		return User.accessTokens.create(user);
 	}
 
 	async forgotPassword({ request, response }: HttpContext) {

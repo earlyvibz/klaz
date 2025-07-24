@@ -3,6 +3,7 @@ import app from "@adonisjs/core/services/app";
 import mail from "@adonisjs/mail/services/main";
 import { DateTime } from "luxon";
 import { v4 as uuidv4 } from "uuid";
+import TenantController from "#controllers/tenant_controller";
 import Invitation from "#models/invitation";
 import env from "#start/env";
 import { importStudentsValidator } from "#validators/students_import";
@@ -30,13 +31,22 @@ export default class InvitationsController {
 			return response.unauthorized({ message: "User not authenticated" });
 		}
 
-		if (!user.schoolId) {
-			return response.forbidden({
-				message: "User is not associated with a school",
-			});
-		}
+		// En mode tenant, utiliser le contexte tenant automatiquement
+		const tenant = TenantController.getCurrentTenant();
+		let schoolId;
 
-		const schoolId = user.schoolId;
+		if (tenant) {
+			// Mode tenant: schoolId automatique
+			schoolId = tenant.schoolId;
+		} else {
+			// Mode global: vérifier que l'utilisateur a un schoolId
+			if (!user.schoolId) {
+				return response.forbidden({
+					message: "User is not associated with a school",
+				});
+			}
+			schoolId = user.schoolId;
+		}
 
 		try {
 			await csvFile.move(app.makePath("tmp/uploads"), {
@@ -149,20 +159,28 @@ export default class InvitationsController {
 		}
 	}
 
-	async index({ auth, response }: HttpContext) {
+	async index({ auth, request, response }: HttpContext) {
 		const user = auth.user;
 		if (!user) {
 			return response.unauthorized({ message: "User not authenticated" });
 		}
 
-		if (!user.schoolId) {
-			return response.forbidden({
-				message: "User is not associated with a school",
-			});
+		// En mode tenant, utiliser le contexte automatiquement
+		const tenant = TenantController.getCurrentTenant();
+
+		if (tenant) {
+			// Mode tenant: scope automatique
+		} else {
+			// Mode global: vérifier les permissions
+			if (!user.schoolId) {
+				return response.forbidden({
+					message: "User is not associated with a school",
+				});
+			}
 		}
 
-		const invitations = await Invitation.query()
-			.where("schoolId", user.schoolId)
+		// Utiliser la méthode tenant-aware mais sans pagination pour garder le format original
+		const invitations = await Invitation.forCurrentTenant()
 			.preload("user")
 			.orderBy("createdAt", "desc");
 
@@ -219,15 +237,21 @@ export default class InvitationsController {
 			return response.unauthorized({ message: "User not authenticated" });
 		}
 
-		if (!user.schoolId) {
-			return response.forbidden({
-				message: "User is not associated with a school",
-			});
+		// En mode tenant, utiliser le contexte automatiquement
+		const tenant = TenantController.getCurrentTenant();
+
+		if (tenant) {
+			// Mode tenant: scope automatique
+		} else {
+			// Mode global: vérifier les permissions
+			if (!user.schoolId) {
+				return response.forbidden({
+					message: "User is not associated with a school",
+				});
+			}
 		}
 
-		const invitations = await Invitation.query()
-			.where("schoolId", user.schoolId)
-			.preload("user");
+		const invitations = await Invitation.forCurrentTenant().preload("user");
 
 		const now = DateTime.now();
 
@@ -270,17 +294,24 @@ export default class InvitationsController {
 			return response.unauthorized({ message: "User not authenticated" });
 		}
 
-		if (!user.schoolId) {
-			return response.forbidden({
-				message: "User is not associated with a school",
-			});
+		// En mode tenant, utiliser le contexte automatiquement
+		const tenant = TenantController.getCurrentTenant();
+
+		if (tenant) {
+			// Mode tenant: scope automatique
+		} else {
+			// Mode global: vérifier les permissions
+			if (!user.schoolId) {
+				return response.forbidden({
+					message: "User is not associated with a school",
+				});
+			}
 		}
 
 		let invitation: Invitation | null;
 		try {
-			invitation = await Invitation.query()
+			invitation = await Invitation.forCurrentTenant()
 				.where("id", params.id)
-				.where("schoolId", user.schoolId)
 				.first();
 		} catch (_error) {
 			return response.notFound({ message: "Invitation not found" });
@@ -299,17 +330,24 @@ export default class InvitationsController {
 			return response.unauthorized({ message: "User not authenticated" });
 		}
 
-		if (!user.schoolId) {
-			return response.forbidden({
-				message: "User is not associated with a school",
-			});
+		// En mode tenant, utiliser le contexte automatiquement
+		const tenant = TenantController.getCurrentTenant();
+
+		if (tenant) {
+			// Mode tenant: scope automatique
+		} else {
+			// Mode global: vérifier les permissions
+			if (!user.schoolId) {
+				return response.forbidden({
+					message: "User is not associated with a school",
+				});
+			}
 		}
 
 		let invitation: Invitation | null;
 		try {
-			invitation = await Invitation.query()
+			invitation = await Invitation.forCurrentTenant()
 				.where("id", params.id)
-				.where("schoolId", user.schoolId)
 				.first();
 		} catch (_error) {
 			return response.notFound({ message: "Invitation not found" });
@@ -334,17 +372,24 @@ export default class InvitationsController {
 			return response.unauthorized({ message: "User not authenticated" });
 		}
 
-		if (!user.schoolId) {
-			return response.forbidden({
-				message: "User is not associated with a school",
-			});
+		// En mode tenant, utiliser le contexte automatiquement
+		const tenant = TenantController.getCurrentTenant();
+
+		if (tenant) {
+			// Mode tenant: scope automatique
+		} else {
+			// Mode global: vérifier les permissions
+			if (!user.schoolId) {
+				return response.forbidden({
+					message: "User is not associated with a school",
+				});
+			}
 		}
 
 		let invitation: Invitation | null;
 		try {
-			invitation = await Invitation.query()
+			invitation = await Invitation.forCurrentTenant()
 				.where("id", params.id)
-				.where("schoolId", user.schoolId)
 				.first();
 		} catch (_error) {
 			return response.notFound({ message: "Invitation not found" });
@@ -355,19 +400,30 @@ export default class InvitationsController {
 		}
 
 		if (invitation.isUsed) {
-			return response.badRequest({ message: "Cannot resend used invitation" });
-		}
-
-		const emailSent =
-			await InvitationsController.sendInvitationEmail(invitation);
-
-		if (!emailSent) {
-			return response.internalServerError({
-				message: "Failed to send invitation email",
+			return response.badRequest({
+				message: "Cannot resend used invitation",
 			});
 		}
 
-		return response.ok({ message: "Invitation resent successfully" });
+		try {
+			await mail.send((message) => {
+				message.to(invitation.schoolEmail);
+				message.subject("Invitation à rejoindre la plateforme Klaz");
+				message.html(`
+          <p>Bonjour${invitation.firstName ? ` ${invitation.firstName}` : ""},</p>
+          <p>Vous avez été invité(e) à rejoindre la plateforme.</p>
+          <p>Votre code d'invitation : <strong>${invitation.invitationCode}</strong></p>
+          <p>Pour créer votre compte, rendez-vous sur : ${env.get("FRONTEND_URL", "http://localhost:3000")}/signup</p>
+        `);
+			});
+
+			return response.ok({ message: "Invitation resent successfully" });
+		} catch (error) {
+			console.error("Failed to resend invitation email:", error);
+			return response.internalServerError({
+				message: "Failed to resend invitation",
+			});
+		}
 	}
 
 	static async sendInvitationEmail(invitation: Invitation): Promise<boolean> {
