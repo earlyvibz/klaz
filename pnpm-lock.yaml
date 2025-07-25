@@ -53,6 +53,9 @@ importers:
       pg:
         specifier: ^8.16.3
         version: 8.16.3
+      pino-pretty:
+        specifier: ^13.0.0
+        version: 13.0.0
       reflect-metadata:
         specifier: ^0.2.2
         version: 0.2.2
@@ -96,9 +99,6 @@ importers:
       hot-hook:
         specifier: ^0.4.0
         version: 0.4.0
-      pino-pretty:
-        specifier: ^13.0.0
-        version: 13.0.0
       ts-node-maintained:
         specifier: ^10.9.5
         version: 10.9.5(@swc/core@1.11.24)(@types/node@22.15.34)(typescript@5.8.3)
