@@ -1,4 +1,5 @@
 import { join } from "node:path";
+import type { HttpContext } from "@adonisjs/core/http";
 import app from "@adonisjs/core/services/app";
 import limiter from "@adonisjs/limiter/services/main";
 import mail from "@adonisjs/mail/services/main";
@@ -28,7 +29,7 @@ function setupTenantContext(school: School) {
 			schoolId: school.id,
 			slug: school.slug,
 		},
-	} as any;
+	} as HttpContext;
 	TenantController.setContext(mockContext);
 }
 
@@ -36,7 +37,7 @@ function setupTenantContext(school: School) {
 function clearTenantContext() {
 	const mockContext = {
 		tenant: null,
-	} as any;
+	} as HttpContext;
 	TenantController.setContext(mockContext);
 }
 

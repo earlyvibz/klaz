@@ -12,7 +12,7 @@ import Spinner from "./components/spinner/spinner.tsx";
 
 export const tuyau = createTuyau({
 	api,
-	baseUrl: "http://localhost:3333",
+	baseUrl: import.meta.env.VITE_API_URL,
 	hooks: {
 		beforeRequest: [
 			(request) => {

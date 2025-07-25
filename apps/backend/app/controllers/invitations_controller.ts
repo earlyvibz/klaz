@@ -33,7 +33,7 @@ export default class InvitationsController {
 
 		// En mode tenant, utiliser le contexte tenant automatiquement
 		const tenant = TenantController.getCurrentTenant();
-		let schoolId;
+		let schoolId: string | null = null;
 
 		if (tenant) {
 			// Mode tenant: schoolId automatique
@@ -159,7 +159,7 @@ export default class InvitationsController {
 		}
 	}
 
-	async index({ auth, request, response }: HttpContext) {
+	async index({ auth, response }: HttpContext) {
 		const user = auth.user;
 		if (!user) {
 			return response.unauthorized({ message: "User not authenticated" });
@@ -185,7 +185,7 @@ export default class InvitationsController {
 			.orderBy("createdAt", "desc");
 
 		return response.ok({
-			invitations: invitations.map((invitation) => {
+			invitations: invitations.map((invitation: Invitation) => {
 				const userData = invitation.user
 					? {
 							exists: true,
@@ -265,7 +265,7 @@ export default class InvitationsController {
 			conversionRate: 0,
 		};
 
-		invitations.forEach((invitation) => {
+		invitations.forEach((invitation: Invitation) => {
 			if (invitation.isUsed) {
 				stats.used++;
 				if (invitation.user) {

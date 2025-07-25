@@ -24,6 +24,7 @@ export default class TenantController {
 		return tenant;
 	}
 
+	// biome-ignore lint/suspicious/noExplicitAny: idk
 	static scopeToTenant(query: any) {
 		const schoolId = TenantController.getCurrentSchoolId();
 		if (schoolId) {

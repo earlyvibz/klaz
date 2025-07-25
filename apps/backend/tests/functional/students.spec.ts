@@ -1,3 +1,4 @@
+import type { HttpContext } from "@adonisjs/core/http";
 import { test } from "@japa/runner";
 import TenantController from "#controllers/tenant_controller";
 import School from "#models/school";
@@ -22,7 +23,7 @@ function setupTenantContext(school: School) {
 			schoolId: school.id,
 			slug: school.slug,
 		},
-	} as any;
+	} as HttpContext;
 
 	TenantController.setContext(mockContext);
 }
