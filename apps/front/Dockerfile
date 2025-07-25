@@ -15,13 +15,13 @@ RUN pnpm install --frozen-lockfile
 
 # Copy source
 COPY packages/shared ./packages/shared/
-COPY apps/backend ./apps/backend/
 COPY apps/front ./apps/front/
+COPY apps/backend/package.json ./apps/backend/
 
-# Build backend first (needed by frontend)
-RUN pnpm --filter @klaz/backend build
+# Build shared package if needed
+RUN pnpm --filter @klaz/shared build
 
-# Build frontend
+# Build frontend only
 RUN pnpm --filter front build
 
 # Production with nginx
