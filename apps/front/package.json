@@ -3,20 +3,16 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
-		"dev": "vite --port 3000",
-		"start": "vite --port 3000",
-		"build": "vite build && tsc",
-		"serve": "vite preview",
+		"dev": "vite --host",
+		"build": "tsc -b && vite build",
+		"lint": "biome check .",
+		"lint:fix": "biome check . --write",
+		"preview": "vite preview",
 		"test": "vitest",
-		"test:unit": "vitest",
-		"test:unit:ui": "vitest --ui",
+		"test:ui": "vitest --ui",
+		"test:run": "vitest run",
 		"test:e2e": "playwright test",
-		"test:e2e:ui": "playwright test --ui",
-		"test:e2e:headed": "playwright test --headed",
-		"test:all": "npm run test:unit && npm run test:e2e",
-		"dev:front": "pnpm --filter front dev",
-		"dev:back": "pnpm --filter backend dev",
-		"dev:full": "pnpm --parallel --filter front --filter backend dev"
+		"test:e2e:ui": "playwright test --ui"
 	},
 	"dependencies": {
 		"@klaz/backend": "workspace:*",

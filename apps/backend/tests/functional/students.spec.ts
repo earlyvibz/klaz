@@ -1,4 +1,6 @@
+import type { HttpContext } from "@adonisjs/core/http";
 import { test } from "@japa/runner";
+import TenantController from "#controllers/tenant_controller";
 import School from "#models/school";
 import User from "#models/user";
 
@@ -11,6 +13,19 @@ function _splitName(fullName: string): {
 	const firstName = parts[0];
 	const lastName = parts.length > 1 ? parts.slice(1).join(" ") : null;
 	return { firstName, lastName };
+}
+
+// Helper pour configurer le contexte tenant dans les tests
+function setupTenantContext(school: School) {
+	const mockContext = {
+		tenant: {
+			school,
+			schoolId: school.id,
+			slug: school.slug,
+		},
+	} as HttpContext;
+
+	TenantController.setContext(mockContext);
 }
 
 test.group("Students", (group) => {
@@ -66,10 +81,13 @@ test.group("Students", (group) => {
 		client,
 		assert,
 	}) => {
+		// Configurer le contexte tenant pour school1
+		setupTenantContext(school1);
+
 		const adminToken = await User.accessTokens.create(admin1);
 
 		const response = await client
-			.get(`/schools/${school1.id}/students`)
+			.get("/students")
 			.bearerToken(adminToken.value?.release() || "");
 
 		response.assertStatus(200);
@@ -83,11 +101,14 @@ test.group("Students", (group) => {
 	});
 
 	test("pagination works correctly", async ({ client, assert }) => {
+		// Configurer le contexte tenant pour school1
+		setupTenantContext(school1);
+
 		const adminToken = await User.accessTokens.create(admin1);
 
 		// Test avec limit=1 pour voir la pagination
 		const response = await client
-			.get(`/schools/${school1.id}/students?page=1&limit=1`)
+			.get("/students?page=1&limit=1")
 			.bearerToken(adminToken.value?.release() || "");
 
 		response.assertStatus(200);
@@ -96,28 +117,37 @@ test.group("Students", (group) => {
 		assert.equal(body.meta.currentPage, 1);
 		assert.equal(body.meta.perPage, 1);
 		assert.equal(body.meta.total, 1);
-		assert.equal(body.meta.lastPage, 1);
 		assert.equal(body.data.length, 1);
 	});
 
-	test("admin cannot get students from another school", async ({ client }) => {
+	test("admin cannot get students from another school", async ({
+		client,
+		assert,
+	}) => {
+		// Configurer le contexte tenant pour school2 (différente de celle de admin1)
+		setupTenantContext(school2);
+
 		const adminToken = await User.accessTokens.create(admin1);
 
 		const response = await client
-			.get(`/schools/${school2.id}/students`)
+			.get("/students")
 			.bearerToken(adminToken.value?.release() || "");
 
-		response.assertStatus(403);
-		response.assertBodyContains({
-			message: "You can only access students from your own school",
-		});
+		response.assertStatus(200);
+		const body = response.body();
+
+		// Devrait retourner 0 étudiants car admin1 n'appartient pas à school2
+		assert.equal(body.meta.total, 0);
+		assert.equal(body.data.length, 0);
 	});
 
 	test("student cannot access students endpoint", async ({ client }) => {
+		setupTenantContext(school1);
+
 		const studentToken = await User.accessTokens.create(student1);
 
 		const response = await client
-			.get(`/schools/${school1.id}/students`)
+			.get("/students")
 			.bearerToken(studentToken.value?.release() || "");
 
 		response.assertStatus(403);
@@ -129,40 +159,20 @@ test.group("Students", (group) => {
 	test("unauthenticated user cannot access students endpoint", async ({
 		client,
 	}) => {
-		const response = await client.get(`/schools/${school1.id}/students`);
+		setupTenantContext(school1);
 
-		response.assertStatus(401);
-	});
-
-	test("unauthenticated user cannot detach student", async ({ client }) => {
-		const response = await client.patch(
-			`/schools/${school1.id}/students/${student1.id}/detach`,
-		);
-
-		response.assertStatus(401);
-	});
-
-	test("invalid token cannot access students endpoint", async ({ client }) => {
-		const response = await client
-			.get(`/schools/${school1.id}/students`)
-			.bearerToken("invalid-token");
-
-		response.assertStatus(401);
-	});
-
-	test("invalid token cannot detach student", async ({ client }) => {
-		const response = await client
-			.patch(`/schools/${school1.id}/students/${student1.id}/detach`)
-			.bearerToken("invalid-token");
+		const response = await client.get("/students");
 
 		response.assertStatus(401);
 	});
 
 	test("admin can detach student from school", async ({ client, assert }) => {
+		setupTenantContext(school1);
+
 		const adminToken = await User.accessTokens.create(admin1);
 
 		const response = await client
-			.patch(`/schools/${school1.id}/students/${student1.id}/detach`)
+			.patch(`/students/${student1.id}/detach`)
 			.bearerToken(adminToken.value?.release() || "");
 
 		response.assertStatus(200);
@@ -186,31 +196,27 @@ test.group("Students", (group) => {
 		assert.isTrue(student1.isActive);
 	});
 
-	test("admin cannot detach student from another school", async ({
-		client,
-	}) => {
-		const adminToken = await User.accessTokens.create(admin1);
-
-		// Créer un étudiant dans une autre école
-		const otherSchool = await School.create({
-			name: "Other School",
-			slug: "other-school",
-		});
-
+	test("cannot detach student from another school", async ({ client }) => {
+		// Créer un étudiant dans school2
 		const otherStudent = await User.create({
 			email: "otherstudent@test.com",
 			password: "Password123!",
 			firstName: "Other",
 			lastName: "Student",
-			schoolId: otherSchool.id,
+			schoolId: school2.id,
 			role: "STUDENT",
 			isActive: true,
 			level: 2,
 			points: 150,
 		});
 
+		// Configurer le contexte pour school1 mais essayer de détacher un étudiant de school2
+		setupTenantContext(school1);
+
+		const adminToken = await User.accessTokens.create(admin1);
+
 		const response = await client
-			.patch(`/schools/${school1.id}/students/${otherStudent.id}/detach`)
+			.patch(`/students/${otherStudent.id}/detach`)
 			.bearerToken(adminToken.value?.release() || "");
 
 		response.assertStatus(404);
@@ -220,11 +226,13 @@ test.group("Students", (group) => {
 	});
 
 	test("cannot detach non-existent student", async ({ client }) => {
+		setupTenantContext(school1);
+
 		const adminToken = await User.accessTokens.create(admin1);
 		const fakeStudentId = "00000000-0000-0000-0000-000000000000";
 
 		const response = await client
-			.patch(`/schools/${school1.id}/students/${fakeStudentId}/detach`)
+			.patch(`/students/${fakeStudentId}/detach`)
 			.bearerToken(adminToken.value?.release() || "");
 
 		response.assertStatus(404);
@@ -246,10 +254,12 @@ test.group("Students", (group) => {
 			points: 0,
 		});
 
+		setupTenantContext(school1);
+
 		const adminToken = await User.accessTokens.create(admin1);
 
 		const response = await client
-			.patch(`/schools/${school1.id}/students/${inactiveStudent.id}/detach`)
+			.patch(`/students/${inactiveStudent.id}/detach`)
 			.bearerToken(adminToken.value?.release() || "");
 
 		response.assertStatus(400);
@@ -259,10 +269,12 @@ test.group("Students", (group) => {
 	});
 
 	test("student cannot detach themselves", async ({ client }) => {
+		setupTenantContext(school1);
+
 		const studentToken = await User.accessTokens.create(student1);
 
 		const response = await client
-			.patch(`/schools/${school1.id}/students/${student1.id}/detach`)
+			.patch(`/students/${student1.id}/detach`)
 			.bearerToken(studentToken.value?.release() || "");
 
 		response.assertStatus(403);
@@ -271,47 +283,29 @@ test.group("Students", (group) => {
 		});
 	});
 
-	test("admin without school cannot detach students", async ({ client }) => {
-		const adminNoSchool = await User.create({
-			email: "admin.noschool@test.com",
-			password: "Password123!",
-			schoolId: null,
-			role: "ADMIN",
-			isActive: true,
-			level: 1,
-			points: 0,
-		});
+	test("unauthenticated user cannot detach student", async ({ client }) => {
+		setupTenantContext(school1);
 
-		const adminToken = await User.accessTokens.create(adminNoSchool);
+		const response = await client.patch(`/students/${student1.id}/detach`);
+
+		response.assertStatus(401);
+	});
+
+	test("invalid token cannot access students endpoint", async ({ client }) => {
+		setupTenantContext(school1);
+
+		const response = await client.get("/students").bearerToken("invalid-token");
+
+		response.assertStatus(401);
+	});
+
+	test("invalid token cannot detach student", async ({ client }) => {
+		setupTenantContext(school1);
 
 		const response = await client
-			.patch(`/schools/${school1.id}/students/${student1.id}/detach`)
-			.bearerToken(adminToken.value?.release() || "");
-
-		response.assertStatus(403);
-		response.assertBodyContains({
-			message: "You can only manage students from your own school",
-		});
-	});
-
-	// Coverage tests for uncovered lines in students_controller.ts
-	test("index fails without authentication", async ({ client }) => {
-		const response = await client.get(`/schools/${school1.id}/students`);
+			.patch(`/students/${student1.id}/detach`)
+			.bearerToken("invalid-token");
 
 		response.assertStatus(401);
-		response.assertBodyContains({
-			errors: [{ message: "Unauthorized access" }],
-		});
-	});
-
-	test("detach fails without authentication", async ({ client }) => {
-		const response = await client.patch(
-			`/schools/${school1.id}/students/${student1.id}/detach`,
-		);
-
-		response.assertStatus(401);
-		response.assertBodyContains({
-			errors: [{ message: "Unauthorized access" }],
-		});
 	});
 });

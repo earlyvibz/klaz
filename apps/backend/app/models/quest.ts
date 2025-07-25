@@ -8,6 +8,7 @@ import {
 import type { BelongsTo, HasMany } from "@adonisjs/lucid/types/relations";
 import type { DateTime } from "luxon";
 import { v4 as uuidv4 } from "uuid";
+import TenantController from "#controllers/tenant_controller";
 import QuestSubmission from "#models/quest_submission";
 import School from "#models/school";
 
@@ -51,5 +52,18 @@ export default class Quest extends BaseModel {
 	@beforeCreate()
 	public static async assignId(model: Quest) {
 		model.id = uuidv4();
+	}
+
+	// Méthodes helper tenant
+	static forCurrentTenant() {
+		return TenantController.scopeToTenant(Quest.query());
+	}
+
+	static createForCurrentTenant(data: Partial<Quest>) {
+		const schoolId = TenantController.getCurrentSchoolId();
+		if (schoolId && !data.schoolId) {
+			data.schoolId = schoolId;
+		}
+		return Quest.create(data);
 	}
 }

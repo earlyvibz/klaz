@@ -137,3 +137,62 @@ pnpm run test
 3. Make your changes
 4. Run tests and linting
 5. Submit a pull request
+
+## 🏢 Développement Multi-Tenant
+
+Ce projet supporte le multi-tenant par subdomain uniquement (ex: `hec.klaz.com`).
+
+### Configuration initiale
+
+1. **Configurer les subdomains locaux** (une seule fois) :
+```bash
+./scripts/setup-hosts.sh
+```
+
+### Développement
+
+```bash
+npm run dev  # Lance avec --host pour accepter tous les subdomains
+```
+
+### Accès aux différents modes
+
+- **http://localhost:5173** → Mode global (super-admin)
+- **http://hec.localhost:5173** → Tenant "hec"
+- **http://essec.localhost:5173** → Tenant "essec"
+- **http://insead.localhost:5173** → Tenant "insead"
+
+### Fonctionnement
+
+Le système détecte automatiquement le subdomain et :
+1. **Frontend** : Configure le contexte tenant via `useTenant()`
+2. **API calls** : Ajoute automatiquement le header `X-Tenant-Slug`
+3. **Backend** : Reçoit le tenant context via le middleware
+
+### Utilisation dans le code
+
+```tsx
+import { useTenant, TenantGuard } from '@/hooks/tenant';
+
+function MyComponent() {
+  const { isTenantMode, school, slug } = useTenant();
+
+  if (isTenantMode) {
+    return <p>École: {school?.name} (slug: {slug})</p>;
+  }
+
+  return <p>Mode global (super-admin)</p>;
+}
+
+// Avec guard
+<TenantGuard requireTenant>
+  <SchoolSpecificContent />
+</TenantGuard>
+```
+
+### Dev Tools
+
+En développement, un bouton "🏢 Tenant Info" apparaît en bas à droite pour voir :
+- Le hostname actuel
+- Le subdomain détecté
+- Le mode (tenant vs global)

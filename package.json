@@ -13,7 +13,10 @@
 		"format:fix": "biome format --write .",
 		"check": "biome check .",
 		"check:fix": "biome check --write .",
-		"clean": "pnpm --recursive clean"
+		"clean": "pnpm --recursive clean",
+		"docker:build:backend": "docker build -f apps/backend/Dockerfile -t klaz-backend .",
+		"docker:build:frontend": "docker build -f apps/front/Dockerfile -t klaz-frontend .",
+		"docker:build": "pnpm docker:build:backend && pnpm docker:build:frontend"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.1.1",

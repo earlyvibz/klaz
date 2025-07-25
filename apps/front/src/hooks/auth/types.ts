@@ -6,8 +6,8 @@ export enum UserRole {
 
 export type User = {
 	id: string;
-	firstName: string;
-	lastName: string;
+	firstName: string | null;
+	lastName: string | null;
 	email: string;
 	role: "STUDENT" | "ADMIN" | "SUPERADMIN";
 	schoolId: string;

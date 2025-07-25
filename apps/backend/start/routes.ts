@@ -21,6 +21,8 @@ const AuthController = () => import("#controllers/auth_controller");
 const StudentsController = () => import("#controllers/students_controller");
 const InvitationsController = () =>
 	import("#controllers/invitations_controller");
+const SchoolsController = () => import("#controllers/schools_controller");
+const TenantController = () => import("#controllers/tenant_controller");
 
 router.get("/", async () => {
 	return {
@@ -28,88 +30,106 @@ router.get("/", async () => {
 	};
 });
 
-// Routes d'authentification avec rate limiting
-router
-	.post("/register", [AuthController, "register"])
-	.as("auth.register")
-	.use(registerThrottle);
-
-router
-	.post("/signup", [AuthController, "signup"])
-	.as("auth.signup")
-	.use(signupThrottle);
-
-router
-	.post("/login", [AuthController, "login"])
-	.as("auth.login")
-	.use(loginThrottle);
-
-router
-	.post("/forgot-password", [AuthController, "forgotPassword"])
-	.as("auth.forgotPassword")
-	.use(forgotPasswordThrottle);
-
-router
-	.post("/reset-password", [AuthController, "resetPassword"])
-	.as("auth.resetPassword")
-	.use(loginThrottle);
-router
-	.delete("/logout", [AuthController, "logout"])
-	.as("auth.logout")
-	.use(middleware.auth());
-router
-	.delete("/logout-all", [AuthController, "logoutAllDevices"])
-	.as("auth.logoutAll")
-	.use(middleware.auth());
-router.get("/me", [AuthController, "me"]).as("auth.me").use(middleware.auth());
-
-// Routes admin seulement (ADMIN ou SUPERADMIN)
+// Routes d'authentification (fonctionnent en mode global ET tenant)
 router
 	.group(() => {
 		router
-			.post("/students/import", [InvitationsController, "import"])
-			.as("students.import")
-			.use(importThrottle);
+			.post("/register", [AuthController, "register"])
+			.as("auth.register")
+			.use(registerThrottle);
 
 		router
-			.get("/schools/:schoolId/students", [StudentsController, "index"])
-			.as("students.index");
+			.post("/signup", [AuthController, "signup"])
+			.as("auth.signup")
+			.use(signupThrottle);
 
 		router
-			.patch("/schools/:schoolId/students/:id/detach", [
-				StudentsController,
-				"detach",
-			])
-			.as("students.detach");
+			.post("/login", [AuthController, "login"])
+			.as("auth.login")
+			.use(loginThrottle);
 
-		// Routes pour gérer les invitations
 		router
-			.get("/invitations", [InvitationsController, "index"])
-			.as("invitations.index");
+			.post("/forgot-password", [AuthController, "forgotPassword"])
+			.as("auth.forgotPassword")
+			.use(forgotPasswordThrottle);
+
 		router
-			.get("/invitations/stats", [InvitationsController, "stats"])
-			.as("invitations.stats");
+			.post("/reset-password", [AuthController, "resetPassword"])
+			.as("auth.resetPassword")
+			.use(loginThrottle);
+
 		router
-			.get("/invitations/:id", [InvitationsController, "show"])
-			.as("invitations.show");
+			.delete("/logout", [AuthController, "logout"])
+			.as("auth.logout")
+			.use(middleware.auth());
+
 		router
-			.delete("/invitations/:id", [InvitationsController, "destroy"])
-			.as("invitations.destroy");
+			.delete("/logout-all", [AuthController, "logoutAllDevices"])
+			.as("auth.logoutAll")
+			.use(middleware.auth());
+
 		router
-			.post("/invitations/:id/resend", [InvitationsController, "resend"])
-			.as("invitations.resend");
+			.get("/me", [AuthController, "me"])
+			.as("auth.me")
+			.use(middleware.auth());
 	})
-	.use([middleware.auth(), middleware.role({ requireAdmin: true })]);
+	.use(middleware.tenant()); // Middleware tenant optionnel
 
-// Exemples d'utilisation du middleware role
+// Routes spécifiques au tenant (nécessite un subdomain valide)
 router
 	.group(() => {
-		// Seuls les SUPERADMIN peuvent accéder
+		// Info sur le tenant actuel
 		router
-			.get("/superadmin/schools", async () => ({ message: "Super admin only" }))
+			.get("/tenant/current", [TenantController, "current"])
+			.as("tenant.current");
+		router.get("/tenant/info", [TenantController, "info"]).as("tenant.info");
+
+		// Routes admin pour le tenant actuel
+		router
+			.group(() => {
+				router
+					.get("/students", [StudentsController, "index"])
+					.as("tenant.students.index");
+
+				router
+					.patch("/students/:id/detach", [StudentsController, "detach"])
+					.as("tenant.students.detach");
+
+				router
+					.post("/students/import", [InvitationsController, "import"])
+					.as("tenant.students.import")
+					.use(importThrottle);
+
+				router
+					.get("/invitations", [InvitationsController, "index"])
+					.as("tenant.invitations.index");
+				router
+					.get("/invitations/stats", [InvitationsController, "stats"])
+					.as("tenant.invitations.stats");
+				router
+					.get("/invitations/:id", [InvitationsController, "show"])
+					.as("tenant.invitations.show");
+				router
+					.delete("/invitations/:id", [InvitationsController, "destroy"])
+					.as("tenant.invitations.destroy");
+				router
+					.post("/invitations/:id/resend", [InvitationsController, "resend"])
+					.as("tenant.invitations.resend");
+			})
+			.use([middleware.auth(), middleware.role({ requireAdmin: true })]);
+	})
+	.use(middleware.tenant()); // Middleware tenant optionnel - les contrôleurs gèrent les exigences
+
+// Routes admin globales (SUPERADMIN seulement)
+router
+	.group(() => {
+		// Gestion des écoles (SUPERADMIN uniquement)
+		router
+			.get("/schools", [SchoolsController, "index"])
+			.as("superadmin.schools.index")
 			.use(middleware.role({ roles: ["SUPERADMIN"] }));
 
-		// ADMIN ou SUPERADMIN
+		// Dashboard admin global
 		router
 			.get("/admin/dashboard", async () => ({ message: "Admin dashboard" }))
 			.use(middleware.role({ roles: ["ADMIN", "SUPERADMIN"] }));
