@@ -32,8 +32,8 @@ WORKDIR /app
 # Copy built app (contains its own package.json)
 COPY --from=base /app/apps/backend/build ./
 
-# Install only prod deps
-RUN pnpm install --prod --frozen-lockfile
+# Install only prod deps (no lockfile needed in production)
+RUN pnpm install --prod --no-frozen-lockfile
 
 EXPOSE 3333
 CMD ["node", "bin/server.js"]
