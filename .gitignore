@@ -12,3 +12,5 @@ coverage/
 .nyc_output/
 *.tsbuildinfo
 apps/backend/.adonisjs/api.ts
+# Deploy directory
+.deploy/

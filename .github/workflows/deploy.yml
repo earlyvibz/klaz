@@ -1,0 +1,103 @@
+name: Deploy
+
+on:
+  push:
+    branches: [dev, staging, main]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME_BACKEND: ghcr.io/earlyvibz/klaz/backend
+  IMAGE_NAME_FRONTEND: ghcr.io/earlyvibz/klaz/frontend
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: latest
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Set environment tag
+        id: env
+        run: |
+          if [[ ${{ github.ref }} == 'refs/heads/main' ]]; then
+            echo "tag=latest" >> $GITHUB_OUTPUT
+            echo "env=prod" >> $GITHUB_OUTPUT
+          elif [[ ${{ github.ref }} == 'refs/heads/staging' ]]; then
+            echo "tag=staging" >> $GITHUB_OUTPUT
+            echo "env=staging" >> $GITHUB_OUTPUT
+          elif [[ ${{ github.ref }} == 'refs/heads/dev' ]]; then
+            echo "tag=dev" >> $GITHUB_OUTPUT
+            echo "env=dev" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build project
+        run: pnpm deploy:all
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push backend image
+        uses: docker/build-push-action@v5
+        with:
+          context: .deploy/backend
+          platforms: linux/amd64
+          push: true
+          tags: ${{ env.IMAGE_NAME_BACKEND }}:${{ steps.env.outputs.tag }}
+
+      - name: Build and push frontend image
+        uses: docker/build-push-action@v5
+        with:
+          context: .deploy/frontend
+          platforms: linux/amd64
+          push: true
+          tags: ${{ env.IMAGE_NAME_FRONTEND }}:${{ steps.env.outputs.tag }}
+
+      - name: Trigger Coolify DEV deployments
+        if: steps.env.outputs.env == 'dev'
+        run: |
+          echo "Triggering DEV deployments"
+          echo "Backend image: ${{ env.IMAGE_NAME_BACKEND }}:${{ steps.env.outputs.tag }}"
+          echo "Frontend image: ${{ env.IMAGE_NAME_FRONTEND }}:${{ steps.env.outputs.tag }}"
+
+          # Déclencher le redéploiement backend DEV (méthode officielle)
+          echo "Deploying backend..."
+          curl --request GET "${{ secrets.COOLIFY_WEBHOOK_BACKEND_DEV }}" \
+            --header "Authorization: Bearer ${{ secrets.COOLIFY_TOKEN }}"
+
+          # Déclencher le redéploiement frontend DEV
+          echo "Deploying frontend..."
+          curl --request GET "${{ secrets.COOLIFY_WEBHOOK_FRONT_DEV }}" \
+            --header "Authorization: Bearer ${{ secrets.COOLIFY_TOKEN }}"
+
+      - name: Other environments (staging/prod)
+        if: steps.env.outputs.env != 'dev'
+        run: |
+          echo "Images pushed for ${{ steps.env.outputs.env }} environment:"
+          echo "Backend: ${{ env.IMAGE_NAME_BACKEND }}:${{ steps.env.outputs.tag }}"
+          echo "Frontend: ${{ env.IMAGE_NAME_FRONTEND }}:${{ steps.env.outputs.tag }}"
+          echo "Configure webhooks in Coolify for these environments manually"

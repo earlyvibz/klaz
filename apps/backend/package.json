@@ -4,6 +4,12 @@
 	"private": true,
 	"type": "module",
 	"license": "UNLICENSED",
+	"files": [
+		"build/",
+		".adonisjs/",
+		"adonisrc.minimal.ts",
+		"package.json"
+	],
 	"scripts": {
 		"start": "node bin/server.js",
 		"build": "node ace build",

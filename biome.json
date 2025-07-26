@@ -14,7 +14,8 @@
 			"!**/apps/front/src/components/ui/**/*",
 			"!**/coverage/**/*",
 			"!**/dist/**/*",
-			"!**/build/**/*"
+			"!**/build/**/*",
+			"!**/node_modules/**/*"
 		]
 	},
 	"formatter": {
