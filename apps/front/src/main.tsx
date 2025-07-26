@@ -10,9 +10,6 @@ import { AuthProvider, useAuth } from "@/hooks/auth";
 import { TenantProvider, useTenant } from "@/hooks/tenant";
 import Spinner from "./components/spinner/spinner.tsx";
 
-console.log("🔍 VITE_API_URL:", import.meta.env.VITE_API_URL);
-console.log("🔍 All env vars:", import.meta.env);
-
 export const tuyau = createTuyau({
 	api,
 	baseUrl: import.meta.env.VITE_API_URL,
