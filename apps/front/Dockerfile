@@ -21,6 +21,10 @@ COPY apps/backend/package.json ./apps/backend/
 # Build shared package if needed
 RUN pnpm --filter @klaz/shared build
 
+# Build args for Vite
+ARG VITE_API_URL
+ENV VITE_API_URL=$VITE_API_URL
+
 # Build frontend only
 RUN pnpm --filter front build
 
