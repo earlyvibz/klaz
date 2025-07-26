@@ -22,7 +22,7 @@ COPY apps/backend/package.json ./apps/backend/
 RUN pnpm --filter @klaz/shared build
 
 # Build args for Vite
-ARG VITE_API_URL=https://api.klaz-dev.fr
+ARG VITE_API_URL
 ENV VITE_API_URL=$VITE_API_URL
 
 # Build frontend only
