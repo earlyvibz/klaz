@@ -28,7 +28,7 @@ export const Route = createFileRoute("/_dashboard/users")({
 			throw new Error("User not authenticated or schoolId not available");
 		}
 
-		const response = tuyau.schools({ schoolId }).students.$get({
+		const response = tuyau.students.$get({
 			query: { page: deps.page, limit: deps.limit },
 		});
 		return response;
