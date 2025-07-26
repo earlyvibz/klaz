@@ -84,6 +84,8 @@ jobs:
           platforms: linux/amd64
           push: true
           tags: ${{ env.IMAGE_NAME_FRONTEND }}:${{ steps.env.outputs.tag }}
+          build-args: |
+            VITE_API_URL=https://api.klaz-dev.fr
 
       - name: Trigger Coolify DEV deployments
         if: steps.env.outputs.env == 'dev'
