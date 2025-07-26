@@ -23,10 +23,10 @@ RUN pnpm --filter @klaz/shared build
 
 # Build args for Vite
 ARG VITE_API_URL
-ENV VITE_API_URL=$VITE_API_URL
 
-# Debug: Check if env var is passed
-RUN echo "🔍 VITE_API_URL during build: $VITE_API_URL"
+# Create .env file for Vite
+RUN echo "VITE_API_URL=$VITE_API_URL" > /app/apps/front/.env
+RUN cat /app/apps/front/.env
 
 # Build frontend only
 RUN pnpm --filter front build
