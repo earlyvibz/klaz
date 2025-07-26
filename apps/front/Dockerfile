@@ -25,6 +25,9 @@ RUN pnpm --filter @klaz/shared build
 ARG VITE_API_URL
 ENV VITE_API_URL=$VITE_API_URL
 
+# Debug: Check if env var is passed
+RUN echo "🔍 VITE_API_URL during build: $VITE_API_URL"
+
 # Build frontend only
 RUN pnpm --filter front build
 
