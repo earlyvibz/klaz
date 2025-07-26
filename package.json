@@ -15,7 +15,7 @@
 		"check:fix": "biome check --write .",
 		"clean": "pnpm --recursive clean",
 		"deploy:clean": "rm -rf .deploy",
-		"deploy:build": "pnpm --filter @klaz/backend build",
+		"deploy:build": "pnpm --filter @klaz/backend build && pnpm --filter @klaz/backend exec node ace tuyau:generate",
 		"deploy:backend": "pnpm --filter @klaz/backend --prod deploy .deploy/backend --legacy",
 		"deploy:frontend": "pnpm --filter front deploy .deploy/frontend --legacy",
 		"deploy:frontend:build": "cd .deploy/frontend && pnpm build",
