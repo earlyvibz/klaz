@@ -6,9 +6,13 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-import type { Student } from "@/types/student";
+import type { PaginatedStudentsResponse } from "@/types";
 
-export default function TableUsers({ users }: { users: Student[] }) {
+export default function TableUsers({
+	users,
+}: {
+	users: PaginatedStudentsResponse["students"];
+}) {
 	return (
 		<Table className="text-center">
 			<TableHeader className="bg-muted sticky top-0 z-10">

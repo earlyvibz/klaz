@@ -26,6 +26,9 @@ export default class QuestSubmission extends BaseModel {
 	@column()
 	declare status: "PENDING" | "APPROVED" | "REJECTED";
 
+	@column()
+	declare feedback?: string;
+
 	@column.dateTime()
 	declare submittedAt: DateTime;
 

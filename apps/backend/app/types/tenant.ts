@@ -1,14 +1,13 @@
 import type School from "#models/school";
 
 export interface TenantContext {
-	school: School;
-	schoolId: string;
-	slug: string;
+	school: School | null;
+	schoolId: string | null;
+	slug: string | null;
 }
 
 declare module "@adonisjs/core/http" {
 	interface HttpContext {
-		tenant: TenantContext | null;
-		adminMode: boolean;
+		school: School | null;
 	}
 }

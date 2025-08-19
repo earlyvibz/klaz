@@ -7,16 +7,18 @@
 	},
 	"files": {
 		"ignoreUnknown": false,
-		"includes": [
-			"**",
-			"!**/apps/backend/.adonisjs/**/*",
-			"!**/apps/front/src/routeTree.gen.ts",
-			"!**/apps/front/src/components/ui/**/*",
-			"!**/coverage/**/*",
-			"!**/dist/**/*",
-			"!**/build/**/*",
-			"!**/node_modules/**/*"
-		]
+		"experimentalScannerIgnores": [
+			"**/apps/backend/.adonisjs/**/*",
+			"**/apps/front/src/routeTree.gen.ts",
+			"**/apps/front/src/components/ui/**/*",
+			"**/coverage/**/*",
+			"**/dist/**/*",
+			"**/build/**/*",
+			"**/node_modules/**/*",
+			"**/playwright-report/**/*",
+			"**/test-results/**/*"
+		],
+		"includes": ["**"]
 	},
 	"formatter": {
 		"enabled": true,

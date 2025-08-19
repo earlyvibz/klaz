@@ -15,9 +15,13 @@ export default class extends BaseSchema {
 				.references("id")
 				.inTable("schools")
 				.onDelete("CASCADE");
-			table.uuid("group_id").nullable().references("id").inTable("groups");
+			table
+				.uuid("user_id")
+				.nullable()
+				.references("id")
+				.inTable("users")
+				.onDelete("SET NULL");
 			table.boolean("is_used").defaultTo(false);
-			table.timestamp("expires_at").nullable();
 			table.timestamps(true);
 		});
 	}

@@ -2,20 +2,15 @@ import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import Header from "@/components/header/header";
 import AppSidebar from "@/components/sidebar/sidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import useAuth from "@/stores/auth-store";
 
 export const Route = createFileRoute("/_dashboard")({
-	beforeLoad: ({ context, location }) => {
-		if (context.auth.loading) {
-			return;
-		}
+	beforeLoad: async () => {
+		const { checkAuth } = useAuth.getState();
+		const isAuthenticated = await checkAuth();
 
-		if (!context.auth.isAuthenticated) {
-			throw redirect({
-				to: "/auth/login",
-				search: {
-					redirect: location.href,
-				},
-			});
+		if (!isAuthenticated) {
+			throw redirect({ to: "/auth/login" });
 		}
 	},
 	component: DashboardLayout,

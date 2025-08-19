@@ -13,16 +13,10 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-
-interface PaginationMeta {
-	currentPage: number;
-	lastPage: number;
-	perPage: number;
-	total: number;
-}
+import type { PaginatedStudentsResponse } from "@/types";
 
 interface PaginationProps {
-	meta: PaginationMeta;
+	meta: PaginatedStudentsResponse["meta"];
 	currentLimit: number;
 	onPageChange: (page: number) => void;
 	onLimitChange: (limit: number) => void;

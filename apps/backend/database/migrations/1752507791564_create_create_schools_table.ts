@@ -9,6 +9,16 @@ export default class extends BaseSchema {
 			table.string("name").notNullable();
 			table.string("slug").notNullable().unique();
 			table.string("address").nullable();
+
+			// Champs de personnalisation
+			table.string("logo_url").nullable();
+			table.string("primary_color").nullable().defaultTo("#3B82F6");
+			table.string("secondary_color").nullable().defaultTo("#64748B");
+			table.text("description").nullable();
+			table.string("website_url").nullable();
+			table.string("contact_email").nullable();
+			table.string("phone").nullable();
+
 			table.timestamps(true);
 		});
 	}

@@ -1,19 +1,14 @@
 import type { HttpContext } from "@adonisjs/core/http";
+import UserDto from "#dtos/user";
 import User from "#models/user";
-import StudentDto from "../dtos/student_dto.js";
+import type { PaginationMeta } from "#types/students";
 
 export default class StudentsController {
-	async index({ request, auth, response }: HttpContext) {
-		const user = auth.user;
-		if (!user) {
-			return response.unauthorized({ message: "User not authenticated" });
-		}
-
+	async getStudents({ request, school }: HttpContext) {
 		const page = request.input("page", 1);
 		const limit = request.input("limit", 10);
 
-		// Utiliser la méthode tenant-aware qui scope automatiquement
-		const students = await User.forCurrentTenant()
+		let query = User.query()
 			.where("role", "STUDENT")
 			.where("isActive", true)
 			.preload("group")
@@ -28,21 +23,42 @@ export default class StudentsController {
 				"createdAt",
 				"lastLoginAt",
 			])
-			.orderBy("createdAt", "desc")
-			.paginate(page, limit);
+			.orderBy("createdAt", "desc");
 
-		const paginationMeta = students.getMeta();
+		query = query.where("schoolId", school?.id ?? "");
+
+		const students = await query.paginate(page, limit);
+		const paginationMeta = students.getMeta() as PaginationMeta;
+
 		const studentsData = students
 			.all()
-			.map((student: User) => new StudentDto(student));
+			.sort((a: User, b: User) => {
+				const nameA = (a.lastName || "").toLowerCase();
+				const nameB = (b.lastName || "").toLowerCase();
+				if (nameA < nameB) return -1;
+				if (nameA > nameB) return 1;
+				return 0;
+			})
+			.map((student: User) => new UserDto(student));
 
-		return response.ok({
-			data: studentsData,
+		return {
+			students: studentsData,
 			meta: paginationMeta,
-		});
+		};
 	}
 
-	async detach({ params, auth, response }: HttpContext) {
+	async getStudentsCount({ school }: HttpContext) {
+		const count = await User.query()
+			.where("role", "STUDENT")
+			.where("isActive", true)
+			.where("schoolId", school?.id ?? "")
+			.count("* as total")
+			.firstOrFail();
+
+		return { count: Number(count.$extras.total) };
+	}
+
+	async detach({ params, auth, response, school }: HttpContext) {
 		const user = auth.user;
 		if (!user) {
 			return response.unauthorized({ message: "User not authenticated" });
@@ -50,11 +66,15 @@ export default class StudentsController {
 
 		const { id } = params;
 
-		// Chercher seulement dans le tenant actuel
-		const student = await User.forCurrentTenant()
-			.where("id", id)
-			.where("role", "STUDENT")
-			.first();
+		let query = User.query().where("id", id).where("role", "STUDENT");
+
+		if (school?.id) {
+			query = query.where("schoolId", school.id);
+		} else if (user.schoolId) {
+			query = query.where("schoolId", user.schoolId);
+		}
+
+		const student = await query.first();
 
 		if (!student) {
 			return response.notFound({ message: "Student not found" });

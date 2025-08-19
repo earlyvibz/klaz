@@ -3,6 +3,7 @@ import type { HasMany } from "@adonisjs/lucid/types/relations";
 import type { DateTime } from "luxon";
 import { v4 as uuidv4 } from "uuid";
 import Group from "#models/group";
+import Invitation from "#models/invitation";
 import Quest from "#models/quest";
 import Reward from "#models/reward";
 import User from "#models/user";
@@ -17,6 +18,31 @@ export default class School extends BaseModel {
 	@column()
 	declare slug: string;
 
+	@column()
+	declare address: string | null;
+
+	// Nouveaux champs de personnalisation
+	@column()
+	declare logoUrl: string | null;
+
+	@column()
+	declare primaryColor: string;
+
+	@column()
+	declare secondaryColor: string;
+
+	@column()
+	declare description: string | null;
+
+	@column()
+	declare websiteUrl: string | null;
+
+	@column()
+	declare contactEmail: string | null;
+
+	@column()
+	declare phone: string | null;
+
 	@hasMany(() => Group)
 	declare groups: HasMany<typeof Group>;
 
@@ -28,6 +54,9 @@ export default class School extends BaseModel {
 
 	@hasMany(() => Reward)
 	declare rewards: HasMany<typeof Reward>;
+
+	@hasMany(() => Invitation)
+	declare invitations: HasMany<typeof Invitation>;
 
 	@column.dateTime({ autoCreate: true })
 	declare createdAt: DateTime;

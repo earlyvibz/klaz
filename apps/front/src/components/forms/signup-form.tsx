@@ -1,8 +1,8 @@
-import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { useAuth } from "@/hooks/auth";
 import { useAppForm } from "@/hooks/form/form";
 import { cn } from "@/lib/utils";
+import useAuth from "@/stores/auth-store";
 import { signupSchema } from "@/validators/auth";
 
 export function SignupForm({
@@ -10,9 +10,8 @@ export function SignupForm({
 	...props
 }: React.ComponentProps<"form">) {
 	const navigate = useNavigate();
-	const { signup } = useAuth();
-	const state = useRouterState();
 	const [error, setError] = useState<string | null>(null);
+	const { signup, isLoading } = useAuth();
 
 	const form = useAppForm({
 		defaultValues: { email: "", password: "", confirmPassword: "", code: "" },
@@ -82,10 +81,7 @@ export function SignupForm({
 				</div>
 
 				<form.AppForm>
-					<form.SubscribeButton
-						label="Créer un compte"
-						isLoading={state.isLoading}
-					/>
+					<form.SubscribeButton label="Créer un compte" isLoading={isLoading} />
 				</form.AppForm>
 			</div>
 			<div className="text-center text-sm">

@@ -22,6 +22,7 @@ export default defineConfig({
 	server: {
 		host: true, // Accepte toutes les connexions (0.0.0.0)
 		port: 5173,
+		allowedHosts: true,
 		// Optionnel: configuration strictTransportSecurity pour HTTPS en local
 		// https: true,
 	},

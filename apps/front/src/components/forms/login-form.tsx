@@ -1,17 +1,15 @@
-import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { useAuth } from "@/hooks/auth";
 import { useAppForm } from "@/hooks/form/form";
 import { cn } from "@/lib/utils";
+import useAuth from "@/stores/auth-store";
 import { loginSchema } from "@/validators/auth";
 
 export function LoginForm({
 	className,
 	...props
 }: React.ComponentProps<"form">) {
-	const navigate = useNavigate();
-	const { login } = useAuth();
-	const state = useRouterState();
+	const { login, isLoading } = useAuth();
 	const [error, setError] = useState<string | null>(null);
 
 	const form = useAppForm({
@@ -23,16 +21,10 @@ export function LoginForm({
 			onBlur: loginSchema,
 		},
 		onSubmit: async ({ value }) => {
-			try {
-				setError(null);
-				await login(value.email, value.password);
-				navigate({ to: "/home" });
-			} catch (error: unknown) {
-				if (error instanceof Error) {
-					setError(error.message);
-				} else {
-					setError("Une erreur inattendue est survenue");
-				}
+			setError(null);
+			const { success, error } = await login(value.email, value.password);
+			if (!success) {
+				setError(error || "Une erreur est survenue lors de la connexion");
 			}
 		},
 	});
@@ -72,7 +64,7 @@ export function LoginForm({
 					</form.AppField>
 				</div>
 				<form.AppForm>
-					<form.SubscribeButton label="Connexion" isLoading={state.isLoading} />
+					<form.SubscribeButton label="Connexion" isLoading={isLoading} />
 				</form.AppForm>
 			</div>
 			<div className="text-center text-sm">
