@@ -6,7 +6,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-import type { PaginatedStudentsResponse } from "@/types";
+import type { PaginatedStudentsResponse, User } from "@/types";
 
 export default function TableUsers({
 	users,
@@ -27,7 +27,7 @@ export default function TableUsers({
 			</TableHeader>
 			<TableBody>
 				{users.length > 0 ? (
-					users.map((user) => (
+					users.map((user: User) => (
 						<TableRow key={user.id}>
 							<TableCell className="font-medium">
 								{user.lastName || "N/A"}
