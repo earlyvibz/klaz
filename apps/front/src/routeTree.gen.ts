@@ -17,8 +17,11 @@ import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as DashboardUsersRouteImport } from './routes/_dashboard.users'
 import { Route as DashboardSchoolsRouteImport } from './routes/_dashboard.schools'
 import { Route as DashboardQuestsRouteImport } from './routes/_dashboard.quests'
+import { Route as DashboardMarketplaceRouteImport } from './routes/_dashboard.marketplace'
+import { Route as DashboardLeaderboardRouteImport } from './routes/_dashboard.leaderboard'
 import { Route as DashboardHomeRouteImport } from './routes/_dashboard.home'
 import { Route as DashboardAccountRouteImport } from './routes/_dashboard.account'
+import { Route as DashboardAdminMarketplaceRouteImport } from './routes/_dashboard.admin.marketplace'
 
 const DashboardRoute = DashboardRouteImport.update({
   id: '/_dashboard',
@@ -59,6 +62,16 @@ const DashboardQuestsRoute = DashboardQuestsRouteImport.update({
   path: '/quests',
   getParentRoute: () => DashboardRoute,
 } as any)
+const DashboardMarketplaceRoute = DashboardMarketplaceRouteImport.update({
+  id: '/marketplace',
+  path: '/marketplace',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardLeaderboardRoute = DashboardLeaderboardRouteImport.update({
+  id: '/leaderboard',
+  path: '/leaderboard',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const DashboardHomeRoute = DashboardHomeRouteImport.update({
   id: '/home',
   path: '/home',
@@ -69,28 +82,40 @@ const DashboardAccountRoute = DashboardAccountRouteImport.update({
   path: '/account',
   getParentRoute: () => DashboardRoute,
 } as any)
+const DashboardAdminMarketplaceRoute =
+  DashboardAdminMarketplaceRouteImport.update({
+    id: '/admin/marketplace',
+    path: '/admin/marketplace',
+    getParentRoute: () => DashboardRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteRouteWithChildren
   '/account': typeof DashboardAccountRoute
   '/home': typeof DashboardHomeRoute
+  '/leaderboard': typeof DashboardLeaderboardRoute
+  '/marketplace': typeof DashboardMarketplaceRoute
   '/quests': typeof DashboardQuestsRoute
   '/schools': typeof DashboardSchoolsRoute
   '/users': typeof DashboardUsersRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/signup': typeof AuthSignupRoute
+  '/admin/marketplace': typeof DashboardAdminMarketplaceRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteRouteWithChildren
   '/account': typeof DashboardAccountRoute
   '/home': typeof DashboardHomeRoute
+  '/leaderboard': typeof DashboardLeaderboardRoute
+  '/marketplace': typeof DashboardMarketplaceRoute
   '/quests': typeof DashboardQuestsRoute
   '/schools': typeof DashboardSchoolsRoute
   '/users': typeof DashboardUsersRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/signup': typeof AuthSignupRoute
+  '/admin/marketplace': typeof DashboardAdminMarketplaceRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -99,11 +124,14 @@ export interface FileRoutesById {
   '/_dashboard': typeof DashboardRouteWithChildren
   '/_dashboard/account': typeof DashboardAccountRoute
   '/_dashboard/home': typeof DashboardHomeRoute
+  '/_dashboard/leaderboard': typeof DashboardLeaderboardRoute
+  '/_dashboard/marketplace': typeof DashboardMarketplaceRoute
   '/_dashboard/quests': typeof DashboardQuestsRoute
   '/_dashboard/schools': typeof DashboardSchoolsRoute
   '/_dashboard/users': typeof DashboardUsersRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/signup': typeof AuthSignupRoute
+  '/_dashboard/admin/marketplace': typeof DashboardAdminMarketplaceRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -112,22 +140,28 @@ export interface FileRouteTypes {
     | '/auth'
     | '/account'
     | '/home'
+    | '/leaderboard'
+    | '/marketplace'
     | '/quests'
     | '/schools'
     | '/users'
     | '/auth/login'
     | '/auth/signup'
+    | '/admin/marketplace'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
     | '/account'
     | '/home'
+    | '/leaderboard'
+    | '/marketplace'
     | '/quests'
     | '/schools'
     | '/users'
     | '/auth/login'
     | '/auth/signup'
+    | '/admin/marketplace'
   id:
     | '__root__'
     | '/'
@@ -135,11 +169,14 @@ export interface FileRouteTypes {
     | '/_dashboard'
     | '/_dashboard/account'
     | '/_dashboard/home'
+    | '/_dashboard/leaderboard'
+    | '/_dashboard/marketplace'
     | '/_dashboard/quests'
     | '/_dashboard/schools'
     | '/_dashboard/users'
     | '/auth/login'
     | '/auth/signup'
+    | '/_dashboard/admin/marketplace'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -206,6 +243,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardQuestsRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/_dashboard/marketplace': {
+      id: '/_dashboard/marketplace'
+      path: '/marketplace'
+      fullPath: '/marketplace'
+      preLoaderRoute: typeof DashboardMarketplaceRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/_dashboard/leaderboard': {
+      id: '/_dashboard/leaderboard'
+      path: '/leaderboard'
+      fullPath: '/leaderboard'
+      preLoaderRoute: typeof DashboardLeaderboardRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/_dashboard/home': {
       id: '/_dashboard/home'
       path: '/home'
@@ -218,6 +269,13 @@ declare module '@tanstack/react-router' {
       path: '/account'
       fullPath: '/account'
       preLoaderRoute: typeof DashboardAccountRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/_dashboard/admin/marketplace': {
+      id: '/_dashboard/admin/marketplace'
+      path: '/admin/marketplace'
+      fullPath: '/admin/marketplace'
+      preLoaderRoute: typeof DashboardAdminMarketplaceRouteImport
       parentRoute: typeof DashboardRoute
     }
   }
@@ -240,17 +298,23 @@ const AuthRouteRouteWithChildren = AuthRouteRoute._addFileChildren(
 interface DashboardRouteChildren {
   DashboardAccountRoute: typeof DashboardAccountRoute
   DashboardHomeRoute: typeof DashboardHomeRoute
+  DashboardLeaderboardRoute: typeof DashboardLeaderboardRoute
+  DashboardMarketplaceRoute: typeof DashboardMarketplaceRoute
   DashboardQuestsRoute: typeof DashboardQuestsRoute
   DashboardSchoolsRoute: typeof DashboardSchoolsRoute
   DashboardUsersRoute: typeof DashboardUsersRoute
+  DashboardAdminMarketplaceRoute: typeof DashboardAdminMarketplaceRoute
 }
 
 const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardAccountRoute: DashboardAccountRoute,
   DashboardHomeRoute: DashboardHomeRoute,
+  DashboardLeaderboardRoute: DashboardLeaderboardRoute,
+  DashboardMarketplaceRoute: DashboardMarketplaceRoute,
   DashboardQuestsRoute: DashboardQuestsRoute,
   DashboardSchoolsRoute: DashboardSchoolsRoute,
   DashboardUsersRoute: DashboardUsersRoute,
+  DashboardAdminMarketplaceRoute: DashboardAdminMarketplaceRoute,
 }
 
 const DashboardRouteWithChildren = DashboardRoute._addFileChildren(

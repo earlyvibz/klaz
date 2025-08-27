@@ -1,6 +1,6 @@
 import { IconInnerShadowTop } from "@tabler/icons-react";
+import { Link, useRouterState } from "@tanstack/react-router";
 import { NavAdmin } from "@/components/sidebar/nav-admin";
-import { NavSuperAdmin } from "@/components/sidebar/nav-super-admin";
 import { NavUser } from "@/components/sidebar/nav-user";
 import {
 	Sidebar,
@@ -11,14 +11,19 @@ import {
 	SidebarMenuButton,
 	SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { useAuth } from "@/hooks/auth/context";
 import { data } from "@/nav-routes/nav-routes";
+import useAuth from "@/stores/auth-store";
+import useSchool from "@/stores/school-store";
 import { NavButton } from "./nav-button";
+import { NavStudent } from "./nav-student";
 
 export default function AppSidebar({
 	...props
 }: React.ComponentProps<typeof Sidebar>) {
-	const { user, isAdmin, isSuperAdmin } = useAuth();
+	const { user } = useAuth();
+	const routerState = useRouterState();
+	const currentPath = routerState.location.pathname;
+	const { school } = useSchool();
 
 	if (!user) {
 		return null;
@@ -31,20 +36,23 @@ export default function AppSidebar({
 					<SidebarMenuItem>
 						<SidebarMenuButton
 							asChild
+							isActive={currentPath === "/home"}
 							className="data-[slot=sidebar-menu-button]:!p-1.5"
 						>
-							<a href="/">
+							<Link to="/home">
 								<IconInnerShadowTop className="!size-5" />
-								<span className="text-base font-semibold">Klaz</span>
-							</a>
+								<span className="text-base font-semibold">
+									Klaz | {school?.name}
+								</span>
+							</Link>
 						</SidebarMenuButton>
 					</SidebarMenuItem>
 				</SidebarMenu>
 			</SidebarHeader>
 			<SidebarContent>
 				<NavButton />
-				{isSuperAdmin() && <NavSuperAdmin items={data.superAdmin} />}
-				{isAdmin() && <NavAdmin items={data.admin} />}
+				{user.isAdmin && <NavAdmin items={data.admin} />}
+				{user.isStudent && <NavStudent items={data.student} />}
 			</SidebarContent>
 			<SidebarFooter>
 				<NavUser user={user} />

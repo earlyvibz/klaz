@@ -1,4 +1,3 @@
-import { DbAccessTokensProvider } from "@adonisjs/auth/access_tokens";
 import { withAuthFinder } from "@adonisjs/auth/mixins/lucid";
 import { compose } from "@adonisjs/core/helpers";
 import hash from "@adonisjs/core/services/hash";
@@ -12,7 +11,6 @@ import {
 import type { BelongsTo, HasMany } from "@adonisjs/lucid/types/relations";
 import { DateTime } from "luxon";
 import { v4 as uuidv4 } from "uuid";
-import TenantController from "#controllers/tenant_controller";
 import Group from "#models/group";
 import QuestSubmission from "#models/quest_submission";
 import RewardRedemption from "#models/reward_redemption";
@@ -71,9 +69,6 @@ export default class User extends compose(BaseModel, AuthFinder) {
 	@column()
 	declare failedLoginAttempts: number;
 
-	@column.dateTime()
-	declare lockedUntil: DateTime | null;
-
 	@column()
 	declare emailVerified: boolean;
 
@@ -86,23 +81,7 @@ export default class User extends compose(BaseModel, AuthFinder) {
 	@column.dateTime({ autoCreate: true, autoUpdate: true })
 	declare updatedAt: DateTime | null;
 
-	// Helper methods for name handling
-	get displayName(): string {
-		if (this.firstName && this.lastName) {
-			return `${this.firstName} ${this.lastName}`;
-		}
-		return this.firstName || this.lastName || this.email;
-	}
-
-	get initials(): string {
-		const firstInitial = this.firstName?.charAt(0)?.toUpperCase() || "";
-		const lastInitial = this.lastName?.charAt(0)?.toUpperCase() || "";
-		return (
-			`${firstInitial}${lastInitial}` || this.email.charAt(0).toUpperCase()
-		);
-	}
-
-	@belongsTo(() => School)
+	@belongsTo(() => School, { foreignKey: "schoolId" })
 	declare school: BelongsTo<typeof School>;
 
 	@belongsTo(() => Group)
@@ -140,29 +119,6 @@ export default class User extends compose(BaseModel, AuthFinder) {
 		return (
 			this.isSuperAdmin() || (this.isAdmin() && this.schoolId === schoolId)
 		);
-	}
-
-	// Security helper methods
-	isAccountLocked(): boolean {
-		if (!this.lockedUntil) return false;
-		return this.lockedUntil > DateTime.now();
-	}
-
-	async incrementFailedAttempts(): Promise<void> {
-		this.failedLoginAttempts = (this.failedLoginAttempts || 0) + 1;
-
-		// Lock account after 5 failed attempts for 30 minutes
-		if (this.failedLoginAttempts >= 5) {
-			this.lockedUntil = DateTime.now().plus({ minutes: 30 });
-		}
-
-		await this.save();
-	}
-
-	async resetFailedAttempts(): Promise<void> {
-		this.failedLoginAttempts = 0;
-		this.lockedUntil = null;
-		await this.save();
 	}
 
 	async generatePasswordResetToken(): Promise<string> {
@@ -219,18 +175,41 @@ export default class User extends compose(BaseModel, AuthFinder) {
 		await this.save();
 	}
 
-	static accessTokens = DbAccessTokensProvider.forModel(User);
-
-	// Méthodes helper tenant
-	static forCurrentTenant() {
-		return TenantController.scopeToTenant(User.query());
+	// Gamification methods
+	calculateLevel(): number {
+		// Formule exponentielle douce: niveau = floor(sqrt(points / 100)) + 1
+		return Math.floor(Math.sqrt(this.points / 100)) + 1;
 	}
 
-	static createForCurrentTenant(data: Partial<User>) {
-		const schoolId = TenantController.getCurrentSchoolId();
-		if (schoolId && !data.schoolId) {
-			data.schoolId = schoolId;
+	getPointsForNextLevel(): number {
+		const nextLevel = this.level + 1;
+		return (nextLevel - 1) ** 2 * 100;
+	}
+
+	getPointsForCurrentLevel(): number {
+		if (this.level <= 1) return 0;
+		return (this.level - 1) ** 2 * 100;
+	}
+
+	getLevelProgress(): number {
+		const currentLevelPoints = this.getPointsForCurrentLevel();
+		const nextLevelPoints = this.getPointsForNextLevel();
+		if (nextLevelPoints === currentLevelPoints) return 1;
+		const progress =
+			(this.points - currentLevelPoints) /
+			(nextLevelPoints - currentLevelPoints);
+		return Math.max(0, Math.min(1, progress));
+	}
+
+	async updateLevel(): Promise<boolean> {
+		const newLevel = this.calculateLevel();
+		const hasLeveledUp = newLevel > this.level;
+
+		if (hasLeveledUp) {
+			this.level = newLevel;
+			await this.save();
 		}
-		return User.create(data);
+
+		return hasLeveledUp;
 	}
 }

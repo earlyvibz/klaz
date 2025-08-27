@@ -33,18 +33,13 @@ server.use([
  * requests with a registered route.
  */
 router.use([
+	() => import("@rlanz/sentry/middleware"),
 	() => import("@adonisjs/core/bodyparser_middleware"),
 	() => import("@adonisjs/auth/initialize_auth_middleware"),
+	() => import("@adonisjs/session/session_middleware"),
+	() => import("@adonisjs/session/session_middleware"),
+	() => import("#middleware/detect_user_locale_middleware"),
 ]);
-
-/**
- * Named middleware collection must be explicitly assigned to
- * the routes or the routes group.
- */
-router.named({
-	auth: () => import("#middleware/auth_middleware"),
-	role: () => import("#middleware/role_middleware"),
-});
 
 /**
  * Named middleware collection must be explicitly assigned to

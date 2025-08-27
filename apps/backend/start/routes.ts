@@ -8,130 +8,104 @@
 */
 
 import router from "@adonisjs/core/services/router";
-import {
-	forgotPasswordThrottle,
-	importThrottle,
-	loginThrottle,
-	registerThrottle,
-	signupThrottle,
-} from "#start/limiter";
 import { middleware } from "./kernel.js";
 
 const AuthController = () => import("#controllers/auth_controller");
-const StudentsController = () => import("#controllers/students_controller");
 const InvitationsController = () =>
 	import("#controllers/invitations_controller");
+const QuestsController = () => import("#controllers/quests_controller");
 const SchoolsController = () => import("#controllers/schools_controller");
-const TenantController = () => import("#controllers/tenant_controller");
+const StudentsController = () => import("#controllers/students_controller");
 
-router.get("/", async () => {
-	return {
-		hello: "world",
-	};
-});
-
-// Routes d'authentification (fonctionnent en mode global ET tenant)
+// ROUTES SUPERADMIN
 router
 	.group(() => {
-		router
-			.post("/register", [AuthController, "register"])
-			.as("auth.register")
-			.use(registerThrottle);
-
-		router
-			.post("/signup", [AuthController, "signup"])
-			.as("auth.signup")
-			.use(signupThrottle);
-
-		router
-			.post("/login", [AuthController, "login"])
-			.as("auth.login")
-			.use(loginThrottle);
-
-		router
-			.post("/forgot-password", [AuthController, "forgotPassword"])
-			.as("auth.forgotPassword")
-			.use(forgotPasswordThrottle);
-
-		router
-			.post("/reset-password", [AuthController, "resetPassword"])
-			.as("auth.resetPassword")
-			.use(loginThrottle);
-
-		router
-			.delete("/logout", [AuthController, "logout"])
-			.as("auth.logout")
-			.use(middleware.auth());
-
-		router
-			.delete("/logout-all", [AuthController, "logoutAllDevices"])
-			.as("auth.logoutAll")
-			.use(middleware.auth());
-
-		router
-			.get("/me", [AuthController, "me"])
-			.as("auth.me")
-			.use(middleware.auth());
-	})
-	.use(middleware.tenant()); // Middleware tenant optionnel
-
-// Routes spécifiques au tenant (nécessite un subdomain valide)
-router
-	.group(() => {
-		// Info sur le tenant actuel
-		router
-			.get("/tenant/current", [TenantController, "current"])
-			.as("tenant.current");
-		router.get("/tenant/info", [TenantController, "info"]).as("tenant.info");
-
-		// Routes admin pour le tenant actuel
-		router
-			.group(() => {
-				router
-					.get("/students", [StudentsController, "index"])
-					.as("tenant.students.index");
-
-				router
-					.patch("/students/:id/detach", [StudentsController, "detach"])
-					.as("tenant.students.detach");
-
-				router
-					.post("/students/import", [InvitationsController, "import"])
-					.as("tenant.students.import")
-					.use(importThrottle);
-
-				router
-					.get("/invitations", [InvitationsController, "index"])
-					.as("tenant.invitations.index");
-				router
-					.get("/invitations/stats", [InvitationsController, "stats"])
-					.as("tenant.invitations.stats");
-				router
-					.get("/invitations/:id", [InvitationsController, "show"])
-					.as("tenant.invitations.show");
-				router
-					.delete("/invitations/:id", [InvitationsController, "destroy"])
-					.as("tenant.invitations.destroy");
-				router
-					.post("/invitations/:id/resend", [InvitationsController, "resend"])
-					.as("tenant.invitations.resend");
-			})
-			.use([middleware.auth(), middleware.role({ requireAdmin: true })]);
-	})
-	.use(middleware.tenant()); // Middleware tenant optionnel - les contrôleurs gèrent les exigences
-
-// Routes admin globales (SUPERADMIN seulement)
-router
-	.group(() => {
-		// Gestion des écoles (SUPERADMIN uniquement)
 		router
 			.get("/schools", [SchoolsController, "index"])
-			.as("superadmin.schools.index")
-			.use(middleware.role({ roles: ["SUPERADMIN"] }));
+			.as("superadmin.schools.index");
 
-		// Dashboard admin global
 		router
-			.get("/admin/dashboard", async () => ({ message: "Admin dashboard" }))
-			.use(middleware.role({ roles: ["ADMIN", "SUPERADMIN"] }));
+			.post("/schools", [SchoolsController, "create"])
+			.as("superadmin.schools.create");
+	})
+	.use(middleware.auth())
+	.use(middleware.role({ roles: ["SUPERADMIN"] }));
+
+// ROUTES ADMIN
+router
+	.group(() => {
+		router
+			.get("/students", [StudentsController, "getStudents"])
+			.as("admin.students.index");
+
+		router
+			.get("/students/count", [StudentsController, "getStudentsCount"])
+			.as("admin.students.count");
+	})
+	.use(middleware.auth())
+	.use(middleware.role({ roles: ["ADMIN"] }))
+	.use(middleware.tenant());
+
+// ✅ Route /me SEULE, sans tenant
+router.get("/me", [AuthController, "me"]).use(middleware.auth());
+
+// Routes de profil utilisateur
+router
+	.group(() => {
+		router.put("/profile/password", [AuthController, "changePassword"]);
+		router.delete("/profile/delete", [AuthController, "deleteAccount"]);
 	})
 	.use(middleware.auth());
+
+// Routes auth avec tenant (SANS /me)
+router
+	.group(() => {
+		router.get("/school", [SchoolsController, "current"]);
+		router.post("/signup", [AuthController, "signup"]);
+		router.post("/login", [AuthController, "login"]);
+		router.post("/forgot-password", [AuthController, "forgotPassword"]);
+		router.post("/reset-password", [AuthController, "resetPassword"]);
+		router.post("/logout", [AuthController, "logout"]);
+	})
+	.use(middleware.tenant());
+
+// Routes admin avec tenant + auth + role
+router
+	.group(() => {
+		router.post("/invitations/import", [InvitationsController, "import"]);
+		router.get("/invitations", [InvitationsController, "index"]);
+		router.post("/invitations/:id/resend", [InvitationsController, "resend"]);
+		router.delete("/invitations/:id", [InvitationsController, "destroy"]);
+
+		// Admin quest routes
+		router.post("/quests", [QuestsController, "create"]);
+		router.put("/quests/:id", [QuestsController, "update"]);
+		router.delete("/quests/:id", [QuestsController, "destroy"]);
+		router.get("/quest-submissions", [QuestsController, "submissions"]);
+		router.post("/quest-submissions/:submissionId/approve", [
+			QuestsController,
+			"approveSubmission",
+		]);
+		router.post("/quest-submissions/:submissionId/reject", [
+			QuestsController,
+			"rejectSubmission",
+		]);
+	})
+	.use([
+		middleware.tenant(),
+		middleware.auth(),
+		middleware.role({ requireAdmin: true }),
+	]);
+
+// Routes tenant avec auth (étudiants et admins)
+router
+	.group(() => {
+		// Quest routes (accessible aux étudiants et admins)
+		router.get("/quests", [QuestsController, "index"]);
+		router.get("/quests/:id", [QuestsController, "show"]);
+		router.post("/quests/:id/submit", [QuestsController, "submit"]);
+
+		// Leaderboard (accessible aux étudiants et admins)
+		router.get("/leaderboard", [QuestsController, "leaderboard"]);
+	})
+	.use([middleware.tenant(), middleware.auth()]);

@@ -1,175 +1,119 @@
 import type { HttpContext } from "@adonisjs/core/http";
 import mail from "@adonisjs/mail/services/main";
-import TenantController from "#controllers/tenant_controller";
+import UserDto from "#dtos/user";
 import Invitation from "#models/invitation";
 import User from "#models/user";
 import env from "#start/env";
-import {
-	forgotPasswordValidator,
-	loginValidator,
-	registerValidator,
-	resetPasswordValidator,
-	signupValidator,
-} from "#validators/auth";
 
 export default class AuthController {
-	async register({ request, response }: HttpContext) {
-		// En mode tenant, le schoolId est automatiquement résolu
-		const tenant = TenantController.getCurrentTenant();
+	async login({ request, auth, response }: HttpContext) {
+		const { email, password } = request.only(["email", "password"]);
+		const user = await User.verifyCredentials(email, password);
+		const origin = request.header("origin") ?? "";
+		const hostname = origin.replace(/^https?:\/\//, "");
+		const subdomain = hostname.split(".")[0] ?? "";
 
-		if (tenant) {
-			// Mode tenant: creation avec schoolId automatique
-			const { email, password } =
-				await request.validateUsing(registerValidator);
-			const user = await User.createForCurrentTenant({
-				email,
-				password,
-				role: "STUDENT",
-				isActive: true,
-				level: 1,
-				points: 0,
-				emailVerified: true,
-			});
-			return User.accessTokens.create(user);
-		} else {
-			// Mode global: schoolId requis explicitement
-			const { email, password, schoolId } =
-				await request.validateUsing(registerValidator);
-			if (!schoolId) {
-				return response.badRequest({
-					message: "schoolId is required in global mode",
-				});
-			}
-			const user = await User.create({
-				email,
-				password,
-				schoolId,
-				role: "STUDENT",
-				isActive: true,
-				level: 1,
-				points: 0,
-				emailVerified: true,
-			});
-			return User.accessTokens.create(user);
-		}
-	}
+		await user.load("school");
 
-	async login({ request, response }: HttpContext) {
-		const { email, password } = await request.validateUsing(loginValidator);
-
-		const user = await User.findBy("email", email);
-		if (!user) {
+		if (user.school?.slug !== subdomain) {
 			return response.badRequest({
-				message: "Adresse e-mail ou mot de passe incorrect.",
+				errors: [
+					{
+						message:
+							"Vous devriez vous connecter depuis le portail de votre école.",
+					},
+				],
 			});
 		}
 
-		try {
-			await User.verifyCredentials(email, password);
+		await auth.use("web").login(user);
 
-			const token = await User.accessTokens.create(user, ["*"], {
-				expiresIn: "7d",
-			});
-
-			return {
-				token,
-				user: {
-					id: user.id,
-					firstName: user.firstName,
-					lastName: user.lastName,
-					email: user.email,
-					role: user.role,
-					group: user.group,
-				},
-			};
-		} catch (_error) {
-			return response.badRequest({
-				message: "Adresse e-mail ou mot de passe incorrect.",
-			});
+		if (!user.isSuperAdmin()) {
+			await user.load("school");
 		}
-	}
-
-	async logout({ auth }: HttpContext) {
-		const user = auth.user;
-		if (!user || !user.currentAccessToken) {
-			throw new Error("Not authenticated");
-		}
-		await User.accessTokens.delete(user, user.currentAccessToken.identifier);
-		return { message: "Logged out successfully" };
-	}
-
-	async me({ auth }: HttpContext) {
-		await auth.check();
 
 		return {
-			user: auth.user,
+			user: new UserDto(user),
 		};
 	}
 
-	async signup({ request, response }: HttpContext) {
-		const { invitationCode, email, password } =
-			await request.validateUsing(signupValidator);
+	async me({ auth }: HttpContext) {
+		return new UserDto(auth.user);
+	}
 
-		// En mode tenant, chercher seulement dans les invitations du tenant
-		const tenant = TenantController.getCurrentTenant();
-		let invitation: Invitation | null = null;
+	async signup({ request, response, school }: HttpContext) {
+		const { invitationCode, email, password } = request.only([
+			"invitationCode",
+			"email",
+			"password",
+		]);
 
-		if (tenant) {
-			invitation = await Invitation.forCurrentTenant()
-				.where("invitationCode", invitationCode)
-				.first();
-		} else {
-			invitation = await Invitation.findBy("invitationCode", invitationCode);
-		}
+		// Chercher l'invitation dans l'école courante
+		const invitation = await Invitation.query()
+			.where("invitationCode", invitationCode)
+			.where("schoolId", school?.id ?? "")
+			.first();
 
 		if (!invitation) {
-			return response.badRequest({ message: "Invalid invitation code" });
+			return response.badRequest({
+				errors: [
+					{
+						message: "Code d'invitation invalide",
+					},
+				],
+			});
 		}
 
 		if (!invitation.isAvailable()) {
 			return response.badRequest({
-				message: invitation.isUsed
-					? "This invitation code has already been used"
-					: "This invitation code has expired",
+				errors: [
+					{
+						message: "Ce code d'invitation a déjà été utilisé",
+					},
+				],
 			});
 		}
 
 		try {
-			const userData = {
+			// Créer l'utilisateur
+			const user = await User.create({
 				email,
 				password,
 				firstName: invitation.firstName,
 				lastName: invitation.lastName,
 				schoolId: invitation.schoolId,
-				groupId: invitation.groupId,
-				role: "STUDENT" as const,
+				role: "STUDENT",
 				isActive: true,
+				emailVerified: true,
 				level: 1,
 				points: 0,
-				emailVerified: true,
-			};
+			});
 
-			const user = tenant
-				? await User.createForCurrentTenant(userData)
-				: await User.create(userData);
+			// Marquer l'invitation comme utilisée
+			await invitation.markAsUsed(user.id);
 
-			// Lier l'invitation au user créé et la marquer comme utilisée
-			invitation.userId = user.id;
-			await invitation.markAsUsed();
+			// Charger la relation school
+			await user.load("school");
 
-			return User.accessTokens.create(user);
+			return new UserDto(user);
 		} catch (error) {
 			console.error("Signup error:", error);
+
+			// Gérer l'erreur d'email déjà existant
+			if (error.code === "23505" || error.message.includes("unique")) {
+				return response.badRequest({ message: "Cet email est déjà utilisé" });
+			}
+
 			return response.internalServerError({
-				message: "An error occurred during signup",
+				message: "Une erreur est survenue lors de l'inscription",
 			});
 		}
 	}
 
 	async forgotPassword({ request, response }: HttpContext) {
-		const { email } = await request.validateUsing(forgotPasswordValidator);
+		const { email } = request.only(["email"]);
 
-		const user = await User.findBy("email", email);
+		const user = await User.query().where("email", email).first();
 		if (!user) {
 			return response.ok({
 				message: "If the email exists, a reset link has been sent",
@@ -185,7 +129,10 @@ export default class AuthController {
 				message.html(`
           <p>Hello,</p>
           <p>You have requested a password reset. Please click the link below to reset your password:</p>
-          <a href="${env.get("FRONTEND_URL", "http://localhost:3000")}/reset-password?token=${resetToken}">Reset Password</a>
+          <a href="${env.get(
+						"FRONTEND_URL",
+						"http://localhost:3000",
+					)}/reset-password?token=${resetToken}">Reset Password</a>
         `);
 			});
 		} catch (error) {
@@ -198,37 +145,76 @@ export default class AuthController {
 	}
 
 	async resetPassword({ request, response }: HttpContext) {
-		const { token, password } = await request.validateUsing(
-			resetPasswordValidator,
-		);
+		const { token, password } = request.only(["token", "password"]);
 
-		const user = await User.findBy("resetPasswordToken", token);
+		const user = await User.query().where("resetPasswordToken", token).first();
 		if (!user || !user.isPasswordResetTokenValid(token)) {
 			return response.badRequest({ message: "Invalid or expired reset token" });
 		}
 
 		user.password = password;
 		await user.clearPasswordResetToken();
-		await user.resetFailedAttempts();
 
 		return response.ok({ message: "Password has been reset successfully" });
 	}
 
-	async logoutAllDevices({ auth, response }: HttpContext) {
-		const user = auth.user;
-		if (!user) {
-			return response.unauthorized();
-		}
-		await User.accessTokens
-			.all(user)
-			.then((tokens) =>
-				Promise.all(
-					tokens.map((token) =>
-						User.accessTokens.delete(user, token.identifier),
-					),
-				),
-			);
+	async logout({ auth, response }: HttpContext) {
+		await auth.use("web").logout();
 
-		return response.ok({ message: "Logged out from all devices" });
+		return response.ok({ message: "Logged out" });
+	}
+
+	async changePassword({ auth, request, response }: HttpContext) {
+		if (!auth.user) {
+			return response.unauthorized({ message: "Unauthorized" });
+		}
+
+		const user = auth.user;
+
+		const { currentPassword, newPassword } = request.only([
+			"currentPassword",
+			"newPassword",
+		]);
+
+		try {
+			const isValidPassword = await User.verifyCredentials(
+				user.email,
+				currentPassword,
+			);
+			if (!isValidPassword) {
+				return response.badRequest({
+					errors: [{ message: "Mot de passe actuel incorrect" }],
+				});
+			}
+
+			user.password = newPassword;
+			await user.save();
+
+			return response.ok({ message: "Mot de passe modifié avec succès" });
+		} catch (error) {
+			console.error("Change password error:", error);
+			return response.internalServerError({
+				message: "Une erreur est survenue lors du changement de mot de passe",
+			});
+		}
+	}
+
+	async deleteAccount({ auth, response }: HttpContext) {
+		if (!auth.user) {
+			return response.unauthorized({ message: "Unauthorized" });
+		}
+		const user = auth.user;
+
+		try {
+			await user.delete();
+			await auth.use("web").logout();
+
+			return response.ok({ message: "Compte supprimé avec succès" });
+		} catch (error) {
+			console.error("Delete account error:", error);
+			return response.internalServerError({
+				message: "Une erreur est survenue lors de la suppression du compte",
+			});
+		}
 	}
 }

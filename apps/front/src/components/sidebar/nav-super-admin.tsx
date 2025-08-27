@@ -1,5 +1,5 @@
 import type { Icon } from "@tabler/icons-react";
-import { Link } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 import {
 	SidebarGroup,
 	SidebarGroupLabel,
@@ -17,20 +17,26 @@ export function NavSuperAdmin({
 		icon: Icon;
 	}[];
 }) {
+	const routerState = useRouterState();
+	const currentPath = routerState.location.pathname;
+
 	return (
 		<SidebarGroup className="group-data-[collapsible=icon]:hidden">
 			<SidebarGroupLabel>Super Admin</SidebarGroupLabel>
 			<SidebarMenu>
-				{items.map((item) => (
-					<SidebarMenuItem key={item.name}>
-						<SidebarMenuButton asChild>
-							<Link to={item.url}>
-								<item.icon />
-								<span>{item.name}</span>
-							</Link>
-						</SidebarMenuButton>
-					</SidebarMenuItem>
-				))}
+				{items.map((item) => {
+					const isActive = currentPath === item.url;
+					return (
+						<SidebarMenuItem key={item.name}>
+							<SidebarMenuButton asChild isActive={isActive}>
+								<Link to={item.url}>
+									<item.icon />
+									<span>{item.name}</span>
+								</Link>
+							</SidebarMenuButton>
+						</SidebarMenuItem>
+					);
+				})}
 			</SidebarMenu>
 		</SidebarGroup>
 	);

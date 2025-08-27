@@ -1,25 +1,14 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
+import Spinner from "@/components/spinner/spinner";
 
 export const Route = createFileRoute("/")({
-	beforeLoad: ({ context }) => {
-		if (context.auth.loading) {
-			return;
-		}
-
-		if (context.auth.isAuthenticated) {
-			throw redirect({
-				to: "/home",
-			});
-		}
-	},
-	component: Index,
+	component: IndexComponent,
 });
 
-function Index() {
+function IndexComponent() {
 	return (
-		<div className="p-2">
-			<h3>Welcome Home!</h3>
-			<p>Page d'accueil publique</p>
+		<div className="flex min-h-screen flex-col items-center justify-center bg-gray-50">
+			<Spinner />
 		</div>
 	);
 }

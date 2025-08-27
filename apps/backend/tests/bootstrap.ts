@@ -1,5 +1,7 @@
+import { authApiClient } from "@adonisjs/auth/plugins/api_client";
 import app from "@adonisjs/core/services/app";
 import testUtils from "@adonisjs/core/services/test_utils";
+import { sessionApiClient } from "@adonisjs/session/plugins/api_client";
 import { apiClient } from "@japa/api-client";
 import { assert } from "@japa/assert";
 import { pluginAdonisJS } from "@japa/plugin-adonisjs";
@@ -17,6 +19,8 @@ export const plugins: Config["plugins"] = [
 	assert(),
 	apiClient(),
 	pluginAdonisJS(app),
+	sessionApiClient(app),
+	authApiClient(app),
 ];
 
 /**
@@ -27,7 +31,7 @@ export const plugins: Config["plugins"] = [
  * The teardown functions are executed after all the tests
  */
 export const runnerHooks: Required<Pick<Config, "setup" | "teardown">> = {
-	setup: [],
+	setup: [() => testUtils.db().migrate()],
 	teardown: [],
 };
 

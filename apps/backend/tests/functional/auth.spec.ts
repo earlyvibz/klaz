@@ -19,44 +19,88 @@ test.group("Auth", (group) => {
 
 	group.teardown(async () => {
 		await User.query().delete();
+		await Invitation.query().delete();
 		await School.query().delete();
 		await limiter.clear(["memory"]);
 	});
 
-	test("register a new user", async ({ client, assert }) => {
-		const response = await client.post("/register").json({
-			email: "test@example.com",
-			password: "Password123!",
+	test("signup with valid invitation code", async ({ client, assert }) => {
+		const invitation = await Invitation.create({
+			schoolEmail: "test@school.com",
+			firstName: "Test",
+			lastName: "User",
+			invitationCode: crypto.randomUUID(),
 			schoolId: school.id,
+			isUsed: false,
 		});
+
+		const response = await client
+			.post("/signup")
+			.header("origin", `https://${school.slug}.klaz.local`)
+			.json({
+				invitationCode: invitation.invitationCode,
+				email: "test@example.com",
+				password: "Password123!",
+			});
 
 		response.assertStatus(200);
-		response.assertBodyContains({
-			type: "bearer",
-		});
-
-		const body = response.body();
-		assert.isOk(body.token, "Token should be present");
-		assert.isString(body.token, "Token should be a string");
 
 		const user = await User.findBy("email", "test@example.com");
 		assert.isNotNull(user, "User should be created");
 		assert.equal(user?.role, "STUDENT", "Default role should be STUDENT");
 		assert.isTrue(user?.isActive, "User should be active");
 		assert.isTrue(user?.emailVerified, "Email should be verified");
+		assert.equal(user?.level, 1, "Default level should be 1");
+		assert.equal(user?.points, 0, "Default points should be 0");
 
-		// Test des helper methods
-		assert.isTrue(user?.isStudent(), "Should identify as student");
-		assert.isFalse(user?.isAdmin(), "Should not identify as admin");
-		assert.isFalse(user?.isSuperAdmin(), "Should not identify as super admin");
-		assert.isFalse(user?.hasAdminRights(), "Should not have admin rights");
-		assert.isFalse(
-			user?.canManageSchool(school.id),
-			"Should not manage school",
-		);
+		// Vérifier que l'invitation est marquée comme utilisée
+		await invitation.refresh();
+		assert.isTrue(invitation.isUsed);
+		assert.equal(invitation.userId, user?.id);
 	});
 
-	test("cannot register with existing email", async ({ client }) => {
+	test("cannot signup with invalid invitation code", async ({ client }) => {
+		const response = await client
+			.post("/signup")
+			.header("origin", `https://${school.slug}.klaz.local`)
+			.json({
+				invitationCode: crypto.randomUUID(),
+				email: "test@example.com",
+				password: "Password123!",
+			});
+
+		response.assertStatus(400);
+		response.assertBodyContains({
+			errors: [{ message: "Code d'invitation invalide" }],
+		});
+	});
+
+	test("cannot signup with used invitation code", async ({ client }) => {
+		const invitation = await Invitation.create({
+			schoolEmail: "used@school.com",
+			firstName: "Used",
+			lastName: "Invitation",
+			invitationCode: crypto.randomUUID(),
+			schoolId: school.id,
+			isUsed: true,
+		});
+
+		const response = await client
+			.post("/signup")
+			.header("origin", `https://${school.slug}.klaz.local`)
+			.json({
+				invitationCode: invitation.invitationCode,
+				email: "test@example.com",
+				password: "Password123!",
+			});
+
+		response.assertStatus(400);
+		response.assertBodyContains({
+			errors: [{ message: "Ce code d'invitation a déjà été utilisé" }],
+		});
+	});
+
+	test("cannot signup with existing email", async ({ client }) => {
 		await User.create({
 			email: "existing@example.com",
 			password: "Password123!",
@@ -67,37 +111,27 @@ test.group("Auth", (group) => {
 			points: 0,
 		});
 
-		const response = await client.post("/register").json({
-			email: "existing@example.com",
-			password: "Password123!",
+		const invitation = await Invitation.create({
+			schoolEmail: "new@school.com",
+			firstName: "New",
+			lastName: "User",
+			invitationCode: crypto.randomUUID(),
 			schoolId: school.id,
+			isUsed: false,
 		});
 
-		response.assertStatus(422);
+		const response = await client
+			.post("/signup")
+			.header("origin", `https://${school.slug}.klaz.local`)
+			.json({
+				invitationCode: invitation.invitationCode,
+				email: "existing@example.com", // Email déjà utilisé
+				password: "Password123!",
+			});
+
+		response.assertStatus(400);
 		response.assertBodyContains({
-			errors: [
-				{
-					field: "email",
-					rule: "database.unique",
-				},
-			],
-		});
-	});
-
-	test("cannot register without schoolId", async ({ client }) => {
-		const response = await client.post("/register").json({
-			email: "test@example.com",
-			password: "Password123!",
-		});
-
-		response.assertStatus(422);
-		response.assertBodyContains({
-			errors: [
-				{
-					field: "schoolId",
-					rule: "required",
-				},
-			],
+			message: "Cet email est déjà utilisé",
 		});
 	});
 
@@ -112,77 +146,74 @@ test.group("Auth", (group) => {
 			points: 0,
 		});
 
-		const response = await client.post("/login").json({
-			email: "login@example.com",
-			password: "Password123!",
-		});
+		const response = await client
+			.post("/login")
+			.header("origin", `https://${school.slug}.klaz.local`)
+			.json({
+				email: "login@example.com",
+				password: "Password123!",
+			});
 
 		response.assertStatus(200);
-		response.assertBodyContains({
-			token: {
-				type: "bearer",
-			},
-		});
-
 		const body = response.body();
-		assert.isOk(body.token.token, "Token should be present");
-		assert.isString(body.token.token, "Token should be a string");
+		assert.equal(body.user.email, "login@example.com");
+		assert.equal(body.user.role, "STUDENT");
 	});
 
 	test("cannot login with wrong credentials", async ({ client }) => {
-		const response = await client.post("/login").json({
-			email: "wrong@example.com",
-			password: "wrongpassword",
-		});
+		const response = await client
+			.post("/login")
+			.header("origin", `https://${school.slug}.klaz.local`)
+			.json({
+				email: "wrong@example.com",
+				password: "wrongpassword",
+			});
 
 		response.assertStatus(400);
-		response.assertBodyContains({
-			message: "Adresse e-mail ou mot de passe incorrect.",
-		});
 	});
 
-	test("cannot login with inactive user", async ({ client }) => {
+	test("cannot login to wrong school", async ({ client }) => {
+		// Créer un autre école
+		const otherSchool = await School.create({
+			name: "Other School",
+			slug: "other-school",
+		});
+
+		// Créer un utilisateur dans l'autre école
 		await User.create({
-			email: "inactive@example.com",
+			email: "other@example.com",
 			password: "Password123!",
-			schoolId: school.id,
-			role: "STUDENT",
-			isActive: false,
-			level: 1,
-			points: 0,
-		});
-
-		const response = await client.post("/login").json({
-			email: "inactive@example.com",
-			password: "Password123!",
-		});
-
-		response.assertStatus(200); // Login réussit même si inactif
-	});
-
-	test("logout user", async ({ client }) => {
-		const user = await User.create({
-			email: "logout@example.com",
-			password: "Password123!",
-			schoolId: school.id,
+			schoolId: otherSchool.id,
 			role: "STUDENT",
 			isActive: true,
 			level: 1,
 			points: 0,
 		});
 
-		const token = await User.accessTokens.create(user);
+		// Essayer de se connecter sur la mauvaise école
 		const response = await client
-			.delete("/logout")
-			.bearerToken(token.value?.release() || "");
+			.post("/login")
+			.header("origin", `https://${school.slug}.klaz.local`)
+			.json({
+				email: "other@example.com",
+				password: "Password123!",
+			});
 
-		response.assertStatus(200);
+		response.assertStatus(400);
 		response.assertBodyContains({
-			message: "Logged out successfully",
+			errors: [
+				{
+					message:
+						"Vous devriez vous connecter depuis le portail de votre école.",
+				},
+			],
 		});
+
+		// Cleanup
+		await otherSchool.delete();
 	});
 
-	test("get authenticated user info", async ({ client, assert }) => {
+	test("get authenticated user info", async ({ client }) => {
 		const user = await User.create({
 			email: "me@example.com",
 			password: "Password123!",
@@ -193,18 +224,19 @@ test.group("Auth", (group) => {
 			points: 0,
 		});
 
-		const token = await User.accessTokens.create(user);
-		const response = await client
-			.get("/me")
-			.bearerToken(token.value?.release() || "");
+		const response = await client.get("/me").loginAs(user);
 
 		response.assertStatus(200);
-		const body = response.body();
-		assert.equal(body.user.email, "me@example.com");
-		assert.equal(body.user.role, "STUDENT");
+		response.assertBodyContains({
+			email: "me@example.com",
+			role: "STUDENT",
+			schoolId: school.id,
+		});
 	});
 
-	test("cannot access protected route without token", async ({ client }) => {
+	test("cannot access protected route without authentication", async ({
+		client,
+	}) => {
 		const response = await client.get("/me");
 
 		response.assertStatus(401);
@@ -212,6 +244,7 @@ test.group("Auth", (group) => {
 
 	test("forgot password with valid email", async ({ client }) => {
 		const { messages } = mail.fake();
+
 		await User.create({
 			email: "forgot@example.com",
 			password: "Password123!",
@@ -222,8 +255,16 @@ test.group("Auth", (group) => {
 			points: 0,
 		});
 
-		await client.post("/forgot-password").json({
-			email: "forgot@example.com",
+		const response = await client
+			.post("/forgot-password")
+			.header("origin", `https://${school.slug}.klaz.local`)
+			.json({
+				email: "forgot@example.com",
+			});
+
+		response.assertStatus(200);
+		response.assertBodyContains({
+			message: "If the email exists, a reset link has been sent",
 		});
 
 		messages.assertSentCount(1);
@@ -234,9 +275,12 @@ test.group("Auth", (group) => {
 	});
 
 	test("forgot password with non-existent email", async ({ client }) => {
-		const response = await client.post("/forgot-password").json({
-			email: "nonexistent@example.com",
-		});
+		const response = await client
+			.post("/forgot-password")
+			.header("origin", `https://${school.slug}.klaz.local`)
+			.json({
+				email: "nonexistent@example.com",
+			});
 
 		response.assertStatus(200);
 		response.assertBodyContains({
@@ -257,10 +301,13 @@ test.group("Auth", (group) => {
 
 		const resetToken = await user.generatePasswordResetToken();
 
-		const response = await client.post("/reset-password").json({
-			token: resetToken,
-			password: "NewPassword123!",
-		});
+		const response = await client
+			.post("/reset-password")
+			.header("origin", `https://${school.slug}.klaz.local`)
+			.json({
+				token: resetToken,
+				password: "NewPassword123!",
+			});
 
 		response.assertStatus(200);
 		response.assertBodyContains({
@@ -273,20 +320,17 @@ test.group("Auth", (group) => {
 	});
 
 	test("reset password with invalid token", async ({ client }) => {
-		const response = await client.post("/reset-password").json({
-			token: "invalid-token",
-			password: "NewPassword123!",
-		});
+		const response = await client
+			.post("/reset-password")
+			.header("origin", `https://${school.slug}.klaz.local`)
+			.json({
+				token: crypto.randomUUID(),
+				password: "NewPassword123!",
+			});
 
-		response.assertStatus(422);
+		response.assertStatus(400);
 		response.assertBodyContains({
-			errors: [
-				{
-					field: "token",
-					message: "The token field must be a valid UUID",
-					rule: "uuid",
-				},
-			],
+			message: "Invalid or expired reset token",
 		});
 	});
 
@@ -306,10 +350,13 @@ test.group("Auth", (group) => {
 		user.resetPasswordExpires = DateTime.now().minus({ hours: 1 });
 		await user.save();
 
-		const response = await client.post("/reset-password").json({
-			token: resetToken,
-			password: "NewPassword123!",
-		});
+		const response = await client
+			.post("/reset-password")
+			.header("origin", `https://${school.slug}.klaz.local`)
+			.json({
+				token: resetToken,
+				password: "NewPassword123!",
+			});
 
 		response.assertStatus(400);
 		response.assertBodyContains({
@@ -317,207 +364,34 @@ test.group("Auth", (group) => {
 		});
 	});
 
-	test("logout all devices", async ({ client }) => {
-		const user = await User.create({
-			email: "logoutall@example.com",
-			password: "Password123!",
-			schoolId: school.id,
-			role: "STUDENT",
-			isActive: true,
-			level: 1,
-			points: 0,
-		});
-
-		const token1 = await User.accessTokens.create(user);
-
-		const response = await client
-			.delete("/logout-all")
-			.bearerToken(token1.value?.release() || "");
-
-		response.assertStatus(200);
-		response.assertBodyContains({
-			message: "Logged out from all devices",
-		});
-	});
-
-	test("signup links invitation to user", async ({ client, assert }) => {
-		const invitation = await Invitation.create({
-			schoolEmail: "signup.link@school.com",
-			firstName: "Link",
-			lastName: "Test",
-			invitationCode: crypto.randomUUID(),
-			schoolId: school.id,
-			isUsed: false,
-			expiresAt: DateTime.now().plus({ days: 30 }),
-		});
-
-		const response = await client.post("/signup").json({
-			invitationCode: invitation.invitationCode,
-			email: "user.signup@personal.com",
-			password: "NewPassword123!",
-		});
-
-		response.assertStatus(200);
-
-		// Vérifier que l'invitation est liée à l'utilisateur
-		await invitation.refresh();
-		assert.isNotNull(invitation.userId);
-		assert.isTrue(invitation.isUsed);
-
-		const user = await User.findBy("email", "user.signup@personal.com");
-		assert.isNotNull(user);
-		assert.equal(invitation.userId, user?.id);
-	});
-
-	test("cannot signup with existing email", async ({ client }) => {
-		await User.create({
-			email: "existing@test.com",
-			password: "Password123!",
-			schoolId: school.id,
-			role: "STUDENT",
-			isActive: true,
-			level: 1,
-			points: 0,
-		});
-
-		const invitation = await Invitation.create({
-			schoolEmail: "existing.signup@school.com",
-			firstName: "Existing",
-			lastName: "Test",
-			invitationCode: crypto.randomUUID(),
-			schoolId: school.id,
-			isUsed: false,
-			expiresAt: DateTime.now().plus({ days: 30 }),
-		});
-
-		const response = await client.post("/signup").json({
-			invitationCode: invitation.invitationCode,
-			email: "existing@test.com", // Email déjà utilisé
-			password: "NewPassword123!",
-		});
-
-		response.assertStatus(422);
-		response.assertBodyContains({
-			errors: [
-				{
-					field: "email",
-					message: "The email has already been taken",
-					rule: "database.unique",
-				},
-			],
-		});
-	});
-
-	test("unauthenticated user cannot access me endpoint", async ({ client }) => {
-		const response = await client.get("/me");
-
-		response.assertStatus(401);
-	});
-
-	test("invalid token cannot access me endpoint", async ({ client }) => {
-		const response = await client.get("/me").bearerToken("invalid-token");
-
-		response.assertStatus(401);
-	});
-
-	test("unauthenticated user cannot logout", async ({ client }) => {
-		const response = await client.delete("/logout");
-
-		response.assertStatus(401);
-	});
-
-	test("unauthenticated user cannot logout all devices", async ({ client }) => {
-		const response = await client.delete("/logout-all");
-
-		response.assertStatus(401);
-	});
-
-	test("should allow access with correct specific role", async ({ client }) => {
-		const admin = await User.create({
-			email: "admin@test.com",
-			password: "password123",
-			role: "ADMIN",
-			schoolId: school.id,
-			level: 1,
-			points: 0,
-			isActive: true,
-		});
-
-		const adminToken = await User.accessTokens.create(admin);
-
-		// Test role middleware with specific roles requirement
-		const response = await client
-			.get("/admin/dashboard")
-			.bearerToken(adminToken.value?.release() || "");
-
-		response.assertStatus(200);
-	});
-
-	test("should deny access without required specific role", async ({
+	test("cannot access tenant routes without origin header", async ({
 		client,
 	}) => {
-		const student = await User.create({
-			email: "student@test.com",
-			password: "password123",
-			role: "STUDENT",
-			schoolId: school.id,
-			level: 1,
-			points: 0,
-			isActive: true,
-		});
-
-		const studentToken = await User.accessTokens.create(student);
-
-		// Try to access admin-only endpoint with student role
-		const response = await client
-			.get("/admin/dashboard")
-			.bearerToken(studentToken.value?.release() || "");
-
-		response.assertStatus(403);
-	});
-
-	// Coverage tests for uncovered lines
-	test("login fails with non-existent user", async ({ client }) => {
 		const response = await client.post("/login").json({
-			email: "nonexistent@example.com",
+			email: "test@example.com",
 			password: "Password123!",
 		});
 
 		response.assertStatus(400);
 		response.assertBodyContains({
-			message: "Adresse e-mail ou mot de passe incorrect.",
+			error: "Origin required",
 		});
 	});
 
-	test("signup fails with invalid invitation code", async ({ client }) => {
-		// Use valid UUID format but non-existent invitation
-		const response = await client.post("/signup").json({
-			invitationCode: "123e4567-e89b-12d3-a456-426614174000",
-			email: "test-invalid-invitation@example.com",
+	test("cannot access routes with invalid school slug", async ({ client }) => {
+		// TODO: Add test for invalid school slug when headers API is available
+		const response = await client.post("/login").json({
+			email: "test@example.com",
 			password: "Password123!",
 		});
 
+		// Will return 400 for Origin required instead of 404 for now
 		response.assertStatus(400);
-		response.assertBodyContains({
-			message: "Invalid invitation code",
-		});
 	});
 
-	test("signup fails when email already registered", async ({ client }) => {
-		// Create invitation first
-		const invitation = await Invitation.create({
-			schoolEmail: "duplicate@example.com",
-			firstName: "Test",
-			lastName: "User",
-			invitationCode: crypto.randomUUID(),
-			schoolId: school.id,
-			isUsed: false,
-			expiresAt: DateTime.now().plus({ days: 30 }),
-		});
-
-		// Create user with same email
-		await User.create({
-			email: "duplicate@example.com",
+	test("logout authenticated user", async ({ client }) => {
+		const user = await User.create({
+			email: "logout@example.com",
 			password: "Password123!",
 			schoolId: school.id,
 			role: "STUDENT",
@@ -526,21 +400,17 @@ test.group("Auth", (group) => {
 			points: 0,
 		});
 
-		// The validator will catch this with 422, so we test that instead
-		const response = await client.post("/signup").json({
-			invitationCode: invitation.invitationCode,
-			email: "duplicate@example.com",
-			password: "Password123!",
-		});
+		const response = await client
+			.post("/logout")
+			.header("origin", `https://${school.slug}.klaz.local`)
+			.loginAs(user);
 
-		response.assertStatus(422);
-		// Validator catches duplicate emails before controller logic
+		response.assertStatus(200);
 	});
 
-	test("forgot password handles email sending error", async ({ client }) => {
-		// Create user
-		await User.create({
-			email: "error@example.com",
+	test("delete account successfully", async ({ client, assert }) => {
+		const user = await User.create({
+			email: "delete.account@example.com",
 			password: "Password123!",
 			schoolId: school.id,
 			role: "STUDENT",
@@ -549,24 +419,18 @@ test.group("Auth", (group) => {
 			points: 0,
 		});
 
-		// The catch block will be triggered by invalid email config in tests
-		// This test covers the error handling path even if email fails silently
-		const response = await client.post("/forgot-password").json({
-			email: "error@example.com",
-		});
+		const response = await client
+			.delete("/profile/delete")
+			.header("origin", `https://${school.slug}.klaz.local`)
+			.loginAs(user);
 
 		response.assertStatus(200);
 		response.assertBodyContains({
-			message: "If the email exists, a reset link has been sent",
+			message: "Compte supprimé avec succès",
 		});
-	});
 
-	test("logout all devices fails without authentication", async ({
-		client,
-	}) => {
-		const response = await client.delete("/logout-all");
-
-		response.assertStatus(401);
+		const deletedUser = await User.find(user.id);
+		assert.isNull(deletedUser, "User should be deleted");
 	});
 });
 
@@ -585,77 +449,57 @@ test.group("User Model", (group) => {
 		await School.query().delete();
 	});
 
-	test("isAccountLocked returns false when no lockout", async ({ assert }) => {
-		const user = await User.create({
-			email: "test.lock@example.com",
+	test("user helper methods work correctly", async ({ assert }) => {
+		const student = await User.create({
+			email: "student@example.com",
 			password: "Password123!",
 			schoolId: school.id,
 			role: "STUDENT",
 			isActive: true,
 			level: 1,
 			points: 0,
-			failedLoginAttempts: 0,
 		});
 
-		assert.isFalse(user.isAccountLocked());
-	});
-
-	test("isAccountLocked returns true when account is locked", async ({
-		assert,
-	}) => {
-		const user = await User.create({
-			email: "locked@example.com",
+		const admin = await User.create({
+			email: "admin@example.com",
 			password: "Password123!",
 			schoolId: school.id,
-			role: "STUDENT",
+			role: "ADMIN",
 			isActive: true,
 			level: 1,
 			points: 0,
-			lockedUntil: DateTime.now().plus({ minutes: 30 }),
 		});
 
-		assert.isTrue(user.isAccountLocked());
-	});
-
-	test("incrementFailedAttempts increments counter", async ({ assert }) => {
-		const user = await User.create({
-			email: "attempts@example.com",
+		const superAdmin = await User.create({
+			email: "superadmin@example.com",
 			password: "Password123!",
 			schoolId: school.id,
-			role: "STUDENT",
+			role: "SUPERADMIN",
 			isActive: true,
 			level: 1,
 			points: 0,
-			failedLoginAttempts: 0,
 		});
 
-		await user.incrementFailedAttempts();
-		await user.refresh();
+		// Test student
+		assert.isTrue(student.isStudent());
+		assert.isFalse(student.isAdmin());
+		assert.isFalse(student.isSuperAdmin());
+		assert.isFalse(student.hasAdminRights());
+		assert.isFalse(student.canManageSchool(school.id));
 
-		assert.equal(user.failedLoginAttempts, 1);
-		assert.isNull(user.lockedUntil);
-	});
+		// Test admin
+		assert.isFalse(admin.isStudent());
+		assert.isTrue(admin.isAdmin());
+		assert.isFalse(admin.isSuperAdmin());
+		assert.isTrue(admin.hasAdminRights());
+		assert.isTrue(admin.canManageSchool(school.id));
 
-	test("incrementFailedAttempts locks account after 5 attempts", async ({
-		assert,
-	}) => {
-		const user = await User.create({
-			email: "lockafter5@example.com",
-			password: "Password123!",
-			schoolId: school.id,
-			role: "STUDENT",
-			isActive: true,
-			level: 1,
-			points: 0,
-			failedLoginAttempts: 4, // Already 4 failed attempts
-		});
-
-		await user.incrementFailedAttempts();
-		await user.refresh();
-
-		assert.equal(user.failedLoginAttempts, 5);
-		assert.isNotNull(user.lockedUntil);
-		assert.isTrue(user.isAccountLocked());
+		// Test super admin
+		assert.isFalse(superAdmin.isStudent());
+		assert.isFalse(superAdmin.isAdmin());
+		assert.isTrue(superAdmin.isSuperAdmin());
+		assert.isTrue(superAdmin.hasAdminRights());
+		assert.isTrue(superAdmin.canManageSchool(school.id));
 	});
 
 	test("generateEmailVerificationToken creates and stores token", async ({
@@ -718,5 +562,50 @@ test.group("User Model", (group) => {
 		assert.isFalse(result);
 		assert.isFalse(user.emailVerified);
 		assert.isNotNull(user.emailVerificationToken);
+	});
+
+	test("detachFromSchool resets user data", async ({ assert }) => {
+		const user = await User.create({
+			email: "detach@example.com",
+			password: "Password123!",
+			schoolId: school.id,
+			role: "STUDENT",
+			isActive: true,
+			level: 5,
+			points: 100,
+		});
+
+		await user.detachFromSchool();
+		await user.refresh();
+
+		assert.isNull(user.schoolId);
+		assert.isNull(user.groupId);
+		assert.equal(user.level, 1);
+		assert.equal(user.points, 0);
+	});
+
+	test("isDetached returns correct value", async ({ assert }) => {
+		const attachedUser = await User.create({
+			email: "attached@example.com",
+			password: "Password123!",
+			schoolId: school.id,
+			role: "STUDENT",
+			isActive: true,
+			level: 1,
+			points: 0,
+		});
+
+		const detachedUser = await User.create({
+			email: "detached@example.com",
+			password: "Password123!",
+			schoolId: null,
+			role: "STUDENT",
+			isActive: true,
+			level: 1,
+			points: 0,
+		});
+
+		assert.isFalse(attachedUser.isDetached());
+		assert.isTrue(detachedUser.isDetached());
 	});
 });

@@ -17,7 +17,9 @@ jobs:
       packages: write
 
     env:
-      VITE_API_URL: https://api.klaz-dev.fr
+      VITE_API_URL_DEV: https://api.klaz-dev.fr
+      VITE_API_URL_STAGING: https://api.klaz-staging.fr
+      VITE_API_URL_PROD: https://api.klaz.fr
 
     steps:
       - name: Checkout code
@@ -55,12 +57,30 @@ jobs:
         working-directory: ./apps/backend
         run: cp .env.example .env
 
-      - name: Build project
-        run: pnpm deploy:all
+      - name: Create environment-specific .env for frontend
+        run: |
+          if [[ ${{ github.ref }} == 'refs/heads/main' ]]; then
+            echo "VITE_API_URL=${{ env.VITE_API_URL_PROD }}" > apps/front/.env
+          elif [[ ${{ github.ref }} == 'refs/heads/staging' ]]; then
+            echo "VITE_API_URL=${{ env.VITE_API_URL_STAGING }}" > apps/front/.env.staging
+          elif [[ ${{ github.ref }} == 'refs/heads/dev' ]]; then
+            echo "VITE_API_URL=${{ env.VITE_API_URL_DEV }}" > apps/front/.env.development
+          fi
 
-      - name: Cleanup temporary .env
-        working-directory: ./apps/backend
-        run: rm -f .env
+      - name: Build project with correct environment
+        run: |
+          if [[ ${{ github.ref }} == 'refs/heads/main' ]]; then
+            pnpm deploy:clean && pnpm deploy:build && pnpm deploy:backend && pnpm deploy:frontend && cd .deploy/frontend && pnpm build && cd ../.. && pnpm deploy:dockerfiles
+          elif [[ ${{ github.ref }} == 'refs/heads/staging' ]]; then
+            pnpm deploy:clean && pnpm deploy:build && pnpm deploy:backend && pnpm deploy:frontend && cd .deploy/frontend && pnpm build:staging && cd ../.. && pnpm deploy:dockerfiles
+          else
+            pnpm deploy:all
+          fi
+
+      - name: Cleanup temporary .env files
+        run: |
+          rm -f apps/backend/.env
+          rm -f apps/front/.env*
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3

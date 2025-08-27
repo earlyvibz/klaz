@@ -26,7 +26,6 @@ export default class extends BaseSchema {
 			table.timestamp("reset_password_expires").nullable();
 			table.timestamp("last_login_at").nullable();
 			table.integer("failed_login_attempts").defaultTo(0);
-			table.timestamp("locked_until").nullable();
 			table.boolean("email_verified").defaultTo(false);
 			table.string("email_verification_token").nullable();
 			table.timestamps(true);

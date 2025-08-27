@@ -18,14 +18,14 @@ sudo cp /etc/hosts /etc/hosts.backup.$(date +%Y%m%d_%H%M%S)
 # Ajouter les entrées pour les subdomains de test
 echo "➕ Ajout des subdomains de test..."
 
-SUBDOMAINS=("admin" "hec" "essec" "insead" "polytechnique" "centrale")
+SUBDOMAINS=("admin" "auth" "hec" "essec" "insead" "polytechnique" "centrale")
 
 for subdomain in "${SUBDOMAINS[@]}"; do
-    if ! grep -q "$subdomain.localhost" /etc/hosts; then
-        echo "127.0.0.1    $subdomain.localhost" | sudo tee -a /etc/hosts > /dev/null
-        echo "✅ Ajouté: $subdomain.localhost"
+    if ! grep -q "$subdomain.klaz-local.fr" /etc/hosts; then
+        echo "0.0.0.0    $subdomain.klaz-local.fr" | sudo tee -a /etc/hosts > /dev/null
+        echo "✅ Ajouté: $subdomain.klaz-local.fr"
     else
-        echo "ℹ️  Déjà présent: $subdomain.localhost"
+        echo "ℹ️  Déjà présent: $subdomain.klaz-local.fr"
     fi
 done
 
@@ -33,10 +33,10 @@ echo ""
 echo "🎉 Configuration terminée !"
 echo ""
 echo "📋 Vous pouvez maintenant utiliser :"
-echo "   • http://localhost:5173 (landing page)"
-echo "   • http://admin.localhost:5173 (interface admin - SUPERADMIN)"
-echo "   • http://hec.localhost:5173 (école HEC)"
-echo "   • http://essec.localhost:5173 (école ESSEC)"
+echo "   • http://klaz-local.fr:80 (landing page)"
+echo "   • http://admin.klaz-local.fr:80 (interface admin - SUPERADMIN)"
+echo "   • http://hec.klaz-local.fr:80 (école HEC)"
+echo "   • http://essec.klaz-local.fr:80 (école ESSEC)"
 echo ""
 echo "🚀 Lancez votre app avec: npm run dev"
 echo ""

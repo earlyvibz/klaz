@@ -12,6 +12,7 @@ jobs:
 
     env:
       NODE_ENV: test
+      DOMAIN: localhost
       PORT: 3333
       APP_KEY: test-key-that-is-32-characters-
       HOST: 0.0.0.0
@@ -25,8 +26,12 @@ jobs:
       LIMITER_STORE: memory
       RESEND_API_KEY: test-resend-api-key
       FRONTEND_URL: http://localhost:3000
-      GOOGLE_CLIENT_ID: test-google-client-id
-      GOOGLE_CLIENT_SECRET: test-google-client-secret
+      SENTRY_DSN: test-sentry-dsn
+      DRIVE_DISK: r2
+      R2_KEY: test-r2-key
+      R2_SECRET: test-r2-secret
+      R2_BUCKET: test-bucket
+      R2_ENDPOINT: https://test-endpoint.com
 
     services:
       postgres:

@@ -1,10 +1,9 @@
 import {
 	IconDotsVertical,
 	IconLogout,
-	IconNotification,
 	IconUserCircle,
 } from "@tabler/icons-react";
-import { Link } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
 	DropdownMenu,
@@ -21,12 +20,15 @@ import {
 	SidebarMenuItem,
 	useSidebar,
 } from "@/components/ui/sidebar";
-import { useAuth } from "@/hooks/auth/context";
-import type { User } from "@/hooks/auth/types";
+import { cn } from "@/lib/utils";
+import useAuth from "@/stores/auth-store";
+import type { User } from "@/types";
 
 export function NavUser({ user }: { user: User }) {
 	const { isMobile } = useSidebar();
 	const { logout } = useAuth();
+	const routerState = useRouterState();
+	const currentPath = routerState.location.pathname;
 
 	return (
 		<SidebarMenu>
@@ -87,15 +89,17 @@ export function NavUser({ user }: { user: User }) {
 						<DropdownMenuSeparator />
 						<DropdownMenuGroup>
 							<Link to="/account">
-								<DropdownMenuItem className="cursor-pointer">
+								<DropdownMenuItem
+									className={cn(
+										"cursor-pointer",
+										currentPath === "/account" &&
+											"bg-accent text-accent-foreground",
+									)}
+								>
 									<IconUserCircle />
 									Account
 								</DropdownMenuItem>
 							</Link>
-							<DropdownMenuItem>
-								<IconNotification />
-								Notifications
-							</DropdownMenuItem>
 						</DropdownMenuGroup>
 						<DropdownMenuItem
 							className="cursor-pointer"

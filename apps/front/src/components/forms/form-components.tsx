@@ -1,4 +1,6 @@
 import { useStore } from "@tanstack/react-form";
+import { Image as ImageIcon, Upload, X } from "lucide-react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,15 +15,17 @@ import { PasswordInput } from "../ui/input-password";
 export function SubscribeButton({
 	label,
 	isLoading,
+	className,
 }: {
 	label: string;
 	isLoading: boolean;
+	className?: string;
 }) {
 	const form = useFormContext();
 	return (
 		<form.Subscribe selector={(state) => state.isSubmitting}>
 			{(isSubmitting) => (
-				<Button type="submit" disabled={isSubmitting}>
+				<Button type="submit" disabled={isSubmitting} className={className}>
 					{isLoading ? <Spinner /> : label}
 				</Button>
 			)}
@@ -234,6 +238,105 @@ export function Switch({ label }: { label: string }) {
 					onCheckedChange={(checked) => field.handleChange(checked)}
 				/>
 				<Label htmlFor={label}>{label}</Label>
+			</div>
+			{field.state.meta.isTouched && <ErrorMessages errors={errors} />}
+		</>
+	);
+}
+
+export function FileField({
+	label,
+	accept = "image/*,.pdf,.doc,.docx",
+}: {
+	label: string;
+	accept?: string;
+}) {
+	const field = useFieldContext<File>();
+	const errors = useStore(field.store, (state) => state.meta.errors);
+	const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+	const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+		const file = event.target.files?.[0];
+		if (file) {
+			field.handleChange(file);
+			const url = URL.createObjectURL(file);
+			setPreviewUrl(url);
+		}
+	};
+
+	const removeFile = () => {
+		if (previewUrl) {
+			URL.revokeObjectURL(previewUrl);
+		}
+		field.handleChange(new File([], ""));
+		setPreviewUrl(null);
+	};
+
+	return (
+		<>
+			<Label htmlFor={label}>{label}</Label>
+			<div className="space-y-3">
+				{!field.state.value || field.state.value.size === 0 ? (
+					<div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center hover:border-gray-400 dark:hover:border-gray-500 transition-colors">
+						<input
+							id={label}
+							type="file"
+							accept={accept}
+							onChange={handleFileSelect}
+							className="hidden"
+						/>
+						<label
+							htmlFor={label}
+							className="cursor-pointer flex flex-col items-center gap-2"
+						>
+							<Upload className="w-8 h-8 text-gray-400" />
+							<span className="text-sm font-medium">
+								Cliquez pour sélectionner un fichier
+							</span>
+							<span className="text-xs text-gray-500">
+								PNG, JPG jusqu'à 5MB
+							</span>
+						</label>
+					</div>
+				) : (
+					<div className="relative">
+						{previewUrl && field.state.value.type.startsWith("image/") ? (
+							<div className="relative rounded-lg overflow-hidden border">
+								<img
+									src={previewUrl}
+									alt="Preview"
+									className="w-full h-48 object-contain bg-gray-50 dark:bg-gray-800"
+								/>
+								<button
+									type="button"
+									onClick={removeFile}
+									className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+								>
+									<X className="w-4 h-4" />
+								</button>
+							</div>
+						) : (
+							<div className="flex items-center gap-3 p-3 border rounded-lg bg-gray-50 dark:bg-gray-900">
+								<ImageIcon className="w-8 h-8 text-gray-400" />
+								<div className="flex-1">
+									<p className="font-medium text-sm">
+										{field.state.value.name}
+									</p>
+									<p className="text-xs text-gray-500">
+										{(field.state.value.size / 1024 / 1024).toFixed(2)} MB
+									</p>
+								</div>
+								<button
+									type="button"
+									onClick={removeFile}
+									className="p-1 text-red-500 hover:text-red-600 transition-colors"
+								>
+									<X className="w-4 h-4" />
+								</button>
+							</div>
+						)}
+					</div>
+				)}
 			</div>
 			{field.state.meta.isTouched && <ErrorMessages errors={errors} />}
 		</>
