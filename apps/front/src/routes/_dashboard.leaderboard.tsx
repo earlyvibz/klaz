@@ -12,7 +12,7 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import { tuyau } from "@/main";
-import type { LeaderboardResponse } from "@/types";
+import type { LeaderboardResponse, LeaderboardUser } from "@/types";
 
 type SearchParams = {
 	page?: number;
@@ -132,8 +132,9 @@ function Leaderboard() {
 					</TableHeader>
 					<TableBody>
 						{leaderboard.length > 0 ? (
-							leaderboard.map((student) => {
+							leaderboard.map((student: LeaderboardUser[0]) => {
 								const rankDisplay = getRankDisplay(student.rank);
+
 								return (
 									<TableRow
 										key={student.id}

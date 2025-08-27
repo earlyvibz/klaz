@@ -6,10 +6,10 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
-import type { Quest } from "@/types";
+import type { Quests } from "@/types";
 
 interface QuestSubmissionModalProps {
-	quest: Quest[0];
+	quest: Quests[0];
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
 }

@@ -44,8 +44,11 @@ const useAuth = create<IAuth>()((set, get) => ({
 			}
 
 			if (error) {
-				// @ts-expect-error
-				return { success: false, error: error.value.errors[0].message };
+				return {
+					success: false,
+					error: (error.value as { errors: { message: string }[] }).errors[0]
+						.message,
+				};
 			}
 
 			return { success: true };

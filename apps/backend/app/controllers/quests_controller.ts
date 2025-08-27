@@ -1,7 +1,9 @@
 import type { HttpContext } from "@adonisjs/core/http";
 import { DateTime } from "luxon";
+import LeaderboardUserDto from "#dtos/leaderboard_user";
 import QuestDto from "#dtos/quest";
 import QuestSubmissionDto from "#dtos/quest_submission";
+import SchoolDto from "#dtos/school";
 import Quest from "#models/quest";
 import QuestSubmission from "#models/quest_submission";
 import User from "#models/user";
@@ -12,7 +14,7 @@ import {
 } from "#validators/quest";
 
 export default class QuestsController {
-	async index({ auth, request, response, school }: HttpContext) {
+	async getQuests({ auth, request, response, school }: HttpContext) {
 		const user = auth.user;
 		if (!user) {
 			return response.unauthorized({ message: "User not authenticated" });
@@ -73,6 +75,24 @@ export default class QuestsController {
 			quests: questsData,
 			meta: paginationMeta,
 		};
+	}
+
+	async getQuest({ params, auth, response, school }: HttpContext) {
+		const user = auth.user;
+		if (!user) {
+			return response.unauthorized({ message: "User not authenticated" });
+		}
+
+		const quest = await Quest.query()
+			.where("id", params.id)
+			.where("schoolId", school?.id ?? "")
+			.first();
+
+		if (!quest) {
+			return response.notFound({ message: "Quest not found" });
+		}
+
+		return new QuestDto(quest);
 	}
 
 	async show({ params, auth, response, school }: HttpContext) {
@@ -415,23 +435,16 @@ export default class QuestsController {
 			.paginate(page, limit);
 
 		const paginationMeta = students.getMeta();
-		const leaderboardData = students.all().map((student, index) => ({
-			rank: (page - 1) * limit + index + 1, // Calculer le rang global
-			id: student.id,
-			firstName: student.firstName,
-			lastName: student.lastName,
-			points: student.points,
-			level: student.level,
-			completedQuests: student.$extras.quest_submissions_count || 0,
-		}));
+		const leaderboardData = students.all().map((student, index) => {
+			const rank = (page - 1) * limit + index + 1;
+			const completedQuests = student.$extras.quest_submissions_count || 0;
+			return new LeaderboardUserDto(student, rank, completedQuests).toJson();
+		});
 
 		return {
 			leaderboard: leaderboardData,
 			meta: paginationMeta,
-			school: {
-				id: school.id,
-				name: school.name,
-			},
+			school: new SchoolDto(school),
 		};
 	}
 }

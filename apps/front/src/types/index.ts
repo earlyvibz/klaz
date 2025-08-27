@@ -8,6 +8,8 @@ import type { tuyau } from "../main";
 // Type pour l'utilisateur connecté (route /me)
 export type User = InferResponseType<typeof tuyau.me.$get>;
 
+export type StudentDto = InferResponseType<typeof tuyau.students.$get>;
+
 // Type pour la liste paginée des étudiants (route /students)
 export type PaginatedStudentsResponse = InferResponseType<
 	typeof tuyau.students.$get
@@ -38,9 +40,12 @@ export type LoginError = InferErrorType<typeof tuyau.login.$post>;
 
 // Types pour les quêtes paginées
 export type QuestsResponse = InferResponseType<typeof tuyau.quests.$get>;
-export type Quest = QuestsResponse["quests"];
+export type Quests = QuestsResponse["quests"];
+export type Quest = InferResponseType<typeof tuyau.quest.$get>;
 
 // Types pour le leaderboard paginé
 export type LeaderboardResponse = InferResponseType<
 	typeof tuyau.leaderboard.$get
 >;
+
+export type LeaderboardUser = LeaderboardResponse["leaderboard"];
