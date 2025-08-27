@@ -10,6 +10,7 @@
 		"experimentalScannerIgnores": [
 			"**/apps/backend/.adonisjs/**/*",
 			"**/apps/front/src/routeTree.gen.ts",
+			"routeTree.gen.ts",
 			"**/apps/front/src/components/ui/**/*",
 			"**/coverage/**/*",
 			"**/dist/**/*",
@@ -18,7 +19,11 @@
 			"**/playwright-report/**/*",
 			"**/test-results/**/*"
 		],
-		"includes": ["**"]
+		"includes": [
+			"**",
+			"!**/apps/front/src/routeTree.gen.ts",
+			"!**/apps/front/src/components/ui/**/*"
+		]
 	},
 	"formatter": {
 		"enabled": true,

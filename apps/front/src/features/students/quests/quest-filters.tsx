@@ -73,7 +73,7 @@ export default function QuestFilters({
 					onClick={() => onFilterChange(filter.key)}
 					className={`flex items-center gap-2 h-8 px-3 rounded-full transition-all ${
 						activeFilter === filter.key
-							? "ring-2 ring-primary/20 shadow-sm " + filter.color
+							? `ring-2 ring-primary/20 shadow-sm ${filter.color}`
 							: filter.color
 					}`}
 				>

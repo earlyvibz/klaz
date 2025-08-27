@@ -17,8 +17,12 @@ export default class InvitationsController {
 			name: `${uuidv4()}.csv`,
 		});
 
+		if (!csvFile.filePath) {
+			return response.badRequest({ message: "CSV file not found" });
+		}
+
 		const fs = await import("node:fs/promises");
-		const csvText = await fs.readFile(csvFile.filePath!, "utf-8");
+		const csvText = await fs.readFile(csvFile.filePath, "utf-8");
 		const lines = csvText.split("\n").filter((line) => line.trim());
 
 		if (lines.length < 2) {

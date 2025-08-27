@@ -165,7 +165,12 @@ export default class AuthController {
 	}
 
 	async changePassword({ auth, request, response }: HttpContext) {
-		const user = auth.user!;
+		if (!auth.user) {
+			return response.unauthorized({ message: "Unauthorized" });
+		}
+
+		const user = auth.user;
+
 		const { currentPassword, newPassword } = request.only([
 			"currentPassword",
 			"newPassword",
@@ -195,7 +200,10 @@ export default class AuthController {
 	}
 
 	async deleteAccount({ auth, response }: HttpContext) {
-		const user = auth.user!;
+		if (!auth.user) {
+			return response.unauthorized({ message: "Unauthorized" });
+		}
+		const user = auth.user;
 
 		try {
 			await user.delete();
