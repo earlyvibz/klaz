@@ -28,7 +28,7 @@ export function DangerZoneCard() {
 	const handleDeleteAccount = async () => {
 		setIsLoading(true);
 		try {
-			await tuyau.profile.$delete();
+			await tuyau.profile.delete.$delete();
 			toast.success("Compte supprimé avec succès");
 			logout();
 		} catch {
