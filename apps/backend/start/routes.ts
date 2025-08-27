@@ -53,7 +53,7 @@ router.get("/me", [AuthController, "me"]).use(middleware.auth());
 router
 	.group(() => {
 		router.put("/profile/password", [AuthController, "changePassword"]);
-		router.delete("/profile", [AuthController, "deleteAccount"]);
+		router.delete("/profile/delete", [AuthController, "deleteAccount"]);
 	})
 	.use(middleware.auth());
 
