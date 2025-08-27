@@ -57,7 +57,8 @@ export default class DetectUserLocaleMiddleware {
 		 * edge templates.
 		 */
 		if ("view" in ctx) {
-			ctx.view.share({ i18n: ctx.i18n });
+			// biome-ignore lint/suspicious/noExplicitAny: idk
+			(ctx.view as any).share({ i18n: ctx.i18n });
 		}
 
 		return next();
