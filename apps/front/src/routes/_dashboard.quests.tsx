@@ -9,6 +9,7 @@ import QuestFilters, {
 	type QuestFilter,
 } from "@/features/students/quests/quest-filters";
 import { tuyau } from "@/main";
+import type { Quest } from "@/types";
 
 type QuestSearchParams = {
 	status?: QuestFilter;
@@ -118,7 +119,7 @@ function Quests() {
 				<div
 					className={`grid gap-6 md:grid-cols-2 lg:grid-cols-3 transition-opacity duration-200 ${isLoading ? "opacity-60" : "opacity-100"}`}
 				>
-					{quests.map((quest) => (
+					{quests.map((quest: Quest) => (
 						<CardQuest quest={quest} key={quest.id} />
 					))}
 				</div>
