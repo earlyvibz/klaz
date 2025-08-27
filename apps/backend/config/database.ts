@@ -12,6 +12,14 @@ const dbConfig = defineConfig({
 				user: env.get("DB_USER"),
 				password: env.get("DB_PASSWORD"),
 				database: env.get("DB_DATABASE"),
+				ssl: {
+					rejectUnauthorized:
+						// biome-ignore lint/complexity/noUselessTernary: idk
+						env.get("NODE_ENV") === "production" ||
+						env.get("NODE_ENV") === "development"
+							? true
+							: false,
+				},
 			},
 			migrations: {
 				naturalSort: true,

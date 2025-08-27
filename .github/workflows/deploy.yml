@@ -64,7 +64,7 @@ jobs:
           elif [[ ${{ github.ref }} == 'refs/heads/staging' ]]; then
             echo "VITE_API_URL=${{ env.VITE_API_URL_STAGING }}" > apps/front/.env.staging
           elif [[ ${{ github.ref }} == 'refs/heads/dev' ]]; then
-            echo "VITE_API_URL=${{ env.VITE_API_URL_DEV }}" > apps/front/.env.development
+            echo "VITE_API_URL=${{ env.VITE_API_URL_DEV }}" > apps/front/.env
           fi
 
       - name: Build project with correct environment
