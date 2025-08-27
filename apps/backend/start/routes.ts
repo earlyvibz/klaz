@@ -101,7 +101,8 @@ router
 router
 	.group(() => {
 		// Quest routes (accessible aux étudiants et admins)
-		router.get("/quests", [QuestsController, "index"]);
+		router.get("/quests", [QuestsController, "getQuests"]);
+		router.get("/quest", [QuestsController, "getQuest"]);
 		router.get("/quests/:id", [QuestsController, "show"]);
 		router.post("/quests/:id/submit", [QuestsController, "submit"]);
 
