@@ -16,7 +16,7 @@ export default defineConfig({
 	/**
 	 * The DSN of the project
 	 */
-	dsn: env.get("SENTRY_DSN"),
+	dsn: env.get("SENTRY_DSN") || "",
 
 	/**
 	 * Additional integrations to use with the Sentry SDK
