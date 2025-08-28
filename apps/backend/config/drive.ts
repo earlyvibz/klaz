@@ -17,12 +17,12 @@ const driveConfig = defineConfig({
 		}),
 		r2: services.s3({
 			credentials: {
-				accessKeyId: env.get("R2_KEY") || "dummy",
-				secretAccessKey: env.get("R2_SECRET") || "dummy",
+				accessKeyId: env.get("R2_KEY")!,
+				secretAccessKey: env.get("R2_SECRET")!,
 			},
 			region: "auto",
-			bucket: env.get("R2_BUCKET") || "dummy",
-			endpoint: env.get("R2_ENDPOINT") || "https://dummy.com",
+			bucket: env.get("R2_BUCKET")!,
+			endpoint: env.get("R2_ENDPOINT")!,
 			visibility: "public",
 		}),
 	},
