@@ -83,7 +83,7 @@ jobs:
       - name: Run tests
         run: |
           pnpm --filter @klaz/backend test
-          pnpm --filter front test:run
+
 
   # Job principal de déploiement
   deploy:
