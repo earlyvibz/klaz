@@ -4,6 +4,7 @@
 	"private": true,
 	"description": "Monorepo for klaz project",
 	"scripts": {
+		"local": "pnpm --parallel --recursive local",
 		"dev": "pnpm --parallel --recursive dev",
 		"build": "pnpm --recursive build",
 		"test": "pnpm --recursive test",

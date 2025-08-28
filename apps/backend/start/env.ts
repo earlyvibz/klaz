@@ -13,6 +13,7 @@ import { Env } from "@adonisjs/core/env";
 
 export default await Env.create(new URL("../", import.meta.url), {
 	NODE_ENV: Env.schema.enum([
+		"local",
 		"development",
 		"staging",
 		"production",
