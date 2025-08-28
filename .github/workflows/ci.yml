@@ -26,12 +26,7 @@ jobs:
       LIMITER_STORE: memory
       RESEND_API_KEY: test-resend-api-key
       FRONTEND_URL: http://localhost:3000
-      SENTRY_DSN: test-sentry-dsn
-      DRIVE_DISK: r2
-      R2_KEY: test-r2-key
-      R2_SECRET: test-r2-secret
-      R2_BUCKET: test-bucket
-      R2_ENDPOINT: https://test-endpoint.com
+      DRIVE_DISK: local
 
     services:
       postgres:
