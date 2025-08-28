@@ -57,6 +57,34 @@ jobs:
         working-directory: ./apps/backend
         run: cp .env.example .env
 
+      - name: Setup test environment
+        working-directory: ./apps/backend
+        run: |
+          cat > .env.test << EOF
+          NODE_ENV=test
+          DOMAIN=localhost
+          PORT=3333
+          APP_KEY=test-app-key-for-ci-only-do-not-use-in-production
+          HOST=0.0.0.0
+          LOG_LEVEL=info
+          DB_HOST=dummy
+          DB_PORT=5432
+          DB_USER=dummy
+          DB_DATABASE=dummy
+          LIMITER_STORE=memory
+          SENTRY_DSN=dummy
+          SESSION_DRIVER=memory
+          DRIVE_DISK=r2
+          R2_KEY=dummy
+          R2_SECRET=dummy
+          R2_BUCKET=dummy
+          R2_ENDPOINT=dummy
+          EOF
+
+      - name: Run backend tests
+        working-directory: ./apps/backend
+        run: NODE_ENV=test node --env-file=.env.test ace test
+
       - name: Create environment-specific .env for frontend
         run: |
           if [[ ${{ github.ref }} == 'refs/heads/main' ]]; then
@@ -80,6 +108,7 @@ jobs:
       - name: Cleanup temporary .env files
         run: |
           rm -f apps/backend/.env
+          rm -f apps/backend/.env.test
           rm -f apps/front/.env*
 
       - name: Set up Docker Buildx

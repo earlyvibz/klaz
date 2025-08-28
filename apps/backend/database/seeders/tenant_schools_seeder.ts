@@ -5,6 +5,7 @@ import School from "#models/school";
 import User from "#models/user";
 
 export default class extends BaseSeeder {
+	static environment = ["local", "development"];
 	async run() {
 		// 1. Créer toutes les écoles (demo + vraies écoles)
 		const schools = await this.createSchools();

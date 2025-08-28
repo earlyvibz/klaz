@@ -29,6 +29,22 @@ FROM nginx:alpine
 
 COPY --from=builder /app/apps/front/dist /usr/share/nginx/html
 
+# Create entrypoint script for env substitution
+RUN cat > /docker-entrypoint.d/40-substitute-env.sh << 'EOF'
+#!/bin/sh
+set -e
+
+# Replace __VITE_API_URL__ placeholder with actual env var
+if [ -n "$VITE_API_URL" ]; then
+    echo "Substituting VITE_API_URL: $VITE_API_URL"
+    find /usr/share/nginx/html -name "*.js" -type f -exec sed -i "s|__VITE_API_URL__|$VITE_API_URL|g" {} +
+else
+    echo "Warning: VITE_API_URL not set, using default placeholder"
+fi
+EOF
+
+RUN chmod +x /docker-entrypoint.d/40-substitute-env.sh
+
 # Config nginx pour SPA
 RUN echo 'server { \
     listen 80; \

@@ -3,7 +3,9 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
+		"local": "vite --host --mode localhost",
 		"dev": "vite --host --mode development",
+		"dev:local": "vite --host --mode local",
 		"build": "tsc -b && vite build --mode production",
 		"build:staging": "tsc -b && vite build --mode staging",
 		"lint": "biome check .",

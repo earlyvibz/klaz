@@ -11,14 +11,18 @@
 		"package.json"
 	],
 	"scripts": {
+		"local": "NODE_ENV=local node ace serve --hmr",
 		"start": "NODE_ENV=production node bin/server.js",
 		"start:staging": "NODE_ENV=staging node bin/server.js",
 		"start:dev": "NODE_ENV=development node bin/server.js",
+		"start:local": "NODE_ENV=local node bin/server.js",
 		"build": "node ace build",
 		"dev": "NODE_ENV=development node ace serve --hmr",
 		"test": "NODE_ENV=test node ace test",
 		"test:coverage": "NODE_ENV=test c8 node ace test",
-		"typecheck": "tsc --noEmit"
+		"typecheck": "tsc --noEmit",
+		"seed:local": "NODE_ENV=local node --env-file=.env.local ace db:seed",
+		"seed:dev": "NODE_ENV=development node --env-file=.env.development ace db:seed"
 	},
 	"imports": {
 		"#controllers/*": "./app/controllers/*.js",
