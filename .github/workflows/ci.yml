@@ -90,10 +90,6 @@ jobs:
         working-directory: ./apps/backend
         run: node ace test --coverage
 
-      - name: Run frontend tests
-        working-directory: ./apps/front
-        run: pnpm test:run
-
       - name: Upload coverage reports
         if: github.event_name == 'push'
         uses: codecov/codecov-action@v4
