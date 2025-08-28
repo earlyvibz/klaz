@@ -9,14 +9,20 @@ const driveConfig = defineConfig({
 	 * services each using the same or a different driver.
 	 */
 	services: {
+		local: services.fs({
+			location: new URL("../tmp/uploads/", import.meta.url),
+			serveFiles: true,
+			routeBasePath: "/uploads",
+			visibility: "public",
+		}),
 		r2: services.s3({
 			credentials: {
-				accessKeyId: env.get("R2_KEY"),
-				secretAccessKey: env.get("R2_SECRET"),
+				accessKeyId: env.get("R2_KEY") || "dummy",
+				secretAccessKey: env.get("R2_SECRET") || "dummy",
 			},
 			region: "auto",
-			bucket: env.get("R2_BUCKET"),
-			endpoint: env.get("R2_ENDPOINT"),
+			bucket: env.get("R2_BUCKET") || "dummy",
+			endpoint: env.get("R2_ENDPOINT") || "https://dummy.com",
 			visibility: "public",
 		}),
 	},
