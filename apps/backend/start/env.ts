@@ -71,7 +71,7 @@ export default await Env.create(new URL("../", import.meta.url), {
 | Variables for configuring @rlanz/sentry package
 |----------------------------------------------------------
 */
-	SENTRY_DSN: Env.schema.string(),
+	SENTRY_DSN: Env.schema.string.optional(),
 
 	/*
 |----------------------------------------------------------
@@ -85,9 +85,9 @@ export default await Env.create(new URL("../", import.meta.url), {
   | Variables for configuring the drive package
   |----------------------------------------------------------
   */
-	DRIVE_DISK: Env.schema.enum(["r2"] as const),
-	R2_KEY: Env.schema.string(),
-	R2_SECRET: Env.schema.string(),
-	R2_BUCKET: Env.schema.string(),
-	R2_ENDPOINT: Env.schema.string(),
+	DRIVE_DISK: Env.schema.enum(["r2", "local"] as const),
+	R2_KEY: Env.schema.string.optional(),
+	R2_SECRET: Env.schema.string.optional(),
+	R2_BUCKET: Env.schema.string.optional(),
+	R2_ENDPOINT: Env.schema.string.optional(),
 });
