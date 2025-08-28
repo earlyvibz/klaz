@@ -6,7 +6,7 @@ export default defineConfig({
 	/**
 	 * Enable or disable Sentry
 	 */
-	enabled: app.inProduction,
+	enabled: app.inProduction && !!env.get("SENTRY_DSN"),
 
 	/**
 	 * The environment Sentry is running in

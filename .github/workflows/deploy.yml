@@ -8,108 +8,173 @@ env:
   REGISTRY: ghcr.io
   IMAGE_NAME_BACKEND: ghcr.io/earlyvibz/klaz/backend
   IMAGE_NAME_FRONTEND: ghcr.io/earlyvibz/klaz/frontend
+  NODE_VERSION: "20"
+  PNPM_VERSION: "latest"
 
 jobs:
-  deploy:
+  # Job séparé pour les tests (réutilise la logique CI)
+  test:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
+    timeout-minutes: 8
 
     env:
-      VITE_API_URL_DEV: https://api.klaz-dev.fr
-      VITE_API_URL_STAGING: https://api.klaz-staging.fr
-      VITE_API_URL_PROD: https://api.klaz.fr
+      NODE_ENV: test
+      DOMAIN: localhost
+      PORT: 3333
+      APP_KEY: test-key-that-is-32-characters-
+      HOST: 0.0.0.0
+      LOG_LEVEL: info
+      SESSION_DRIVER: memory
+      DB_HOST: 127.0.0.1
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_DATABASE: klaz_test
+      LIMITER_STORE: memory
+      RESEND_API_KEY: test-resend-api-key
+      FRONTEND_URL: http://localhost:3000
+      SENTRY_DSN: ""
+      DRIVE_DISK: local
+      R2_KEY: ""
+      R2_SECRET: ""
+      R2_BUCKET: ""
+      R2_ENDPOINT: ""
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: klaz_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
         with:
-          version: latest
+          version: ${{ env.PNPM_VERSION }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: ${{ env.NODE_VERSION }}
           cache: "pnpm"
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
-      - name: Set environment tag
+      - name: Generate APP_KEY
+        working-directory: ./apps/backend
+        run: node ace generate:key
+
+      - name: Run migrations
+        working-directory: ./apps/backend
+        run: node ace migration:run
+
+      - name: Run tests
+        run: |
+          pnpm --filter @klaz/backend test
+          pnpm --filter front test:run
+
+  # Job principal de déploiement
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      packages: write
+
+    outputs:
+      tag: ${{ steps.env.outputs.tag }}
+      environment: ${{ steps.env.outputs.env }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set environment variables
         id: env
         run: |
-          if [[ ${{ github.ref }} == 'refs/heads/main' ]]; then
-            echo "tag=latest" >> $GITHUB_OUTPUT
-            echo "env=prod" >> $GITHUB_OUTPUT
-          elif [[ ${{ github.ref }} == 'refs/heads/staging' ]]; then
-            echo "tag=staging" >> $GITHUB_OUTPUT
-            echo "env=staging" >> $GITHUB_OUTPUT
-          elif [[ ${{ github.ref }} == 'refs/heads/dev' ]]; then
-            echo "tag=dev" >> $GITHUB_OUTPUT
-            echo "env=dev" >> $GITHUB_OUTPUT
-          fi
+          case "${{ github.ref }}" in
+            "refs/heads/main")
+              echo "tag=latest" >> $GITHUB_OUTPUT
+              echo "env=prod" >> $GITHUB_OUTPUT
+              echo "api_url=https://api.klaz.fr" >> $GITHUB_OUTPUT
+              echo "build_mode=production" >> $GITHUB_OUTPUT
+              ;;
+            "refs/heads/staging")
+              echo "tag=staging" >> $GITHUB_OUTPUT
+              echo "env=staging" >> $GITHUB_OUTPUT
+              echo "api_url=https://api.klaz-staging.fr" >> $GITHUB_OUTPUT
+              echo "build_mode=staging" >> $GITHUB_OUTPUT
+              ;;
+            "refs/heads/dev")
+              echo "tag=dev" >> $GITHUB_OUTPUT
+              echo "env=dev" >> $GITHUB_OUTPUT
+              echo "api_url=https://api.klaz-dev.fr" >> $GITHUB_OUTPUT
+              echo "build_mode=development" >> $GITHUB_OUTPUT
+              ;;
+          esac
 
-      - name: Setup environment for Tuyau generation
-        working-directory: ./apps/backend
-        run: cp .env.example .env
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
 
-      - name: Setup test environment
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Setup backend env for Tuyau
         working-directory: ./apps/backend
         run: |
-          cat > .env.test << EOF
-          NODE_ENV=test
+          cat > .env << EOF
+          NODE_ENV=development
           DOMAIN=localhost
           PORT=3333
-          APP_KEY=test-app-key-for-ci-only-do-not-use-in-production
+          APP_KEY=temp-key-for-build-only-32-chars
           HOST=0.0.0.0
           LOG_LEVEL=info
-          DB_HOST=dummy
-          DB_PORT=5432
-          DB_USER=dummy
-          DB_DATABASE=dummy
-          LIMITER_STORE=memory
-          SENTRY_DSN=dummy
           SESSION_DRIVER=memory
-          DRIVE_DISK=r2
-          R2_KEY=dummy
-          R2_SECRET=dummy
-          R2_BUCKET=dummy
-          R2_ENDPOINT=dummy
+          DB_HOST=localhost
+          DB_PORT=5432
+          DB_USER=postgres
+          DB_PASSWORD=postgres
+          DB_DATABASE=klaz_build
+          LIMITER_STORE=memory
+          SENTRY_DSN=""
+          DRIVE_DISK=local
+          RESEND_API_KEY=temp-key
+          FRONTEND_URL=http://localhost:3000
           EOF
 
-      - name: Run backend tests
-        working-directory: ./apps/backend
-        run: NODE_ENV=test node --env-file=.env.test ace test
+      - name: Setup frontend env
+        working-directory: ./apps/front
+        run: echo "VITE_API_URL=${{ steps.env.outputs.api_url }}" > .env
 
-      - name: Create environment-specific .env for frontend
+      - name: Build and deploy
         run: |
-          if [[ ${{ github.ref }} == 'refs/heads/main' ]]; then
-            echo "VITE_API_URL=${{ env.VITE_API_URL_PROD }}" > apps/front/.env
-          elif [[ ${{ github.ref }} == 'refs/heads/staging' ]]; then
-            echo "VITE_API_URL=${{ env.VITE_API_URL_STAGING }}" > apps/front/.env.staging
-          elif [[ ${{ github.ref }} == 'refs/heads/dev' ]]; then
-            echo "VITE_API_URL=${{ env.VITE_API_URL_DEV }}" > apps/front/.env
-          fi
-
-      - name: Build project with correct environment
-        run: |
-          if [[ ${{ github.ref }} == 'refs/heads/main' ]]; then
-            pnpm deploy:clean && pnpm deploy:build && pnpm deploy:backend && pnpm deploy:frontend && cd .deploy/frontend && pnpm build && cd ../.. && pnpm deploy:dockerfiles
-          elif [[ ${{ github.ref }} == 'refs/heads/staging' ]]; then
-            pnpm deploy:clean && pnpm deploy:build && pnpm deploy:backend && pnpm deploy:frontend && cd .deploy/frontend && pnpm build:staging && cd ../.. && pnpm deploy:dockerfiles
-          else
-            pnpm deploy:all
-          fi
-
-      - name: Cleanup temporary .env files
-        run: |
-          rm -f apps/backend/.env
-          rm -f apps/backend/.env.test
-          rm -f apps/front/.env*
+          pnpm deploy:clean
+          pnpm deploy:build
+          pnpm deploy:backend
+          pnpm deploy:frontend
+          cd .deploy/frontend && pnpm build
+          cd ../.. && pnpm deploy:dockerfiles
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -128,6 +193,8 @@ jobs:
           platforms: linux/amd64
           push: true
           tags: ${{ env.IMAGE_NAME_BACKEND }}:${{ steps.env.outputs.tag }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Build and push frontend image
         uses: docker/build-push-action@v5
@@ -136,28 +203,45 @@ jobs:
           platforms: linux/amd64
           push: true
           tags: ${{ env.IMAGE_NAME_FRONTEND }}:${{ steps.env.outputs.tag }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
+  # Job de déploiement automatique (DEV uniquement)
+  deploy-dev:
+    needs: deploy
+    if: needs.deploy.outputs.environment == 'dev'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
       - name: Trigger Coolify DEV deployments
-        if: steps.env.outputs.env == 'dev'
         run: |
-          echo "Triggering DEV deployments"
-          echo "Backend image: ${{ env.IMAGE_NAME_BACKEND }}:${{ steps.env.outputs.tag }}"
-          echo "Frontend image: ${{ env.IMAGE_NAME_FRONTEND }}:${{ steps.env.outputs.tag }}"
+          echo "🚀 Deploying to DEV environment"
+          echo "Backend: ${{ env.IMAGE_NAME_BACKEND }}:${{ needs.deploy.outputs.tag }}"
+          echo "Frontend: ${{ env.IMAGE_NAME_FRONTEND }}:${{ needs.deploy.outputs.tag }}"
 
-          # Déclencher le redéploiement backend DEV (méthode officielle)
-          echo "Deploying backend..."
-          curl --request GET "${{ secrets.COOLIFY_WEBHOOK_BACKEND_DEV }}" \
-            --header "Authorization: Bearer ${{ secrets.COOLIFY_TOKEN }}"
+          # Deploy backend
+          curl -f --request GET "${{ secrets.COOLIFY_WEBHOOK_BACKEND_DEV }}" \
+            --header "Authorization: Bearer ${{ secrets.COOLIFY_TOKEN }}" \
+            --max-time 30
 
-          # Déclencher le redéploiement frontend DEV
-          echo "Deploying frontend..."
-          curl --request GET "${{ secrets.COOLIFY_WEBHOOK_FRONT_DEV }}" \
-            --header "Authorization: Bearer ${{ secrets.COOLIFY_TOKEN }}"
+          # Deploy frontend
+          curl -f --request GET "${{ secrets.COOLIFY_WEBHOOK_FRONT_DEV }}" \
+            --header "Authorization: Bearer ${{ secrets.COOLIFY_TOKEN }}" \
+            --max-time 30
 
-      - name: Other environments (staging/prod)
-        if: steps.env.outputs.env != 'dev'
+          echo "✅ DEV deployment triggered successfully"
+
+  # Job d'information pour staging/prod
+  notify-manual:
+    needs: deploy
+    if: needs.deploy.outputs.environment != 'dev'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Manual deployment info
         run: |
-          echo "Images pushed for ${{ steps.env.outputs.env }} environment:"
-          echo "Backend: ${{ env.IMAGE_NAME_BACKEND }}:${{ steps.env.outputs.tag }}"
-          echo "Frontend: ${{ env.IMAGE_NAME_FRONTEND }}:${{ steps.env.outputs.tag }}"
-          echo "Configure webhooks in Coolify for these environments manually"
+          echo "📦 Images built for ${{ needs.deploy.outputs.environment }} environment:"
+          echo "Backend: ${{ env.IMAGE_NAME_BACKEND }}:${{ needs.deploy.outputs.tag }}"
+          echo "Frontend: ${{ env.IMAGE_NAME_FRONTEND }}:${{ needs.deploy.outputs.tag }}"
+          echo "⚠️  Manual deployment required via Coolify dashboard"
