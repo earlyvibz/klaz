@@ -11,7 +11,7 @@ import { routeTree } from "./routeTree.gen";
 
 export const tuyau = createTuyau({
 	api,
-	baseUrl: import.meta.env.VITE_API_URL || "__VITE_API_URL__",
+	baseUrl: import.meta.env.VITE_API_URL || "http://localhost:3333",
 	credentials: "include",
 });
 
