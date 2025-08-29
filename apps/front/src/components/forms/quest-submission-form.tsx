@@ -1,3 +1,4 @@
+import { TuyauHTTPError } from "@tuyau/client";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -7,7 +8,7 @@ import type { Quest } from "@/types";
 import { questSubmissionSchema } from "@/validators/quest";
 
 interface QuestSubmissionFormProps {
-	quest: Quest[0];
+	quest: Quest;
 	onCancel: () => void;
 	onSuccess?: () => void;
 }
@@ -30,25 +31,25 @@ export default function QuestSubmissionForm({
 		},
 		onSubmit: async ({ value }) => {
 			setIsSubmitting(true);
-			try {
-				setError(null);
+			setError(null);
 
-				const formData = new FormData();
-				formData.append("image", value.file);
-				formData.append("description", value.description);
+			const formData = new FormData();
+			formData.append("image", value.file);
+			formData.append("description", value.description);
 
-				await tuyau.quests({ id: quest.id }).submit.$post(formData);
-				toast.success("Soumission réussie");
-				onSuccess?.();
-			} catch (error) {
-				if (error instanceof Error) {
-					setError(error.message);
-				} else {
-					setError("Une erreur inattendue est survenue");
-				}
-			} finally {
+			const { error } = await tuyau
+				.quests({ id: quest.id })
+				.submit.$post(formData);
+
+			if (error instanceof TuyauHTTPError) {
+				setError(error.message);
 				setIsSubmitting(false);
+				return;
 			}
+
+			toast.success("Soumission réussie");
+			onSuccess?.();
+			setIsSubmitting(false);
 		},
 	});
 
