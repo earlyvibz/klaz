@@ -1,4 +1,4 @@
-import { CheckCircle, Clock, Target, Trophy } from "lucide-react";
+import { CheckCircle, Clock, Target, Trash, Trophy } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,10 +9,14 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import DeleteQuest from "@/features/admin/quests/delete-quest";
+import UpdateQuest from "@/features/admin/quests/update-quest";
+import useAuth from "@/stores/auth-store";
 import type { Quest } from "@/types";
 import QuestSubmissionModal from "./quest-submission-modal";
 
 export default function CardQuest({ quest }: { quest: Quest }) {
+	const { user } = useAuth();
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const isDeadlineSoon =
 		quest.deadline &&
@@ -152,44 +156,51 @@ export default function CardQuest({ quest }: { quest: Quest }) {
 			</CardContent>
 
 			<CardFooter className="pt-0 mt-auto">
-				<Button
-					className="w-full group-hover:shadow-md transition-all"
-					disabled={
-						!quest.isActive ||
-						!!isExpired ||
-						submissionStatus === "APPROVED" ||
-						submissionStatus === "PENDING"
-					}
-					onClick={() => setIsModalOpen(true)}
-					variant={submissionStatus === "APPROVED" ? "outline" : "default"}
-				>
-					{submissionStatus === "APPROVED" ? (
-						<>
-							<CheckCircle className="w-4 h-4" />
-							Quête terminée
-						</>
-					) : submissionStatus === "PENDING" ? (
-						<>
-							<Clock className="w-4 h-4" />
-							En attente de validation
-						</>
-					) : submissionStatus === "REJECTED" ? (
-						<>
-							<Target className="w-4 h-4" />
-							Soumettre à nouveau
-						</>
-					) : isExpired ? (
-						<>
-							<Target className="w-4 h-4" />
-							Quête expirée
-						</>
-					) : (
-						<>
-							<Target className="w-4 h-4" />
-							Commencer la quête
-						</>
-					)}
-				</Button>
+				{user?.isAdmin ? (
+					<div className="flex items-center gap-2">
+						<UpdateQuest quest={quest} />
+						<DeleteQuest quest={quest} />
+					</div>
+				) : (
+					<Button
+						className="w-full group-hover:shadow-md transition-all"
+						disabled={
+							!quest.isActive ||
+							!!isExpired ||
+							submissionStatus === "APPROVED" ||
+							submissionStatus === "PENDING"
+						}
+						onClick={() => setIsModalOpen(true)}
+						variant={submissionStatus === "APPROVED" ? "outline" : "default"}
+					>
+						{submissionStatus === "APPROVED" ? (
+							<>
+								<CheckCircle className="w-4 h-4" />
+								Quête terminée
+							</>
+						) : submissionStatus === "PENDING" ? (
+							<>
+								<Clock className="w-4 h-4" />
+								En attente de validation
+							</>
+						) : submissionStatus === "REJECTED" ? (
+							<>
+								<Target className="w-4 h-4" />
+								Soumettre à nouveau
+							</>
+						) : isExpired ? (
+							<>
+								<Target className="w-4 h-4" />
+								Quête expirée
+							</>
+						) : (
+							<>
+								<Target className="w-4 h-4" />
+								Commencer la quête
+							</>
+						)}
+					</Button>
+				)}
 			</CardFooter>
 
 			<QuestSubmissionModal

@@ -20,44 +20,23 @@ const StudentsController = () => import("#controllers/students_controller");
 // ROUTES SUPERADMIN
 router
 	.group(() => {
-		router
-			.get("/schools", [SchoolsController, "index"])
-			.as("superadmin.schools.index");
-
-		router
-			.post("/schools", [SchoolsController, "create"])
-			.as("superadmin.schools.create");
+		router.get("/schools", [SchoolsController, "index"]);
+		router.post("/schools", [SchoolsController, "create"]);
 	})
-	.use(middleware.auth())
-	.use(middleware.role({ roles: ["SUPERADMIN"] }));
-
-// ROUTES ADMIN
-router
-	.group(() => {
-		router
-			.get("/students", [StudentsController, "getStudents"])
-			.as("admin.students.index");
-
-		router
-			.get("/students/count", [StudentsController, "getStudentsCount"])
-			.as("admin.students.count");
-	})
-	.use(middleware.auth())
-	.use(middleware.role({ roles: ["ADMIN"] }))
-	.use(middleware.tenant());
+	.use([middleware.auth(), middleware.role({ roles: ["SUPERADMIN"] })]);
 
 // ✅ Route /me SEULE, sans tenant
 router.get("/me", [AuthController, "me"]).use(middleware.auth());
 
-// Routes de profil utilisateur
+// ROUTES DE PROFIL UTILISATEUR
 router
 	.group(() => {
 		router.put("/profile/password", [AuthController, "changePassword"]);
 		router.delete("/profile/delete", [AuthController, "deleteAccount"]);
 	})
-	.use(middleware.auth());
+	.use([middleware.auth()]);
 
-// Routes auth avec tenant (SANS /me)
+// ROUTES AUTH AVEC TENANT (SANS /me)
 router
 	.group(() => {
 		router.get("/school", [SchoolsController, "current"]);
@@ -67,17 +46,22 @@ router
 		router.post("/reset-password", [AuthController, "resetPassword"]);
 		router.post("/logout", [AuthController, "logout"]);
 	})
-	.use(middleware.tenant());
+	.use([middleware.tenant()]);
 
-// Routes admin avec tenant + auth + role
+// ROUTES ADMIN AVEC TENANT
 router
 	.group(() => {
+		// Students
+		router.get("/students", [StudentsController, "getStudents"]);
+		router.get("/students/count", [StudentsController, "getStudentsCount"]);
+
+		// Invitations
 		router.post("/invitations/import", [InvitationsController, "import"]);
 		router.get("/invitations", [InvitationsController, "index"]);
 		router.post("/invitations/:id/resend", [InvitationsController, "resend"]);
 		router.delete("/invitations/:id", [InvitationsController, "destroy"]);
 
-		// Admin quest routes
+		// Quests (admin only)
 		router.post("/quests", [QuestsController, "create"]);
 		router.put("/quests/:id", [QuestsController, "update"]);
 		router.delete("/quests/:id", [QuestsController, "destroy"]);
@@ -94,19 +78,18 @@ router
 	.use([
 		middleware.tenant(),
 		middleware.auth(),
-		middleware.role({ requireAdmin: true }),
+		middleware.role({ roles: ["ADMIN"] }),
 	]);
 
-// Routes tenant avec auth (étudiants et admins)
+// ROUTES TENANT AVEC AUTH (étudiants et admins)
 router
 	.group(() => {
-		// Quest routes (accessible aux étudiants et admins)
+		// Quests (lecture et soumission)
 		router.get("/quests", [QuestsController, "getQuests"]);
 		router.get("/quest", [QuestsController, "getQuest"]);
-		router.get("/quests/:id", [QuestsController, "show"]);
 		router.post("/quests/:id/submit", [QuestsController, "submit"]);
 
-		// Leaderboard (accessible aux étudiants et admins)
+		// Leaderboard
 		router.get("/leaderboard", [QuestsController, "leaderboard"]);
 	})
 	.use([middleware.tenant(), middleware.auth()]);

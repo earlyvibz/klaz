@@ -7,6 +7,7 @@ import SchoolDto from "#dtos/school";
 import Quest from "#models/quest";
 import QuestSubmission from "#models/quest_submission";
 import User from "#models/user";
+import type { PaginationMeta } from "#types/students";
 import {
 	createQuestValidator,
 	reviewSubmissionValidator,
@@ -14,111 +15,6 @@ import {
 } from "#validators/quest";
 
 export default class QuestsController {
-	async getQuests({ auth, request, response, school }: HttpContext) {
-		const user = auth.user;
-		if (!user) {
-			return response.unauthorized({ message: "User not authenticated" });
-		}
-
-		if (!school) {
-			return response.badRequest({ message: "School not found" });
-		}
-
-		const page = request.input("page", 1);
-		const limit = request.input("limit", 10);
-		const status = request.input("status", "all");
-
-		let query = Quest.query()
-			.where("schoolId", school.id)
-			.where("isActive", true)
-			.withCount("submissions")
-			.preload("submissions", (submissionQuery) => {
-				submissionQuery.where("userId", user.id);
-			});
-
-		if (status !== "all") {
-			switch (status) {
-				case "available":
-					query = query.whereDoesntHave("submissions", (subQuery) => {
-						subQuery.where("userId", user.id);
-					});
-					break;
-				case "pending":
-					query = query.whereHas("submissions", (subQuery) => {
-						subQuery.where("userId", user.id).where("status", "PENDING");
-					});
-					break;
-				case "completed":
-					query = query.whereHas("submissions", (subQuery) => {
-						subQuery.where("userId", user.id).where("status", "APPROVED");
-					});
-					break;
-				case "rejected":
-					query = query.whereHas("submissions", (subQuery) => {
-						subQuery.where("userId", user.id).where("status", "REJECTED");
-					});
-					break;
-				case "expired":
-					query = query.where("deadline", "<", DateTime.now().toSQL());
-					break;
-			}
-		}
-
-		const quests = await query
-			.orderBy("createdAt", "desc")
-			.paginate(page, limit);
-
-		const paginationMeta = quests.getMeta();
-		const questsData = quests.all().map((quest) => new QuestDto(quest));
-
-		return {
-			quests: questsData,
-			meta: paginationMeta,
-		};
-	}
-
-	async getQuest({ params, auth, response, school }: HttpContext) {
-		const user = auth.user;
-		if (!user) {
-			return response.unauthorized({ message: "User not authenticated" });
-		}
-
-		const quest = await Quest.query()
-			.where("id", params.id)
-			.where("schoolId", school?.id ?? "")
-			.first();
-
-		if (!quest) {
-			return response.notFound({ message: "Quest not found" });
-		}
-
-		return new QuestDto(quest);
-	}
-
-	async show({ params, auth, response, school }: HttpContext) {
-		const user = auth.user;
-		if (!user) {
-			return response.unauthorized({ message: "User not authenticated" });
-		}
-
-		const quest = await Quest.query()
-			.where("id", params.id)
-			.where("schoolId", school?.id ?? "")
-			.preload("submissions", (query) => {
-				if (user.role === "STUDENT") {
-					query.where("userId", user.id);
-				}
-				query.preload("user");
-			})
-			.first();
-
-		if (!quest) {
-			return response.notFound({ message: "Quest not found" });
-		}
-
-		return new QuestDto(quest);
-	}
-
 	async create({ request, response, school, auth }: HttpContext) {
 		const user = auth.user;
 		if (!user?.isAdmin()) {
@@ -171,6 +67,89 @@ export default class QuestsController {
 		return new QuestDto(quest);
 	}
 
+	async getQuests({ auth, request, response, school }: HttpContext) {
+		const user = auth.user;
+		if (!user) {
+			return response.unauthorized({ message: "User not authenticated" });
+		}
+
+		if (!school) {
+			return response.badRequest({ message: "School not found" });
+		}
+
+		const page = request.input("page", 1);
+		const limit = request.input("limit", 10);
+		const status = request.input("status", "all");
+
+		let query = Quest.query()
+			.where("schoolId", school.id)
+			.where("isActive", true)
+			.withCount("submissions")
+			.preload("submissions", (submissionQuery) => {
+				submissionQuery.where("userId", user.id);
+			});
+
+		if (status !== "all") {
+			switch (status) {
+				case "active":
+					query = query.where((subQuery) => {
+						subQuery
+							.where("deadline", ">", DateTime.now().toSQL())
+							.orWhereNull("deadline");
+					});
+					break;
+				case "pending":
+					query = query.whereHas("submissions", (subQuery) => {
+						subQuery.where("userId", user.id).where("status", "PENDING");
+					});
+					break;
+				case "completed":
+					query = query.whereHas("submissions", (subQuery) => {
+						subQuery.where("userId", user.id).where("status", "APPROVED");
+					});
+					break;
+				case "rejected":
+					query = query.whereHas("submissions", (subQuery) => {
+						subQuery.where("userId", user.id).where("status", "REJECTED");
+					});
+					break;
+				case "expired":
+					query = query.where("deadline", "<", DateTime.now().toSQL());
+					break;
+			}
+		}
+
+		const quests = await query
+			.orderBy("createdAt", "desc")
+			.paginate(page, limit);
+
+		const paginationMeta = quests.getMeta() as PaginationMeta;
+		const questsData = quests.all().map((quest) => new QuestDto(quest));
+
+		return {
+			quests: questsData,
+			meta: paginationMeta,
+		};
+	}
+
+	async getQuest({ params, auth, response, school }: HttpContext) {
+		const user = auth.user;
+		if (!user) {
+			return response.unauthorized({ message: "User not authenticated" });
+		}
+
+		const quest = await Quest.query()
+			.where("id", params.id)
+			.where("schoolId", school?.id ?? "")
+			.first();
+
+		if (!quest) {
+			return response.notFound({ message: "Quest not found" });
+		}
+
+		return new QuestDto(quest);
+	}
+
 	async update({ params, request, response, school, auth }: HttpContext) {
 		const user = auth.user;
 		if (!user?.isAdmin()) {
@@ -196,12 +175,37 @@ export default class QuestsController {
 			isActive,
 		} = await request.validateUsing(updateQuestValidator);
 
+		let parsedDeadline: DateTime | undefined;
+		if (deadline) {
+			parsedDeadline = DateTime.fromISO(deadline);
+
+			if (!parsedDeadline.isValid) {
+				return response.badRequest({
+					errors: [
+						{
+							message: "La date limite doit être dans un format valide",
+						},
+					],
+				});
+			}
+
+			if (parsedDeadline <= DateTime.now()) {
+				return response.badRequest({
+					errors: [
+						{
+							message: "La date limite doit être dans le futur",
+						},
+					],
+				});
+			}
+		}
+
 		quest.merge({
 			title,
 			description,
 			type,
 			points,
-			deadline: deadline ? DateTime.fromJSDate(deadline) : undefined,
+			deadline: parsedDeadline,
 			validationType,
 			isActive,
 		});
@@ -425,7 +429,7 @@ export default class QuestsController {
 		}
 
 		const submissions = await query.paginate(page, limit);
-		const meta = submissions.getMeta();
+		const meta = submissions.getMeta() as PaginationMeta;
 		const data = submissions.all().map((sub) => new QuestSubmissionDto(sub));
 
 		return {
@@ -459,7 +463,7 @@ export default class QuestsController {
 			.orderBy("createdAt", "asc") // En cas d'égalité, prendre le plus ancien
 			.paginate(page, limit);
 
-		const paginationMeta = students.getMeta();
+		const paginationMeta = students.getMeta() as PaginationMeta;
 		const leaderboardData = students.all().map((student, index) => {
 			const rank = (page - 1) * limit + index + 1;
 			const completedQuests = student.$extras.quest_submissions_count || 0;

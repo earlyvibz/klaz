@@ -17,7 +17,7 @@ export const updateQuestValidator = vine.compile(
 		description: vine.string().trim().optional(),
 		type: vine.string().trim().optional(),
 		points: vine.number().min(0).optional(),
-		deadline: vine.date().optional(),
+		deadline: vine.string().optional(),
 		validationType: vine.enum(["MANUAL", "AUTO_API"]).optional(),
 		isActive: vine.boolean().optional(),
 	}),

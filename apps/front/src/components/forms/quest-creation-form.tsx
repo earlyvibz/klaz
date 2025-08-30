@@ -1,32 +1,39 @@
+import { useRouter } from "@tanstack/react-router";
 import { TuyauHTTPError } from "@tuyau/client";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useAppForm } from "@/hooks/form/form";
 import { tuyau } from "@/main";
-import type { CreateQuestRequest } from "@/types";
+import type { CreateQuestRequest, Quest } from "@/types";
 import { createQuestSchema } from "@/validators/quest";
 
 interface QuestCreationFormProps {
 	onCancel: () => void;
 	onSuccess?: () => void;
+	quest?: Quest;
 }
 
 export default function QuestCreationForm({
 	onCancel,
 	onSuccess,
+	quest,
 }: QuestCreationFormProps) {
+	const router = useRouter();
 	const [error, setError] = useState<string | null>(null);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
 	const form = useAppForm({
 		defaultValues: {
-			title: "",
-			description: "",
-			type: "UGC",
-			points: 1,
-			deadline: null as Date | null,
-			validationType: "MANUAL" as "MANUAL" | "AUTO_API",
+			title: quest?.title || "",
+			description: quest?.description || "",
+			type: quest?.type || "UGC",
+			points: quest?.points || 1,
+			deadline: quest?.deadline
+				? new Date(quest.deadline)
+				: (null as Date | null),
+			validationType:
+				quest?.validationType || ("MANUAL" as "MANUAL" | "AUTO_API"),
 		},
 		validators: {
 			onSubmit: createQuestSchema,
@@ -44,12 +51,14 @@ export default function QuestCreationForm({
 			};
 
 			if (value.deadline) {
-				payload.deadline = new Date(
-					value.deadline.setHours(23, 59, 59, 999),
-				).toISOString();
+				const date = new Date(value.deadline);
+				date.setHours(23, 59, 59, 999);
+				payload.deadline = date.toISOString();
 			}
 
-			const { error } = await tuyau.quests.$post(payload);
+			const { error } = quest
+				? await tuyau.quests({ id: quest.id }).$put(payload)
+				: await tuyau.quests.$post(payload);
 
 			if (error instanceof TuyauHTTPError) {
 				setError(error.value.errors[0].message);
@@ -57,7 +66,10 @@ export default function QuestCreationForm({
 				return;
 			}
 
-			toast.success("Quête créée avec succès");
+			toast.success(
+				quest ? "Quête modifiée avec succès" : "Quête créée avec succès",
+			);
+			router.invalidate();
 			onSuccess?.();
 			setIsSubmitting(false);
 		},
@@ -143,7 +155,7 @@ export default function QuestCreationForm({
 				<div className="flex gap-3">
 					<form.AppForm>
 						<form.SubscribeButton
-							label={isSubmitting ? "Création..." : "Créer la quête"}
+							label={quest ? "Modifier la quête" : "Créer la quête"}
 							isLoading={isSubmitting}
 							className="flex-1"
 						/>

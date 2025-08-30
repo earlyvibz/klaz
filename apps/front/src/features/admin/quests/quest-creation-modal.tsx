@@ -6,15 +6,18 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
+import type { Quest } from "@/types";
 
 interface QuestCreationModalProps {
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
+	quest?: Quest;
 }
 
 export default function QuestCreationModal({
 	open,
 	onOpenChange,
+	quest,
 }: QuestCreationModalProps) {
 	const handleSuccess = () => {
 		onOpenChange(false);
@@ -24,16 +27,21 @@ export default function QuestCreationModal({
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogContent className="max-w-2xl">
 				<DialogHeader>
-					<DialogTitle>Créer une nouvelle quête</DialogTitle>
-					<DialogDescription>
-						Créez une nouvelle quête pour engager vos étudiants et gamifier leur
-						apprentissage
-					</DialogDescription>
+					<DialogTitle>
+						{quest ? "Modifier la quête" : "Créer une nouvelle quête"}
+					</DialogTitle>
+					{!quest && (
+						<DialogDescription>
+							Créez une nouvelle quête pour engager vos étudiants et gamifier
+							leur apprentissage"
+						</DialogDescription>
+					)}
 				</DialogHeader>
 
 				<QuestCreationForm
 					onCancel={() => onOpenChange(false)}
 					onSuccess={handleSuccess}
+					quest={quest}
 				/>
 			</DialogContent>
 		</Dialog>

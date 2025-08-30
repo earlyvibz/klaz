@@ -39,7 +39,12 @@ const useAuth = create<IAuth>()((set, get) => ({
 
 			if (data?.user) {
 				set({ user: data?.user, isLoading: false });
-				window.location.href = "/home";
+
+				if (data?.user.role === "ADMIN") {
+					window.location.href = "/admin/home";
+				} else {
+					window.location.href = "/home";
+				}
 				return { success: true };
 			}
 
