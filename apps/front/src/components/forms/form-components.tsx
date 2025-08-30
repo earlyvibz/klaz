@@ -1,9 +1,15 @@
-import { useStore } from "@tanstack/react-form";
-import { Image as ImageIcon, Upload, X } from "lucide-react";
+import { type Updater, useStore } from "@tanstack/react-form";
+import { ChevronDownIcon, Image as ImageIcon, Upload, X } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+	Popover,
+	PopoverContent,
+	PopoverTrigger,
+} from "@/components/ui/popover";
 import * as ShadcnSelect from "@/components/ui/select";
 import { Slider as ShadcnSlider } from "@/components/ui/slider";
 import { Switch as ShadcnSwitch } from "@/components/ui/switch";
@@ -71,6 +77,87 @@ export function TextField({
 				onBlur={field.handleBlur}
 				onChange={(e) => field.handleChange(e.target.value)}
 			/>
+			{field.state.meta.isTouched && <ErrorMessages errors={errors} />}
+		</>
+	);
+}
+
+export function NumberField({
+	label,
+	placeholder,
+}: {
+	label: string;
+	placeholder?: string;
+}) {
+	const field = useFieldContext<number>();
+	const errors = useStore(field.store, (state) => state.meta.errors);
+
+	return (
+		<>
+			<Label htmlFor={label}>{label}</Label>
+			<Input
+				id={label}
+				type="number"
+				value={field.state.value === 0 ? "" : (field.state.value ?? "")}
+				placeholder={placeholder}
+				onBlur={field.handleBlur}
+				onChange={(e) => {
+					const value = e.target.value;
+					field.handleChange(value === "" ? 0 : Number(value));
+				}}
+			/>
+			{field.state.meta.isTouched && <ErrorMessages errors={errors} />}
+		</>
+	);
+}
+
+export function DateField({
+	label,
+	placeholder = "Select date",
+}: {
+	label: string;
+	placeholder?: string;
+}) {
+	const field = useFieldContext<Date>();
+	const errors = useStore(field.store, (state) => state.meta.errors);
+	const [open, setOpen] = useState(false);
+
+	return (
+		<>
+			<Label htmlFor={label}>{label}</Label>
+			<Popover open={open} onOpenChange={setOpen} modal={true}>
+				<PopoverTrigger asChild>
+					<Button
+						variant="outline"
+						id={label}
+						className="w-full justify-between font-normal"
+						onBlur={field.handleBlur}
+					>
+						{field.state.value
+							? field.state.value.toLocaleDateString()
+							: placeholder}
+						<ChevronDownIcon className="h-4 w-4" />
+					</Button>
+				</PopoverTrigger>
+				<PopoverContent
+					className="w-auto overflow-hidden p-0"
+					align="start"
+					side="bottom"
+					sideOffset={4}
+					style={{ zIndex: 9999 }}
+				>
+					<Calendar
+						required={true}
+						mode="single"
+						selected={field.state.value}
+						captionLayout="dropdown"
+						onSelect={(date: Updater<Date>) => {
+							field.handleChange(date);
+							setOpen(false);
+						}}
+					/>
+				</PopoverContent>
+			</Popover>
 			{field.state.meta.isTouched && <ErrorMessages errors={errors} />}
 		</>
 	);
@@ -146,9 +233,11 @@ export function PasswordField({
 export function TextArea({
 	label,
 	rows = 3,
+	placeholder,
 }: {
 	label: string;
 	rows?: number;
+	placeholder?: string;
 }) {
 	const field = useFieldContext<string>();
 	const errors = useStore(field.store, (state) => state.meta.errors);
@@ -161,6 +250,7 @@ export function TextArea({
 				value={field.state.value}
 				onBlur={field.handleBlur}
 				rows={rows}
+				placeholder={placeholder}
 				onChange={(e) => field.handleChange(e.target.value)}
 			/>
 			{field.state.meta.isTouched && <ErrorMessages errors={errors} />}
@@ -182,6 +272,7 @@ export function Select({
 
 	return (
 		<>
+			<Label htmlFor={label}>{label}</Label>
 			<ShadcnSelect.Select
 				name={field.name}
 				value={field.state.value}

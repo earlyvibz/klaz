@@ -12,7 +12,7 @@ import {
 import type { Quest } from "@/types";
 import QuestSubmissionModal from "./quest-submission-modal";
 
-export default function CardQuest({ quest }: { quest: Quest[0] }) {
+export default function CardQuest({ quest }: { quest: Quest }) {
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const isDeadlineSoon =
 		quest.deadline &&

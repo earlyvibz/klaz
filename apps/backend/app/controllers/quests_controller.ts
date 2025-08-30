@@ -132,12 +132,37 @@ export default class QuestsController {
 		const { title, description, type, points, deadline, validationType } =
 			await request.validateUsing(createQuestValidator);
 
+		let parsedDeadline: DateTime | undefined;
+		if (deadline) {
+			parsedDeadline = DateTime.fromISO(deadline);
+
+			if (!parsedDeadline.isValid) {
+				return response.badRequest({
+					errors: [
+						{
+							message: "La date limite doit être dans un format valide",
+						},
+					],
+				});
+			}
+
+			if (parsedDeadline <= DateTime.now()) {
+				return response.badRequest({
+					errors: [
+						{
+							message: "La date limite doit être dans le futur",
+						},
+					],
+				});
+			}
+		}
+
 		const quest = await Quest.create({
 			title,
 			description,
 			type,
 			points: points || 0,
-			deadline: deadline ? DateTime.fromJSDate(deadline) : undefined,
+			deadline: parsedDeadline,
 			validationType: validationType || "MANUAL",
 			schoolId: school.id,
 			isActive: true,

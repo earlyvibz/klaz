@@ -21,7 +21,9 @@ import { Route as DashboardMarketplaceRouteImport } from './routes/_dashboard.ma
 import { Route as DashboardLeaderboardRouteImport } from './routes/_dashboard.leaderboard'
 import { Route as DashboardHomeRouteImport } from './routes/_dashboard.home'
 import { Route as DashboardAccountRouteImport } from './routes/_dashboard.account'
+import { Route as DashboardAdminQuestsRouteImport } from './routes/_dashboard.admin.quests'
 import { Route as DashboardAdminMarketplaceRouteImport } from './routes/_dashboard.admin.marketplace'
+import { Route as DashboardAdminHomeRouteImport } from './routes/_dashboard.admin.home'
 
 const DashboardRoute = DashboardRouteImport.update({
   id: '/_dashboard',
@@ -82,12 +84,22 @@ const DashboardAccountRoute = DashboardAccountRouteImport.update({
   path: '/account',
   getParentRoute: () => DashboardRoute,
 } as any)
+const DashboardAdminQuestsRoute = DashboardAdminQuestsRouteImport.update({
+  id: '/admin/quests',
+  path: '/admin/quests',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const DashboardAdminMarketplaceRoute =
   DashboardAdminMarketplaceRouteImport.update({
     id: '/admin/marketplace',
     path: '/admin/marketplace',
     getParentRoute: () => DashboardRoute,
   } as any)
+const DashboardAdminHomeRoute = DashboardAdminHomeRouteImport.update({
+  id: '/admin/home',
+  path: '/admin/home',
+  getParentRoute: () => DashboardRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -101,7 +113,9 @@ export interface FileRoutesByFullPath {
   '/users': typeof DashboardUsersRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/signup': typeof AuthSignupRoute
+  '/admin/home': typeof DashboardAdminHomeRoute
   '/admin/marketplace': typeof DashboardAdminMarketplaceRoute
+  '/admin/quests': typeof DashboardAdminQuestsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -115,7 +129,9 @@ export interface FileRoutesByTo {
   '/users': typeof DashboardUsersRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/signup': typeof AuthSignupRoute
+  '/admin/home': typeof DashboardAdminHomeRoute
   '/admin/marketplace': typeof DashboardAdminMarketplaceRoute
+  '/admin/quests': typeof DashboardAdminQuestsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -131,7 +147,9 @@ export interface FileRoutesById {
   '/_dashboard/users': typeof DashboardUsersRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/signup': typeof AuthSignupRoute
+  '/_dashboard/admin/home': typeof DashboardAdminHomeRoute
   '/_dashboard/admin/marketplace': typeof DashboardAdminMarketplaceRoute
+  '/_dashboard/admin/quests': typeof DashboardAdminQuestsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -147,7 +165,9 @@ export interface FileRouteTypes {
     | '/users'
     | '/auth/login'
     | '/auth/signup'
+    | '/admin/home'
     | '/admin/marketplace'
+    | '/admin/quests'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -161,7 +181,9 @@ export interface FileRouteTypes {
     | '/users'
     | '/auth/login'
     | '/auth/signup'
+    | '/admin/home'
     | '/admin/marketplace'
+    | '/admin/quests'
   id:
     | '__root__'
     | '/'
@@ -176,7 +198,9 @@ export interface FileRouteTypes {
     | '/_dashboard/users'
     | '/auth/login'
     | '/auth/signup'
+    | '/_dashboard/admin/home'
     | '/_dashboard/admin/marketplace'
+    | '/_dashboard/admin/quests'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -271,11 +295,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardAccountRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/_dashboard/admin/quests': {
+      id: '/_dashboard/admin/quests'
+      path: '/admin/quests'
+      fullPath: '/admin/quests'
+      preLoaderRoute: typeof DashboardAdminQuestsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/_dashboard/admin/marketplace': {
       id: '/_dashboard/admin/marketplace'
       path: '/admin/marketplace'
       fullPath: '/admin/marketplace'
       preLoaderRoute: typeof DashboardAdminMarketplaceRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/_dashboard/admin/home': {
+      id: '/_dashboard/admin/home'
+      path: '/admin/home'
+      fullPath: '/admin/home'
+      preLoaderRoute: typeof DashboardAdminHomeRouteImport
       parentRoute: typeof DashboardRoute
     }
   }
@@ -303,7 +341,9 @@ interface DashboardRouteChildren {
   DashboardQuestsRoute: typeof DashboardQuestsRoute
   DashboardSchoolsRoute: typeof DashboardSchoolsRoute
   DashboardUsersRoute: typeof DashboardUsersRoute
+  DashboardAdminHomeRoute: typeof DashboardAdminHomeRoute
   DashboardAdminMarketplaceRoute: typeof DashboardAdminMarketplaceRoute
+  DashboardAdminQuestsRoute: typeof DashboardAdminQuestsRoute
 }
 
 const DashboardRouteChildren: DashboardRouteChildren = {
@@ -314,7 +354,9 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardQuestsRoute: DashboardQuestsRoute,
   DashboardSchoolsRoute: DashboardSchoolsRoute,
   DashboardUsersRoute: DashboardUsersRoute,
+  DashboardAdminHomeRoute: DashboardAdminHomeRoute,
   DashboardAdminMarketplaceRoute: DashboardAdminMarketplaceRoute,
+  DashboardAdminQuestsRoute: DashboardAdminQuestsRoute,
 }
 
 const DashboardRouteWithChildren = DashboardRoute._addFileChildren(

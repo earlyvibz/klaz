@@ -3,10 +3,10 @@ import vine from "@vinejs/vine";
 export const createQuestValidator = vine.compile(
 	vine.object({
 		title: vine.string().trim().minLength(3).maxLength(255),
-		description: vine.string().trim().optional(),
+		description: vine.string().trim().minLength(1),
 		type: vine.string().trim().optional(),
 		points: vine.number().min(0).optional(),
-		deadline: vine.date().optional(),
+		deadline: vine.string().optional(),
 		validationType: vine.enum(["MANUAL", "AUTO_API"]).optional(),
 	}),
 );

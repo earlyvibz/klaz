@@ -1,4 +1,4 @@
-import QuestSubmissionForm from "@/components/forms/quest-submission-form";
+import QuestCreationForm from "@/components/forms/quest-creation-form";
 import {
 	Dialog,
 	DialogContent,
@@ -6,19 +6,16 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
-import type { Quest } from "@/types";
 
-interface QuestSubmissionModalProps {
-	quest: Quest;
+interface QuestCreationModalProps {
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
 }
 
-export default function QuestSubmissionModal({
-	quest,
+export default function QuestCreationModal({
 	open,
 	onOpenChange,
-}: QuestSubmissionModalProps) {
+}: QuestCreationModalProps) {
 	const handleSuccess = () => {
 		onOpenChange(false);
 	};
@@ -27,15 +24,14 @@ export default function QuestSubmissionModal({
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogContent className="max-w-2xl">
 				<DialogHeader>
-					<DialogTitle>Soumettre la quête</DialogTitle>
+					<DialogTitle>Créer une nouvelle quête</DialogTitle>
 					<DialogDescription>
-						Uploadez une preuve de votre accomplissement pour valider cette
-						quête
+						Créez une nouvelle quête pour engager vos étudiants et gamifier leur
+						apprentissage
 					</DialogDescription>
 				</DialogHeader>
 
-				<QuestSubmissionForm
-					quest={quest}
+				<QuestCreationForm
 					onCancel={() => onOpenChange(false)}
 					onSuccess={handleSuccess}
 				/>

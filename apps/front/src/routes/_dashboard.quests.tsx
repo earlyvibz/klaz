@@ -54,17 +54,14 @@ function Quests() {
 	const isLoading = routerState.status === "pending";
 
 	const handleFilterChange = (newFilter: QuestFilter) => {
-		// Éviter le rechargement si c'est le même filtre
 		if (newFilter === currentFilter) return;
 
-		// TanStack Router va automatiquement recharger les données via loaderDeps
 		navigate({
 			search: { status: newFilter, page: 1 },
 			replace: true,
 		});
 	};
 
-	// Si aucune quête disponible, afficher le message d'état vide
 	if (quests.length === 0 && currentFilter === "all") {
 		return (
 			<div className="flex flex-col items-center justify-center py-16 text-center">
