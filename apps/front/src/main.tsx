@@ -1,10 +1,10 @@
-import { createRouter, RouterProvider } from "@tanstack/react-router";
-import { StrictMode } from "react";
-import "./styles.css";
 import { api } from "@klaz/backend/api";
+import { Toaster } from "@klaz/ui";
+import "./styles.css";
+import { createRouter, RouterProvider } from "@tanstack/react-router";
 import { createTuyau } from "@tuyau/client";
+import { StrictMode } from "react";
 import ReactDOM from "react-dom/client";
-import { Toaster } from "@/components/ui/sonner";
 import reportWebVitals from "./reportWebVitals";
 // Import the generated route tree
 import { routeTree } from "./routeTree.gen";
@@ -18,6 +18,11 @@ export const tuyau = createTuyau({
 // Create the router instance
 const router = createRouter({
 	routeTree,
+	context: {},
+	defaultPreload: "intent",
+	scrollRestoration: true,
+	defaultStructuralSharing: true,
+	defaultPreloadStaleTime: 0,
 });
 
 // Register the router instance for type safety

@@ -1,9 +1,10 @@
-import { CheckCircle, Clock, Target, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@klaz/ui";
+import { CheckCircle, Clock, Play, X } from "lucide-react";
+import useAuth from "@/stores/auth-store";
 
 export type QuestFilter =
 	| "all"
-	| "available"
+	| "active"
 	| "pending"
 	| "completed"
 	| "rejected"
@@ -18,7 +19,9 @@ export default function QuestFilters({
 	activeFilter,
 	onFilterChange,
 }: QuestFiltersProps) {
-	const filters = [
+	const { user } = useAuth();
+
+	const allFilters = [
 		{
 			key: "all" as QuestFilter,
 			label: "Toutes",
@@ -27,11 +30,11 @@ export default function QuestFilters({
 				"bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700",
 		},
 		{
-			key: "available" as QuestFilter,
-			label: "Disponibles",
-			icon: <Target className="w-4 h-4" />,
+			key: "active" as QuestFilter,
+			label: "En cours",
+			icon: <Play className="w-4 h-4" />,
 			color:
-				"bg-blue-100 text-blue-700 hover:bg-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:hover:bg-blue-900/50",
+				"bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-300 dark:hover:bg-green-900/50",
 		},
 		{
 			key: "pending" as QuestFilter,
@@ -62,6 +65,12 @@ export default function QuestFilters({
 				"bg-gray-100 text-gray-500 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700",
 		},
 	];
+
+	const filters = user?.isAdmin
+		? allFilters.filter((filter) =>
+				["all", "active", "expired"].includes(filter.key),
+			)
+		: allFilters;
 
 	return (
 		<div className="flex flex-wrap gap-2">

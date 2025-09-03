@@ -4,8 +4,8 @@ import {
 	CardDescription,
 	CardHeader,
 	CardTitle,
-} from "../../components/ui/card";
-import { Label } from "../../components/ui/label";
+	Label,
+} from "@klaz/ui";
 import type { User } from "../../types";
 
 interface UserInfoCardProps {

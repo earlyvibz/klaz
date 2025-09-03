@@ -1,16 +1,16 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import GenericPagination from "@/components/pagination/generic-pagination";
-import Pending from "@/components/pending/pending";
-import { Avatar } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import {
+	Avatar,
+	Badge,
 	Table,
 	TableBody,
 	TableCell,
 	TableHead,
 	TableHeader,
 	TableRow,
-} from "@/components/ui/table";
+} from "@klaz/ui";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import Pagination from "@/components/pagination/pagination";
+import Pending from "@/components/pending/pending";
 import { tuyau } from "@/main";
 import type { LeaderboardResponse, LeaderboardUser } from "@/types";
 
@@ -196,12 +196,11 @@ function Leaderboard() {
 				</Table>
 
 				{meta && (
-					<GenericPagination
+					<Pagination
 						meta={meta}
 						currentLimit={currentLimit}
 						onPageChange={handlePageChange}
 						onLimitChange={handleLimitChange}
-						itemLabel="étudiants"
 					/>
 				)}
 			</div>

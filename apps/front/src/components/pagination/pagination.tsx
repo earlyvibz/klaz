@@ -1,18 +1,18 @@
 import {
-	IconChevronLeft,
-	IconChevronRight,
-	IconChevronsLeft,
-	IconChevronsRight,
-} from "@tabler/icons-react";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import {
+	Button,
+	Label,
 	Select,
 	SelectContent,
 	SelectItem,
 	SelectTrigger,
 	SelectValue,
-} from "@/components/ui/select";
+} from "@klaz/ui";
+import {
+	IconChevronLeft,
+	IconChevronRight,
+	IconChevronsLeft,
+	IconChevronsRight,
+} from "@tabler/icons-react";
 import type { PaginatedStudentsResponse } from "@/types";
 
 interface PaginationProps {
@@ -40,8 +40,7 @@ export default function Pagination({
 		<div className="flex items-center justify-between px-4 py-4">
 			<div className="text-muted-foreground hidden flex-1 text-sm lg:flex">
 				Affichage de {(meta.currentPage - 1) * meta.perPage + 1} à{" "}
-				{Math.min(meta.currentPage * meta.perPage, meta.total)} sur {meta.total}{" "}
-				étudiants.
+				{Math.min(meta.currentPage * meta.perPage, meta.total)} sur {meta.total}
 			</div>
 			<div className="flex w-full items-center gap-8 lg:w-fit">
 				<div className="hidden items-center gap-2 lg:flex">

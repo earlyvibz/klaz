@@ -43,6 +43,7 @@ export type QuestsResponse = InferResponseType<typeof tuyau.quests.$get>;
 export type Quests = QuestsResponse["quests"];
 export type Quest = InferResponseType<typeof tuyau.quest.$get>;
 export type QuestSubmitError = InferErrorType<typeof tuyau.quests.$post>;
+export type CreateQuestRequest = InferRequestType<typeof tuyau.quests.$post>;
 
 // Types pour le leaderboard paginé
 export type LeaderboardResponse = InferResponseType<

@@ -15,6 +15,17 @@ export default class AuthController {
 
 		await user.load("school");
 
+		if (user.isSuperAdmin()) {
+			return response.badRequest({
+				errors: [
+					{
+						message:
+							"Les super administrateurs doivent utiliser l'interface d'administration dédiée.",
+					},
+				],
+			});
+		}
+
 		if (user.school?.slug !== subdomain) {
 			return response.badRequest({
 				errors: [
@@ -216,5 +227,22 @@ export default class AuthController {
 				message: "Une erreur est survenue lors de la suppression du compte",
 			});
 		}
+	}
+
+	async superAdminLogin({ request, response, auth }: HttpContext) {
+		const { email, password } = request.only(["email", "password"]);
+		const user = await User.verifyCredentials(email, password);
+
+		if (!user.isSuperAdmin()) {
+			return response.badRequest({
+				errors: [{ message: "Vous n'avez pas les permissions requises" }],
+			});
+		}
+
+		await auth.use("web").login(user);
+
+		return {
+			user: new UserDto(user),
+		};
 	}
 }

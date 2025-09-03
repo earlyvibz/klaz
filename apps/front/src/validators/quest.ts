@@ -20,3 +20,15 @@ export const questSubmissionSchema = z.object({
 		),
 	description: z.string(),
 });
+
+export const createQuestSchema = z.object({
+	title: z
+		.string()
+		.min(3, "Le titre doit contenir au moins 3 caractères")
+		.max(255, "Le titre ne doit pas dépasser 255 caractères"),
+	description: z.string().min(1, "La description est obligatoire"),
+	type: z.string(),
+	points: z.number().min(1, "Les points doivent être d'au moins 1"),
+	deadline: z.date().nullable(),
+	validationType: z.enum(["MANUAL", "AUTO_API"]),
+});

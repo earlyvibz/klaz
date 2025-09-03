@@ -1,16 +1,16 @@
-import { useState } from "react";
-import { toast } from "sonner";
-import { useAppForm } from "@/hooks/form/form";
-import { cn } from "@/lib/utils";
-import { changePasswordSchema } from "@/validators/auth";
-import { tuyau } from "../../main";
 import {
 	Card,
 	CardContent,
 	CardDescription,
 	CardHeader,
 	CardTitle,
-} from "../ui/card";
+} from "@klaz/ui";
+import { useState } from "react";
+import { toast } from "sonner";
+import { useAppForm } from "@/hooks/form/form";
+import { cn } from "@/lib/utils";
+import { changePasswordSchema } from "@/validators/auth";
+import { tuyau } from "../../main";
 
 export function PasswordChangeForm({
 	className,

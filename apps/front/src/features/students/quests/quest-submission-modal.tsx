@@ -1,15 +1,15 @@
-import QuestSubmissionForm from "@/components/forms/quest-submission-form";
 import {
 	Dialog,
 	DialogContent,
 	DialogDescription,
 	DialogHeader,
 	DialogTitle,
-} from "@/components/ui/dialog";
-import type { Quests } from "@/types";
+} from "@klaz/ui";
+import QuestSubmissionForm from "@/components/forms/quest-submission-form";
+import type { Quest } from "@/types";
 
 interface QuestSubmissionModalProps {
-	quest: Quests[0];
+	quest: Quest;
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
 }

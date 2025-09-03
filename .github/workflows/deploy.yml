@@ -8,6 +8,7 @@ env:
   REGISTRY: ghcr.io
   IMAGE_NAME_BACKEND: ghcr.io/earlyvibz/klaz/backend
   IMAGE_NAME_FRONTEND: ghcr.io/earlyvibz/klaz/frontend
+  IMAGE_NAME_SUPER_ADMIN: ghcr.io/earlyvibz/klaz/super-admin
   NODE_VERSION: "20"
   PNPM_VERSION: "latest"
 
@@ -166,7 +167,10 @@ jobs:
           pnpm deploy:build
           pnpm deploy:backend
           pnpm deploy:frontend
+          pnpm deploy:super-admin
           cd .deploy/frontend
+          VITE_API_URL=${{ steps.env.outputs.api_url }} pnpm build
+          cd ../super-admin
           VITE_API_URL=${{ steps.env.outputs.api_url }} pnpm build
           cd ../..
           pnpm deploy:dockerfiles
@@ -201,6 +205,16 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      - name: Build and push super-admin image
+        uses: docker/build-push-action@v5
+        with:
+          context: .deploy/super-admin
+          platforms: linux/amd64
+          push: true
+          tags: ${{ env.IMAGE_NAME_SUPER_ADMIN }}:${{ steps.env.outputs.tag }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
   # Job de déploiement automatique (DEV uniquement)
   deploy-dev:
     needs: deploy
@@ -214,6 +228,7 @@ jobs:
           echo "🚀 Deploying to DEV environment"
           echo "Backend: ${{ env.IMAGE_NAME_BACKEND }}:${{ needs.deploy.outputs.tag }}"
           echo "Frontend: ${{ env.IMAGE_NAME_FRONTEND }}:${{ needs.deploy.outputs.tag }}"
+          echo "Super-Admin: ${{ env.IMAGE_NAME_SUPER_ADMIN }}:${{ needs.deploy.outputs.tag }}"
 
           # Deploy backend
           curl -f --request GET "${{ secrets.COOLIFY_WEBHOOK_BACKEND_DEV }}" \
@@ -222,6 +237,11 @@ jobs:
 
           # Deploy frontend
           curl -f --request GET "${{ secrets.COOLIFY_WEBHOOK_FRONT_DEV }}" \
+            --header "Authorization: Bearer ${{ secrets.COOLIFY_TOKEN }}" \
+            --max-time 30
+
+          # Deploy super-admin
+          curl -f --request GET "${{ secrets.COOLIFY_WEBHOOK_SUPER_ADMIN_DEV }}" \
             --header "Authorization: Bearer ${{ secrets.COOLIFY_TOKEN }}" \
             --max-time 30
 
@@ -239,4 +259,5 @@ jobs:
           echo "📦 Images built for ${{ needs.deploy.outputs.environment }} environment:"
           echo "Backend: ${{ env.IMAGE_NAME_BACKEND }}:${{ needs.deploy.outputs.tag }}"
           echo "Frontend: ${{ env.IMAGE_NAME_FRONTEND }}:${{ needs.deploy.outputs.tag }}"
+          echo "Super-Admin: ${{ env.IMAGE_NAME_SUPER_ADMIN }}:${{ needs.deploy.outputs.tag }}"
           echo "⚠️  Manual deployment required via Coolify dashboard"
