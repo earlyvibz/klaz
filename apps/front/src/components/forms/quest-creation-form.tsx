@@ -61,7 +61,8 @@ export default function QuestCreationForm({
 				: await tuyau.quests.$post(payload);
 
 			if (error instanceof TuyauHTTPError) {
-				setError(error.value.errors[0].message);
+				const errorData = error.value as { errors: Array<{ message: string }> };
+				setError(errorData.errors[0].message);
 				setIsSubmitting(false);
 				return;
 			}
