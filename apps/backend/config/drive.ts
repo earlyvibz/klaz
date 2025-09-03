@@ -2,19 +2,13 @@ import { defineConfig, services } from "@adonisjs/drive";
 import env from "#start/env";
 
 const driveConfig = defineConfig({
-	default: env.get("DRIVE_DISK"),
+	default: "r2",
 
 	/**
 	 * The services object can be used to configure multiple file system
 	 * services each using the same or a different driver.
 	 */
 	services: {
-		local: services.fs({
-			location: new URL("../tmp/uploads/", import.meta.url),
-			serveFiles: true,
-			routeBasePath: "/uploads",
-			visibility: "public",
-		}),
 		r2: services.s3({
 			credentials: {
 				accessKeyId: env.get("R2_KEY") || "",
@@ -24,6 +18,7 @@ const driveConfig = defineConfig({
 			bucket: env.get("R2_BUCKET") || "",
 			endpoint: env.get("R2_ENDPOINT") || "",
 			visibility: "public",
+			cdnUrl: env.get("R2_CDN_URL") || "",
 		}),
 	},
 });

@@ -22,7 +22,12 @@
 		"includes": [
 			"**",
 			"!**/apps/front/src/routeTree.gen.ts",
-			"!**/apps/front/src/components/ui/**/*"
+			"!**/apps/front/src/components/ui/**/*",
+			"!**/packages/ui/**/*",
+			"!**/apps/super-admin/src/routeTree.gen.ts",
+			"!**/apps/super-admin/src/components/ui/**/*",
+			"!**/packages/ui/**/*",
+			"!**/apps/super-admin/src/reportWebVitals.ts"
 		]
 	},
 	"formatter": {

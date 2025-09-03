@@ -1,11 +1,11 @@
-import type { Icon } from "@tabler/icons-react";
-import { Link, useRouterState } from "@tanstack/react-router";
 import {
 	SidebarGroup,
 	SidebarMenu,
 	SidebarMenuButton,
 	SidebarMenuItem,
-} from "@/components/ui/sidebar";
+} from "@klaz/ui";
+import type { Icon } from "@tabler/icons-react";
+import { Link, useRouterState } from "@tanstack/react-router";
 
 export function NavStudent({
 	items,

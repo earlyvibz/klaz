@@ -1,14 +1,10 @@
-import { useState } from "react";
-import { toast } from "sonner";
-import { Button } from "../../components/ui/button";
 import {
+	Button,
 	Card,
 	CardContent,
 	CardDescription,
 	CardHeader,
 	CardTitle,
-} from "../../components/ui/card";
-import {
 	Dialog,
 	DialogContent,
 	DialogDescription,
@@ -16,7 +12,9 @@ import {
 	DialogHeader,
 	DialogTitle,
 	DialogTrigger,
-} from "../../components/ui/dialog";
+} from "@klaz/ui";
+import { useState } from "react";
+import { toast } from "sonner";
 import { tuyau } from "../../main";
 import useAuth from "../../stores/auth-store";
 

@@ -33,7 +33,7 @@ export default class extends BaseSeeder {
 				email: "superadmin@klaz.fr",
 				password: "SuperAdmin123!",
 				role: "SUPERADMIN",
-				schoolId: demoSchool.id,
+				schoolId: null,
 				isActive: true,
 				level: 1,
 				points: 0,

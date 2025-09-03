@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@klaz/ui";
 import type { StudentsCountResponse } from "@/types";
 
 export default function Stats({

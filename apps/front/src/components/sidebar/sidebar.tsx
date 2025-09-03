@@ -1,7 +1,3 @@
-import { IconInnerShadowTop } from "@tabler/icons-react";
-import { Link, useRouterState } from "@tanstack/react-router";
-import { NavAdmin } from "@/components/sidebar/nav-admin";
-import { NavUser } from "@/components/sidebar/nav-user";
 import {
 	Sidebar,
 	SidebarContent,
@@ -10,7 +6,11 @@ import {
 	SidebarMenu,
 	SidebarMenuButton,
 	SidebarMenuItem,
-} from "@/components/ui/sidebar";
+} from "@klaz/ui";
+import { IconInnerShadowTop } from "@tabler/icons-react";
+import { Link, useRouterState } from "@tanstack/react-router";
+import { NavAdmin } from "@/components/sidebar/nav-admin";
+import { NavUser } from "@/components/sidebar/nav-user";
 import { data } from "@/nav-routes/nav-routes";
 import useAuth from "@/stores/auth-store";
 import useSchool from "@/stores/school-store";

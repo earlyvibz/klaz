@@ -1,14 +1,14 @@
-import { CheckCircle, Clock, Target, Trash, Trophy } from "lucide-react";
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import {
+	Button,
 	Card,
 	CardContent,
 	CardDescription,
 	CardFooter,
 	CardHeader,
 	CardTitle,
-} from "@/components/ui/card";
+} from "@klaz/ui";
+import { CheckCircle, Clock, Target, Trophy } from "lucide-react";
+import { useState } from "react";
 import DeleteQuest from "@/features/admin/quests/delete-quest";
 import UpdateQuest from "@/features/admin/quests/update-quest";
 import useAuth from "@/stores/auth-store";

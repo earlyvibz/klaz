@@ -5,7 +5,7 @@ import {
 	TableHead,
 	TableHeader,
 	TableRow,
-} from "@/components/ui/table";
+} from "@klaz/ui";
 import type { PaginatedStudentsResponse, User } from "@/types";
 
 export default function TableUsers({

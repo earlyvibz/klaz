@@ -1,11 +1,11 @@
-import QuestCreationForm from "@/components/forms/quest-creation-form";
 import {
 	Dialog,
 	DialogContent,
 	DialogDescription,
 	DialogHeader,
 	DialogTitle,
-} from "@/components/ui/dialog";
+} from "@klaz/ui";
+import QuestCreationForm from "@/components/forms/quest-creation-form";
 import type { Quest } from "@/types";
 
 interface QuestCreationModalProps {

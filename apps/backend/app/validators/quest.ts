@@ -26,6 +26,7 @@ export const updateQuestValidator = vine.compile(
 export const submitQuestValidator = vine.compile(
 	vine.object({
 		proofUrl: vine.string().trim().url().optional(),
+		description: vine.string().trim().maxLength(1000).optional(),
 	}),
 );
 

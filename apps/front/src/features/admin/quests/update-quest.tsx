@@ -1,6 +1,6 @@
+import { Button } from "@klaz/ui";
 import { Pencil } from "lucide-react";
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import type { Quest } from "@/types";
 import QuestCreationModal from "./quest-creation-modal";
 

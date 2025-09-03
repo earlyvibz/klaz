@@ -15,7 +15,7 @@ export default class SchoolsController {
 		return new SchoolDto(school);
 	}
 
-	async index({ auth, request, response }: HttpContext) {
+	async getSchools({ auth, request, response }: HttpContext) {
 		const user = auth.user;
 		if (!user) {
 			return response.unauthorized({ message: "User not authenticated" });

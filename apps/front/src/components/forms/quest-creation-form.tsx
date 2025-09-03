@@ -1,8 +1,8 @@
+import { Button } from "@klaz/ui";
 import { useRouter } from "@tanstack/react-router";
 import { TuyauHTTPError } from "@tuyau/client";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
 import { useAppForm } from "@/hooks/form/form";
 import { tuyau } from "@/main";
 import type { CreateQuestRequest, Quest } from "@/types";

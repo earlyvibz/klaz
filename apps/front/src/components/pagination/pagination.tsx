@@ -1,18 +1,18 @@
 import {
-	IconChevronLeft,
-	IconChevronRight,
-	IconChevronsLeft,
-	IconChevronsRight,
-} from "@tabler/icons-react";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import {
+	Button,
+	Label,
 	Select,
 	SelectContent,
 	SelectItem,
 	SelectTrigger,
 	SelectValue,
-} from "@/components/ui/select";
+} from "@klaz/ui";
+import {
+	IconChevronLeft,
+	IconChevronRight,
+	IconChevronsLeft,
+	IconChevronsRight,
+} from "@tabler/icons-react";
 import type { PaginatedStudentsResponse } from "@/types";
 
 interface PaginationProps {

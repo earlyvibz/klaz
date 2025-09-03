@@ -10,6 +10,7 @@ export default class QuestSubmissionDto extends BaseModelDto {
 	declare questId: string;
 	declare proofUrl: string;
 	declare status: "PENDING" | "APPROVED" | "REJECTED";
+	declare studentComment?: string;
 	declare feedback?: string;
 	declare submittedAt: DateTime;
 	declare user: UserDto | null;
@@ -26,11 +27,29 @@ export default class QuestSubmissionDto extends BaseModelDto {
 		this.questId = questSubmission.questId;
 		this.proofUrl = questSubmission.proofUrl;
 		this.status = questSubmission.status;
+		this.studentComment = questSubmission.studentComment;
 		this.feedback = questSubmission.feedback;
 		this.submittedAt = questSubmission.submittedAt;
 		this.user = questSubmission.user && new UserDto(questSubmission.user);
 		this.quest = questSubmission.quest && new QuestDto(questSubmission.quest);
 		this.createdAt = questSubmission.createdAt;
 		this.updatedAt = questSubmission.updatedAt;
+	}
+
+	toJson() {
+		return {
+			id: this.id,
+			userId: this.userId,
+			questId: this.questId,
+			proofUrl: this.proofUrl,
+			status: this.status,
+			studentComment: this.studentComment,
+			feedback: this.feedback,
+			submittedAt: this.submittedAt,
+			user: this.user && this.user,
+			quest: this.quest && this.quest,
+			createdAt: this.createdAt,
+			updatedAt: this.updatedAt,
+		};
 	}
 }

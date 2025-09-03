@@ -1,5 +1,5 @@
-import { CheckCircle, Clock, Play, Target, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@klaz/ui";
+import { CheckCircle, Clock, Play, X } from "lucide-react";
 import useAuth from "@/stores/auth-store";
 
 export type QuestFilter =

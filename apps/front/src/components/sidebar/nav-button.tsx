@@ -1,13 +1,13 @@
-import { IconCirclePlusFilled, IconMapPin } from "@tabler/icons-react";
-import { Link } from "@tanstack/react-router";
-import { useState } from "react";
 import {
 	SidebarGroup,
 	SidebarGroupContent,
 	SidebarMenu,
 	SidebarMenuButton,
 	SidebarMenuItem,
-} from "@/components/ui/sidebar";
+} from "@klaz/ui";
+import { IconCirclePlusFilled, IconMapPin } from "@tabler/icons-react";
+import { Link } from "@tanstack/react-router";
+import { useState } from "react";
 import QuestCreationModal from "@/features/admin/quests/quest-creation-modal";
 import useAuth from "@/stores/auth-store";
 

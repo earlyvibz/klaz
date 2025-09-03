@@ -58,4 +58,33 @@ export default class UserDto extends BaseModelDto {
 			user.rewardRedemptions,
 		);
 	}
+
+	toJson() {
+		return {
+			id: this.id,
+			firstName: this.firstName,
+			lastName: this.lastName,
+			email: this.email,
+			role: this.role,
+			level: this.level,
+			points: this.points,
+			schoolId: this.schoolId,
+			groupId: this.groupId,
+			isActive: this.isActive,
+			resetPasswordExpires: this.resetPasswordExpires,
+			lastLoginAt: this.lastLoginAt,
+			failedLoginAttempts: this.failedLoginAttempts,
+			emailVerified: this.emailVerified,
+			createdAt: this.createdAt,
+			updatedAt: this.updatedAt,
+			school: this.school && this.school,
+			group: this.group && this.group,
+			questSubmissions: this.questSubmissions,
+			rewardRedemptions: this.rewardRedemptions,
+			isStudent: this.isStudent,
+			isAdmin: this.isAdmin,
+			isSuperAdmin: this.isSuperAdmin,
+			hasAdminRights: this.hasAdminRights,
+		};
+	}
 }

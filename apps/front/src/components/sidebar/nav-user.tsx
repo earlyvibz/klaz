@@ -1,11 +1,8 @@
 import {
-	IconDotsVertical,
-	IconLogout,
-	IconUserCircle,
-} from "@tabler/icons-react";
-import { Link, useRouterState } from "@tanstack/react-router";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
+	Avatar,
+	AvatarFallback,
+	AvatarImage,
+	cn,
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuGroup,
@@ -13,14 +10,17 @@ import {
 	DropdownMenuLabel,
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
 	SidebarMenu,
 	SidebarMenuButton,
 	SidebarMenuItem,
 	useSidebar,
-} from "@/components/ui/sidebar";
-import { cn } from "@/lib/utils";
+} from "@klaz/ui";
+import {
+	IconDotsVertical,
+	IconLogout,
+	IconUserCircle,
+} from "@tabler/icons-react";
+import { Link, useRouterState } from "@tanstack/react-router";
 import useAuth from "@/stores/auth-store";
 import type { User } from "@/types";
 

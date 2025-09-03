@@ -14,19 +14,31 @@ const AuthController = () => import("#controllers/auth_controller");
 const InvitationsController = () =>
 	import("#controllers/invitations_controller");
 const QuestsController = () => import("#controllers/quests_controller");
+const QuestsSubmissionsController = () =>
+	import("#controllers/quests_submissions_controller");
 const SchoolsController = () => import("#controllers/schools_controller");
 const StudentsController = () => import("#controllers/students_controller");
 
 // ROUTES SUPERADMIN
 router
 	.group(() => {
-		router.get("/schools", [SchoolsController, "index"]);
+		router.get("/schools", [SchoolsController, "getSchools"]);
 		router.post("/schools", [SchoolsController, "create"]);
+		router.get("/quests/submissions", [QuestsSubmissionsController, "index"]);
+		router.post("/quests/submissions/:submissionId/approve", [
+			QuestsSubmissionsController,
+			"approve",
+		]);
+		router.post("/quests/submissions/:submissionId/reject", [
+			QuestsSubmissionsController,
+			"reject",
+		]);
 	})
 	.use([middleware.auth(), middleware.role({ roles: ["SUPERADMIN"] })]);
 
 // ✅ Route /me SEULE, sans tenant
 router.get("/me", [AuthController, "me"]).use(middleware.auth());
+router.post("/login/superadmin", [AuthController, "superAdminLogin"]);
 
 // ROUTES DE PROFIL UTILISATEUR
 router
@@ -65,15 +77,6 @@ router
 		router.post("/quests", [QuestsController, "create"]);
 		router.put("/quests/:id", [QuestsController, "update"]);
 		router.delete("/quests/:id", [QuestsController, "destroy"]);
-		router.get("/quest-submissions", [QuestsController, "submissions"]);
-		router.post("/quest-submissions/:submissionId/approve", [
-			QuestsController,
-			"approveSubmission",
-		]);
-		router.post("/quest-submissions/:submissionId/reject", [
-			QuestsController,
-			"rejectSubmission",
-		]);
 	})
 	.use([
 		middleware.tenant(),
@@ -87,7 +90,7 @@ router
 		// Quests (lecture et soumission)
 		router.get("/quests", [QuestsController, "getQuests"]);
 		router.get("/quest", [QuestsController, "getQuest"]);
-		router.post("/quests/:id/submit", [QuestsController, "submit"]);
+		router.post("/quests/:id/submit", [QuestsSubmissionsController, "submit"]);
 
 		// Leaderboard
 		router.get("/leaderboard", [QuestsController, "leaderboard"]);
