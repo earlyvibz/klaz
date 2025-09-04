@@ -24,8 +24,8 @@ ENV NODE_ENV=production
 ENV HOST=0.0.0.0
 ENV PORT=3333
 
-# Start depuis le build existant
-CMD ["node", "build/bin/server.js"]
+# Run migrations then start server
+CMD ["sh", "-c", "node build/ace migration:run && node build/bin/server.js"]
 EOF
 
 # Frontend Dockerfile
