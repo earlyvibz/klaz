@@ -22,7 +22,11 @@
 		"test:coverage": "NODE_ENV=test c8 node ace test",
 		"typecheck": "tsc --noEmit",
 		"seed:local": "NODE_ENV=local node --env-file=.env.local ace db:seed",
-		"seed:dev": "NODE_ENV=development node --env-file=.env.development ace db:seed"
+		"seed:dev": "NODE_ENV=development node --env-file=.env.development ace db:seed",
+		"migrate:local": "NODE_ENV=local node ace migration:run",
+		"migrate:dev": "NODE_ENV=development node ace migration:run",
+		"migrate:staging": "NODE_ENV=staging node ace migration:run",
+		"migrate:production": "NODE_ENV=production node ace migration:run"
 	},
 	"imports": {
 		"#controllers/*": "./app/controllers/*.js",
