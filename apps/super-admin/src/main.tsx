@@ -1,15 +1,16 @@
 import { api } from "@klaz/backend/api";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createRouter, RouterProvider } from "@tanstack/react-router";
 import { createTuyau } from "@tuyau/client";
 import { StrictMode } from "react";
 import ReactDOM from "react-dom/client";
-
 // Import the generated route tree
 import { routeTree } from "./routeTree.gen";
-
 import "./styles.css";
 import { Toaster } from "@klaz/ui";
 import reportWebVitals from "./reportWebVitals.ts";
+
+const queryClient = new QueryClient();
 
 export const tuyau = createTuyau({
 	api,
@@ -40,8 +41,10 @@ if (rootElement && !rootElement.innerHTML) {
 	const root = ReactDOM.createRoot(rootElement);
 	root.render(
 		<StrictMode>
-			<Toaster />
-			<RouterProvider router={router} />
+			<QueryClientProvider client={queryClient}>
+				<Toaster />
+				<RouterProvider router={router} />
+			</QueryClientProvider>
 		</StrictMode>,
 	);
 }
