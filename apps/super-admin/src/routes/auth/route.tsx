@@ -4,10 +4,11 @@ import useAuth from "@/stores/auth-store";
 
 export const Route = createFileRoute("/auth")({
 	beforeLoad: async () => {
-		const { isAuthenticated } = useAuth.getState();
+		const { checkAuth } = useAuth.getState();
+		const isAuthenticated = await checkAuth();
 
-		if (isAuthenticated()) {
-			redirect({
+		if (isAuthenticated) {
+			throw redirect({
 				to: "/home",
 			});
 		}

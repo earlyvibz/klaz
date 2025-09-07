@@ -62,9 +62,14 @@ const useAuth = create<IAuth>()((set, get) => ({
 	},
 
 	logout: async () => {
-		await tuyau.logout.$post();
-		set({ user: null });
-		window.location.href = "/auth/login";
+		try {
+			await tuyau.logout.$post();
+		} catch (error) {
+			console.error("Logout API call failed:", error);
+		} finally {
+			set({ user: null });
+			window.location.href = "/auth/login";
+		}
 	},
 
 	checkAuth: async () => {

@@ -1,6 +1,5 @@
 import {
 	SidebarGroup,
-	SidebarGroupLabel,
 	SidebarMenu,
 	SidebarMenuButton,
 	SidebarMenuItem,
@@ -22,7 +21,6 @@ export function Nav({
 
 	return (
 		<SidebarGroup className="group-data-[collapsible=icon]:hidden">
-			<SidebarGroupLabel>Admin</SidebarGroupLabel>
 			<SidebarMenu>
 				{items.map((item) => {
 					const isActive = currentPath === item.url;
