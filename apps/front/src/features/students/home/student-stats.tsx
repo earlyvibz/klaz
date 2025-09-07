@@ -41,7 +41,7 @@ export default function StudentStats({ user }: { user: User }) {
 				</div>
 			</div>
 
-			<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+			<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 				<Card>
 					<CardHeader>
 						<CardTitle className="flex items-center gap-2">🏆 Niveau</CardTitle>
@@ -67,15 +67,6 @@ export default function StudentStats({ user }: { user: User }) {
 								? `${pointsToNext} pour level up`
 								: "Niveau max !"}
 						</p>
-					</CardContent>
-				</Card>
-
-				<Card>
-					<CardHeader>
-						<CardTitle className="flex items-center gap-2">👥 Groupe</CardTitle>
-					</CardHeader>
-					<CardContent>
-						<div className="text-lg">{user.group?.name || "Aucun groupe"}</div>
 					</CardContent>
 				</Card>
 			</div>
