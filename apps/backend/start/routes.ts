@@ -39,6 +39,7 @@ router
 // ✅ Route /me SEULE, sans tenant
 router.get("/me", [AuthController, "me"]).use(middleware.auth());
 router.post("/login/superadmin", [AuthController, "superAdminLogin"]);
+router.post("/logout", [AuthController, "logout"]);
 
 // ROUTES DE PROFIL UTILISATEUR
 router
@@ -56,7 +57,6 @@ router
 		router.post("/login", [AuthController, "login"]);
 		router.post("/forgot-password", [AuthController, "forgotPassword"]);
 		router.post("/reset-password", [AuthController, "resetPassword"]);
-		router.post("/logout", [AuthController, "logout"]);
 	})
 	.use([middleware.tenant()]);
 
