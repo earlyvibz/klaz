@@ -139,20 +139,6 @@ export default function QuestCreationForm({
 					</form.AppField>
 				</div>
 
-				<div className="space-y-2">
-					<form.AppField name="validationType">
-						{(field) => (
-							<field.Select
-								label="Type de validation"
-								values={[
-									{ value: "MANUAL", label: "Manuelle" },
-									{ value: "AUTO_API", label: "Automatique (API)" },
-								]}
-							/>
-						)}
-					</form.AppField>
-				</div>
-
 				<div className="flex gap-3">
 					<form.AppForm>
 						<form.SubscribeButton
