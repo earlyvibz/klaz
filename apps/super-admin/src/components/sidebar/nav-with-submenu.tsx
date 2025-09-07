@@ -3,7 +3,6 @@ import {
 	CollapsibleContent,
 	CollapsibleTrigger,
 	SidebarGroup,
-	SidebarGroupLabel,
 	SidebarMenu,
 	SidebarMenuButton,
 	SidebarMenuItem,
@@ -42,7 +41,6 @@ export function NavWithSubmenu({
 
 	return (
 		<SidebarGroup className="group-data-[collapsible=icon]:hidden">
-			<SidebarGroupLabel>Admin</SidebarGroupLabel>
 			<SidebarMenu>
 				{simpleItems.map((item) => {
 					const isActive = currentPath === item.url;
