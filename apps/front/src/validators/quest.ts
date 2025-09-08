@@ -1,25 +1,34 @@
 import { z } from "zod";
 
-export const questSubmissionSchema = z.object({
-	file: z
-		.instanceof(File)
-		.refine((file) => file.size > 0, {
-			message: "Vous devez sélectionner un fichier",
-		})
-		.refine((file) => file.size <= 5 * 1024 * 1024, {
-			message: "Le fichier ne doit pas dépasser 5MB",
-		})
-		.refine(
-			(file) => {
-				const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
-				return allowedTypes.includes(file.type);
-			},
-			{
-				message: "Format de fichier non supporté",
-			},
-		),
-	description: z.string(),
-});
+export const questSubmissionSchema = (questType?: string) =>
+	z.object({
+		file: z
+			.instanceof(File)
+			.refine((file) => file.size > 0, {
+				message: "Vous devez sélectionner un fichier",
+			})
+			.refine((file) => file.size <= 5 * 1024 * 1024, {
+				message: "Le fichier ne doit pas dépasser 5MB",
+			})
+			.refine(
+				(file) => {
+					const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+					return allowedTypes.includes(file.type);
+				},
+				{
+					message: "Format de fichier non supporté",
+				},
+			),
+		description:
+			questType === "SOCIAL"
+				? z
+						.string()
+						.min(
+							1,
+							"La description est obligatoire pour les quêtes sociales (incluez le lien)",
+						)
+				: z.string(),
+	});
 
 export const createQuestSchema = z.object({
 	title: z

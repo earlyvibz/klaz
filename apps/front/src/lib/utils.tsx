@@ -5,7 +5,13 @@ export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs));
 }
 
-export const LinkifiedText = ({ text }: { text: string }) => {
+export const LinkifiedText = ({
+	text,
+}: {
+	text: string | null | undefined;
+}) => {
+	if (!text) return null;
+
 	const urlRegex = /(https?:\/\/[^\s]+)/g;
 	const parts = text.split(urlRegex);
 

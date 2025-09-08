@@ -29,7 +29,7 @@ export default function QuestSubmissionForm({
 			description: "",
 		},
 		validators: {
-			onSubmit: questSubmissionSchema,
+			onSubmit: questSubmissionSchema(quest.type),
 		},
 		onSubmit: async ({ value }) => {
 			setIsSubmitting(true);
@@ -116,9 +116,25 @@ export default function QuestSubmissionForm({
 
 				<div className="space-y-2">
 					<form.AppField name="description">
-						{(field) => (
-							<field.TextArea label="Description (optionnel)" rows={3} />
-						)}
+						{(field) => {
+							const isSocial = quest.type === "SOCIAL";
+
+							return (
+								<field.TextArea
+									label={
+										isSocial
+											? "Description (obligatoire - incluez le lien)"
+											: "Description (optionnel)"
+									}
+									placeholder={
+										isSocial
+											? "Incluez le lien de la publication/contenu social (ex: https://...)"
+											: "Description optionnelle de votre soumission"
+									}
+									rows={3}
+								/>
+							);
+						}}
 					</form.AppField>
 				</div>
 

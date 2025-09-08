@@ -22,13 +22,13 @@ export const Route = createFileRoute("/_dashboard/admin/quests")({
 		return {
 			status: (search.status as QuestFilter) || "all",
 			page: Number(search.page) || 1,
-			limit: Number(search.limit) || 10,
+			limit: Number(search.limit) || 9,
 		};
 	},
 	loaderDeps: ({ search }) => ({
 		status: search.status || "all",
 		page: search.page || 1,
-		limit: search.limit || 10,
+		limit: search.limit || 9,
 	}),
 	loader: async ({ deps }) => {
 		const questsResponse = await tuyau.quests.$get({
@@ -58,7 +58,7 @@ function AdminQuests() {
 	const data = response.data as QuestsResponse;
 	const currentFilter = status || "all";
 	const isLoading = routerState.status === "pending";
-	const currentLimit = limit || 10;
+	const currentLimit = limit || 9;
 
 	const handleFilterChange = (newFilter: QuestFilter) => {
 		if (newFilter === currentFilter) return;
