@@ -43,7 +43,22 @@ export default class QuestsSubmissionsController {
 			return response.badRequest({ message: statusMessage });
 		}
 
-		const { description } = await request.validateUsing(submitQuestValidator);
+		// Conditional validation based on quest type
+		const validatedData = await request.validateUsing(submitQuestValidator);
+
+		if (quest.type === "SOCIAL") {
+			if (
+				!validatedData.description ||
+				validatedData.description.trim().length === 0
+			) {
+				return response.badRequest({
+					message:
+						"La description est obligatoire pour les quêtes sociales (elle doit contenir le lien à vérifier)",
+				});
+			}
+		}
+
+		const { description } = validatedData;
 
 		const imageUrl = await this.handleImageUpload(
 			request,

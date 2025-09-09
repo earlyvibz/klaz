@@ -11,6 +11,7 @@ import { CheckCircle, Clock, Target, Trophy } from "lucide-react";
 import { useState } from "react";
 import DeleteQuest from "@/features/admin/quests/delete-quest";
 import UpdateQuest from "@/features/admin/quests/update-quest";
+import { LinkifiedText } from "@/lib/utils";
 import useAuth from "@/stores/auth-store";
 import type { Quest } from "@/types";
 import QuestSubmissionModal from "./quest-submission-modal";
@@ -113,7 +114,7 @@ export default function CardQuest({ quest }: { quest: Quest }) {
 							{quest.title}
 						</CardTitle>
 						<CardDescription className="mt-2 text-sm leading-relaxed">
-							{quest.description}
+							<LinkifiedText text={quest.description} />
 						</CardDescription>
 					</div>
 				</div>

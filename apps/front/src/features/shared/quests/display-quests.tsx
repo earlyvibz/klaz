@@ -1,3 +1,7 @@
+import { Button } from "@klaz/ui";
+import { IconPlus } from "@tabler/icons-react";
+import { useState } from "react";
+import QuestCreationModal from "@/features/admin/quests/quest-creation-modal";
 import CardQuest from "@/features/students/quests/card-quest";
 import type { QuestFilter } from "@/features/students/quests/quest-filters";
 import QuestFilters from "@/features/students/quests/quest-filters";
@@ -17,6 +21,7 @@ export default function DisplayQuests({
 	handleFilterChange,
 	isLoading,
 }: DisplayQuestsProps) {
+	const [isQuestModalOpen, setIsQuestModalOpen] = useState<boolean>(false);
 	const { user } = useAuth();
 	if (quests.length === 0 && currentFilter === "all") {
 		return (
@@ -54,10 +59,26 @@ export default function DisplayQuests({
 					</div>
 				</div>
 
-				<QuestFilters
-					activeFilter={currentFilter}
-					onFilterChange={handleFilterChange}
-				/>
+				<div className="flex items-center gap-2 justify-between">
+					<QuestFilters
+						activeFilter={currentFilter}
+						onFilterChange={handleFilterChange}
+					/>
+
+					{user?.isAdmin && (
+						<>
+							<Button onClick={() => setIsQuestModalOpen(true)}>
+								<IconPlus />
+								Ajouter une quête
+							</Button>
+
+							<QuestCreationModal
+								open={isQuestModalOpen}
+								onOpenChange={setIsQuestModalOpen}
+							/>
+						</>
+					)}
+				</div>
 			</div>
 
 			{quests.length === 0 ? (
