@@ -79,7 +79,7 @@ const useAuth = create<IAuth>()((set, get) => ({
 			setLoading(true);
 			const response = await tuyau.me.$get();
 
-			if (response.data) {
+			if (response.data && response.data.role === "SUPERADMIN") {
 				setUser(response.data);
 				return true;
 			} else {
