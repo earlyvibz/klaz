@@ -6,7 +6,7 @@ import Pagination from "@/components/pagination/pagination";
 import Pending from "@/components/pending/pending";
 import { useNotificationActions } from "@/hooks/use-notifications";
 import { tuyau } from "@/main";
-import type { NotificationsResponse } from "@/types";
+import type { Notification, NotificationsResponse } from "@/types";
 
 type NotificationFilter = "all" | "unread" | "read";
 
@@ -150,7 +150,7 @@ function NotificationsPage() {
 						</div>
 					) : (
 						<div className="space-y-2">
-							{notifications.map((notification) => (
+							{notifications.map((notification: Notification) => (
 								<NotificationItem
 									key={notification.id}
 									notification={notification}
