@@ -13,6 +13,8 @@ import { middleware } from "./kernel.js";
 const AuthController = () => import("#controllers/auth_controller");
 const InvitationsController = () =>
 	import("#controllers/invitations_controller");
+const NotificationsController = () =>
+	import("#controllers/notifications_controller");
 const QuestsController = () => import("#controllers/quests_controller");
 const QuestsSubmissionsController = () =>
 	import("#controllers/quests_submissions_controller");
@@ -77,6 +79,12 @@ router
 		router.post("/quests", [QuestsController, "create"]);
 		router.put("/quests/:id", [QuestsController, "update"]);
 		router.delete("/quests/:id", [QuestsController, "destroy"]);
+
+		// Notifications (admin only)
+		router.post("/notifications/custom", [
+			NotificationsController,
+			"sendCustomNotification",
+		]);
 	})
 	.use([
 		middleware.tenant(),
@@ -94,5 +102,38 @@ router
 
 		// Leaderboard
 		router.get("/leaderboard", [QuestsController, "leaderboard"]);
+
+		// Notifications (students and admins)
+		router.get("/notifications", [NotificationsController, "index"]);
+		router.get("/notifications/stats", [NotificationsController, "stats"]);
+		router.get("/notifications/unread-count", [
+			NotificationsController,
+			"unreadCount",
+		]);
+		router.post("/notifications/:id/read", [
+			NotificationsController,
+			"markAsRead",
+		]);
+		router.post("/notifications/mark-all-read", [
+			NotificationsController,
+			"markAllAsRead",
+		]);
+		router.delete("/notifications/:id", [NotificationsController, "destroy"]);
+		router.post("/notifications/bulk-delete", [
+			NotificationsController,
+			"bulkDelete",
+		]);
+		router.post("/notifications/clear-old", [
+			NotificationsController,
+			"clearOldNotifications",
+		]);
+		router.get("/notifications/preferences", [
+			NotificationsController,
+			"getPreferences",
+		]);
+		router.put("/notifications/preferences", [
+			NotificationsController,
+			"updatePreferences",
+		]);
 	})
 	.use([middleware.tenant(), middleware.auth()]);

@@ -1,6 +1,7 @@
 import type { HttpContext } from "@adonisjs/core/http";
 import { DateTime } from "luxon";
 import QuestSubmissionDto from "#dtos/quest_submission";
+import Notification from "#models/notification";
 import Quest from "#models/quest";
 import QuestSubmission from "#models/quest_submission";
 import type { PaginationMeta } from "#types/students";
@@ -126,13 +127,19 @@ export default class QuestsSubmissionsController {
 
 			await submission.user.save();
 
-			console.log(
-				`🎮 User ${submission.user.id}: +${pointsToAward} points - Quest completed: ${submission.quest.title}`,
+			// Create quest approval notification
+			await Notification.createQuestApprovalNotification(
+				submission.user.id,
+				submission,
+				pointsToAward,
 			);
 
+			// Create level up notification if user leveled up
 			if (hasLeveledUp) {
-				console.log(
-					`🎉 User ${submission.user.email} leveled up from ${oldLevel} to ${submission.user.level}!`,
+				await Notification.createLevelUpNotification(
+					submission.user.id,
+					submission.user.level,
+					oldLevel,
 				);
 			}
 		}
@@ -158,6 +165,15 @@ export default class QuestsSubmissionsController {
 		submission.status = "REJECTED";
 		submission.feedback = feedback;
 		await submission.save();
+
+		// Create quest rejection notification
+		if (submission.user) {
+			await Notification.createQuestRejectionNotification(
+				submission.user.id,
+				submission,
+				feedback,
+			);
+		}
 
 		return new QuestSubmissionDto(submission);
 	}

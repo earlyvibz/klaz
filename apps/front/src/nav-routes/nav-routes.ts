@@ -1,4 +1,5 @@
 import {
+	IconBell,
 	IconHome,
 	IconMapPin,
 	IconSettings,
@@ -13,6 +14,7 @@ export const pageTitles: Record<string, string> = {
 	"/quests": "Quêtes",
 	"/schools": "Écoles",
 	"/leaderboard": "Classement",
+	"/notifications": "Notifications",
 };
 
 export const data = {
@@ -28,6 +30,7 @@ export const data = {
 	student: [
 		{ name: "Accueil", url: "/home", icon: IconHome },
 		{ name: "Quêtes", url: "/quests", icon: IconMapPin },
+		{ name: "Notifications", url: "/notifications", icon: IconBell },
 		{ name: "Marketplace", url: "/marketplace", icon: IconShoppingBag },
 		{ name: "Classement", url: "/leaderboard", icon: IconTrophy },
 	],

@@ -51,3 +51,12 @@ export type LeaderboardResponse = InferResponseType<
 >;
 
 export type LeaderboardUser = LeaderboardResponse["leaderboard"];
+
+// Types pour les notifications
+export type NotificationsResponse = InferResponseType<
+	typeof tuyau.notifications.$get
+>;
+export type Notification = NotificationsResponse["notifications"][0];
+export type NotificationStats = InferResponseType<
+	typeof tuyau.notifications.stats.$get
+>;

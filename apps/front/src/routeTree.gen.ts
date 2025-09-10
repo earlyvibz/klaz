@@ -17,6 +17,7 @@ import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as DashboardUsersRouteImport } from './routes/_dashboard.users'
 import { Route as DashboardSchoolsRouteImport } from './routes/_dashboard.schools'
 import { Route as DashboardQuestsRouteImport } from './routes/_dashboard.quests'
+import { Route as DashboardNotificationsRouteImport } from './routes/_dashboard.notifications'
 import { Route as DashboardMarketplaceRouteImport } from './routes/_dashboard.marketplace'
 import { Route as DashboardLeaderboardRouteImport } from './routes/_dashboard.leaderboard'
 import { Route as DashboardHomeRouteImport } from './routes/_dashboard.home'
@@ -64,6 +65,11 @@ const DashboardQuestsRoute = DashboardQuestsRouteImport.update({
   path: '/quests',
   getParentRoute: () => DashboardRoute,
 } as any)
+const DashboardNotificationsRoute = DashboardNotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const DashboardMarketplaceRoute = DashboardMarketplaceRouteImport.update({
   id: '/marketplace',
   path: '/marketplace',
@@ -108,6 +114,7 @@ export interface FileRoutesByFullPath {
   '/home': typeof DashboardHomeRoute
   '/leaderboard': typeof DashboardLeaderboardRoute
   '/marketplace': typeof DashboardMarketplaceRoute
+  '/notifications': typeof DashboardNotificationsRoute
   '/quests': typeof DashboardQuestsRoute
   '/schools': typeof DashboardSchoolsRoute
   '/users': typeof DashboardUsersRoute
@@ -124,6 +131,7 @@ export interface FileRoutesByTo {
   '/home': typeof DashboardHomeRoute
   '/leaderboard': typeof DashboardLeaderboardRoute
   '/marketplace': typeof DashboardMarketplaceRoute
+  '/notifications': typeof DashboardNotificationsRoute
   '/quests': typeof DashboardQuestsRoute
   '/schools': typeof DashboardSchoolsRoute
   '/users': typeof DashboardUsersRoute
@@ -142,6 +150,7 @@ export interface FileRoutesById {
   '/_dashboard/home': typeof DashboardHomeRoute
   '/_dashboard/leaderboard': typeof DashboardLeaderboardRoute
   '/_dashboard/marketplace': typeof DashboardMarketplaceRoute
+  '/_dashboard/notifications': typeof DashboardNotificationsRoute
   '/_dashboard/quests': typeof DashboardQuestsRoute
   '/_dashboard/schools': typeof DashboardSchoolsRoute
   '/_dashboard/users': typeof DashboardUsersRoute
@@ -160,6 +169,7 @@ export interface FileRouteTypes {
     | '/home'
     | '/leaderboard'
     | '/marketplace'
+    | '/notifications'
     | '/quests'
     | '/schools'
     | '/users'
@@ -176,6 +186,7 @@ export interface FileRouteTypes {
     | '/home'
     | '/leaderboard'
     | '/marketplace'
+    | '/notifications'
     | '/quests'
     | '/schools'
     | '/users'
@@ -193,6 +204,7 @@ export interface FileRouteTypes {
     | '/_dashboard/home'
     | '/_dashboard/leaderboard'
     | '/_dashboard/marketplace'
+    | '/_dashboard/notifications'
     | '/_dashboard/quests'
     | '/_dashboard/schools'
     | '/_dashboard/users'
@@ -267,6 +279,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardQuestsRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/_dashboard/notifications': {
+      id: '/_dashboard/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof DashboardNotificationsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/_dashboard/marketplace': {
       id: '/_dashboard/marketplace'
       path: '/marketplace'
@@ -338,6 +357,7 @@ interface DashboardRouteChildren {
   DashboardHomeRoute: typeof DashboardHomeRoute
   DashboardLeaderboardRoute: typeof DashboardLeaderboardRoute
   DashboardMarketplaceRoute: typeof DashboardMarketplaceRoute
+  DashboardNotificationsRoute: typeof DashboardNotificationsRoute
   DashboardQuestsRoute: typeof DashboardQuestsRoute
   DashboardSchoolsRoute: typeof DashboardSchoolsRoute
   DashboardUsersRoute: typeof DashboardUsersRoute
@@ -351,6 +371,7 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardHomeRoute: DashboardHomeRoute,
   DashboardLeaderboardRoute: DashboardLeaderboardRoute,
   DashboardMarketplaceRoute: DashboardMarketplaceRoute,
+  DashboardNotificationsRoute: DashboardNotificationsRoute,
   DashboardQuestsRoute: DashboardQuestsRoute,
   DashboardSchoolsRoute: DashboardSchoolsRoute,
   DashboardUsersRoute: DashboardUsersRoute,
