@@ -15,6 +15,7 @@ import {
 	useNotifications,
 	useUnreadCount,
 } from "@/hooks/use-notifications";
+import type { Notification } from "@/types";
 
 export default function NotificationsPanel() {
 	const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -89,7 +90,7 @@ export default function NotificationsPanel() {
 						</div>
 					) : (
 						<div className="divide-y">
-							{notifications.map((notification) => (
+							{notifications.map((notification: Notification) => (
 								<NotificationItem
 									key={notification.id}
 									notification={notification}
