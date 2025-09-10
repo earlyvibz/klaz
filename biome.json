@@ -27,7 +27,8 @@
 			"!**/apps/super-admin/src/routeTree.gen.ts",
 			"!**/apps/super-admin/src/components/ui/**/*",
 			"!**/packages/ui/**/*",
-			"!**/apps/super-admin/src/reportWebVitals.ts"
+			"!**/apps/super-admin/src/reportWebVitals.ts",
+			"!**/apps/backend/database/migrations/**/*"
 		]
 	},
 	"formatter": {

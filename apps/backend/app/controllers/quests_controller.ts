@@ -3,6 +3,7 @@ import { DateTime } from "luxon";
 import LeaderboardUserDto from "#dtos/leaderboard_user";
 import QuestDto from "#dtos/quest";
 import SchoolDto from "#dtos/school";
+import Notification from "#models/notification";
 import Quest from "#models/quest";
 import User from "#models/user";
 import type { PaginationMeta } from "#types/students";
@@ -57,6 +58,9 @@ export default class QuestsController {
 			schoolId: school.id,
 			isActive: true,
 		});
+
+		// Notify all students in the school about the new quest
+		await Notification.notifyAllStudentsOfNewQuest(quest);
 
 		return new QuestDto(quest);
 	}

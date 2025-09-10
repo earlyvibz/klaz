@@ -12,6 +12,7 @@ import type { BelongsTo, HasMany } from "@adonisjs/lucid/types/relations";
 import { DateTime } from "luxon";
 import { v4 as uuidv4 } from "uuid";
 import Group from "#models/group";
+import Notification from "#models/notification";
 import QuestSubmission from "#models/quest_submission";
 import RewardRedemption from "#models/reward_redemption";
 import School from "#models/school";
@@ -92,6 +93,9 @@ export default class User extends compose(BaseModel, AuthFinder) {
 
 	@hasMany(() => RewardRedemption)
 	declare rewardRedemptions: HasMany<typeof RewardRedemption>;
+
+	@hasMany(() => Notification)
+	declare notifications: HasMany<typeof Notification>;
 
 	@beforeCreate()
 	public static async assignId(model: User) {
