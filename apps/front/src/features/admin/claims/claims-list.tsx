@@ -1,39 +1,22 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@klaz/ui";
+import {
+	Card,
+	CardContent,
+	CardHeader,
+	CardTitle,
+	Table,
+	TableBody,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from "@klaz/ui";
 import Pagination from "@/components/pagination/pagination";
-import { ClaimsCard } from "./claims-card";
+import type { Claim, ClaimsMeta } from "@/types";
 import { ClaimsEmptyState } from "./claims-empty-state";
-
-interface ClaimItem {
-	id: string;
-	quantity: number;
-	totalPoints: number;
-	status: "pending" | "claimed" | "cancelled";
-	createdAt: string;
-	user: {
-		id: string;
-		firstName: string;
-		lastName: string;
-		email: string;
-	};
-	product: {
-		id: string;
-		title: string;
-		description: string;
-		image: string;
-		pricePoints: number;
-	};
-}
-
-interface Meta {
-	total: number;
-	perPage: number;
-	currentPage: number;
-	lastPage: number;
-}
+import { ClaimsTableRow } from "./claims-table-row";
 
 interface ClaimsListProps {
-	claims: ClaimItem[];
-	meta: Meta;
+	claims: Claim[];
+	meta: ClaimsMeta;
 	currentLimit: number;
 	processingClaim: string | undefined;
 	onPageChange: (page: number) => void;
@@ -60,17 +43,29 @@ export function ClaimsList({
 			<CardContent>
 				{claims.length > 0 ? (
 					<>
-						<div className="space-y-4">
-							{claims.map((claim) => (
-								<ClaimsCard
-									key={claim.id}
-									claim={claim}
-									processingClaim={processingClaim}
-									onClaimPurchase={onClaimPurchase}
-									onCancelPurchase={onCancelPurchase}
-								/>
-							))}
-						</div>
+						<Table>
+							<TableHeader>
+								<TableRow>
+									<TableHead>Produit</TableHead>
+									<TableHead>Étudiant</TableHead>
+									<TableHead>Date d'achat</TableHead>
+									<TableHead className="text-right">Points</TableHead>
+									<TableHead className="text-right">Quantité</TableHead>
+									<TableHead className="text-center">Actions</TableHead>
+								</TableRow>
+							</TableHeader>
+							<TableBody>
+								{claims.map((claim) => (
+									<ClaimsTableRow
+										key={claim.id}
+										claim={claim}
+										processingClaim={processingClaim}
+										onClaimPurchase={onClaimPurchase}
+										onCancelPurchase={onCancelPurchase}
+									/>
+								))}
+							</TableBody>
+						</Table>
 
 						{meta && (
 							<div className="mt-8">
