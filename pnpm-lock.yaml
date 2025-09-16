@@ -132,9 +132,6 @@ importers:
       '@klaz/backend':
         specifier: workspace:*
         version: link:../backend
-      '@klaz/types':
-        specifier: workspace:*
-        version: link:../../packages/types
       '@klaz/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -283,9 +280,6 @@ importers:
       '@klaz/backend':
         specifier: workspace:*
         version: link:../backend
-      '@klaz/types':
-        specifier: workspace:*
-        version: link:../../packages/types
       '@klaz/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -377,19 +371,6 @@ importers:
       web-vitals:
         specifier: ^4.2.4
         version: 4.2.4
-
-  packages/types:
-    dependencies:
-      '@klaz/backend':
-        specifier: workspace:*
-        version: link:../../apps/backend
-      '@tuyau/client':
-        specifier: ^0.2.10
-        version: 0.2.10
-    devDependencies:
-      typescript:
-        specifier: ^5.0.0
-        version: 5.9.2
 
   packages/ui:
     dependencies:
