@@ -28,7 +28,7 @@ export type Purchase = PurchasesResponse["purchases"][0];
 
 // Types pour les réclamations (claims)
 export type ClaimsResponse = InferResponseType<
-	typeof tuyau.marketplace.schools.claims.$get
+	typeof tuyau.marketplace.claims.$get
 >;
 
 export type Claim = ClaimsResponse["purchases"][0];
