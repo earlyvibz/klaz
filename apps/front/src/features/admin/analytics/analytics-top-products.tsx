@@ -1,6 +1,15 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@klaz/ui";
 import type { AnalyticsResponse } from "@/types";
 
+interface TopProductItem {
+	product: {
+		id: string;
+		title: string;
+		pricePoints: number;
+	};
+	sales: number;
+}
+
 interface AnalyticsTopProductsProps {
 	data: AnalyticsResponse;
 }
@@ -14,7 +23,7 @@ export function AnalyticsTopProducts({ data }: AnalyticsTopProductsProps) {
 			<CardContent>
 				{data.topProducts.length > 0 ? (
 					<div className="space-y-4">
-						{data.topProducts.map((item, index) => (
+						{data.topProducts.map((item: TopProductItem, index: number) => (
 							<div
 								key={item.product.id}
 								className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
