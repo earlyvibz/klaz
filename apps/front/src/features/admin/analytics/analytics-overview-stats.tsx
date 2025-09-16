@@ -10,12 +10,20 @@ import {
 } from "@tabler/icons-react";
 import type { AnalyticsResponse } from "@/types";
 
+interface StatItem {
+	title: string;
+	value: number | string;
+	icon: React.ComponentType<{ className?: string }>;
+	color: string;
+	bgColor: string;
+}
+
 interface AnalyticsOverviewStatsProps {
 	data: AnalyticsResponse;
 }
 
 export function AnalyticsOverviewStats({ data }: AnalyticsOverviewStatsProps) {
-	const stats = [
+	const stats: StatItem[] = [
 		{
 			title: "Produits totaux",
 			value: data.overview.totalProducts,
@@ -69,7 +77,7 @@ export function AnalyticsOverviewStats({ data }: AnalyticsOverviewStatsProps) {
 
 	return (
 		<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-			{stats.map((stat) => {
+			{stats.map((stat: StatItem) => {
 				const Icon = stat.icon;
 				return (
 					<Card key={stat.title}>
