@@ -100,3 +100,6 @@ export type AnalyticsResponse = InferResponseType<
 export type ClaimsResponse = InferResponseType<
 	typeof tuyau.marketplace.claims.$get
 >;
+
+export type Claim = ClaimsResponse["purchases"][0];
+export type ClaimsMeta = ClaimsResponse["meta"];
