@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@klaz/ui";
-import type { AnalyticsResponse } from "@/types";
+import type { AnalyticsResponse, PurchaseHistory } from "@/types";
 
 interface AnalyticsRecentPurchasesProps {
 	data: AnalyticsResponse;
@@ -16,7 +16,7 @@ export function AnalyticsRecentPurchases({
 			<CardContent>
 				{data.recentPurchases.length > 0 ? (
 					<div className="space-y-4">
-						{data.recentPurchases.map((purchase) => (
+						{data.recentPurchases.map((purchase: PurchaseHistory) => (
 							<div
 								key={purchase.id}
 								className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
