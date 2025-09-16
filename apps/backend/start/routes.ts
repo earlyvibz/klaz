@@ -20,6 +20,8 @@ const QuestsSubmissionsController = () =>
 	import("#controllers/quests_submissions_controller");
 const SchoolsController = () => import("#controllers/schools_controller");
 const StudentsController = () => import("#controllers/students_controller");
+const MarketplaceController = () =>
+	import("#controllers/marketplace_controller");
 
 // ROUTES SUPERADMIN
 router
@@ -34,6 +36,40 @@ router
 		router.post("/quests/submissions/:submissionId/reject", [
 			QuestsSubmissionsController,
 			"reject",
+		]);
+
+		// Super Admin Marketplace routes
+		router.get("/marketplace/schools/:schoolId/products", [
+			MarketplaceController,
+			"getSuperAdminProducts",
+		]);
+		router.post("/marketplace/schools/:schoolId/products", [
+			MarketplaceController,
+			"createSuperAdminProduct",
+		]);
+		router.put("/marketplace/schools/:schoolId/products/:id", [
+			MarketplaceController,
+			"updateSuperAdminProduct",
+		]);
+		router.delete("/marketplace/schools/:schoolId/products/:id", [
+			MarketplaceController,
+			"deleteSuperAdminProduct",
+		]);
+		router.get("/marketplace/schools/:schoolId/claims", [
+			MarketplaceController,
+			"getSuperAdminClaims",
+		]);
+		router.post("/marketplace/schools/:schoolId/claims/:id/claim", [
+			MarketplaceController,
+			"claimSuperAdminPurchase",
+		]);
+		router.post("/marketplace/schools/:schoolId/claims/:id/cancel", [
+			MarketplaceController,
+			"cancelSuperAdminPurchase",
+		]);
+		router.get("/marketplace/schools/:schoolId/purchases", [
+			MarketplaceController,
+			"getSuperAdminPurchases",
 		]);
 	})
 	.use([middleware.auth(), middleware.role({ roles: ["SUPERADMIN"] })]);
@@ -85,6 +121,44 @@ router
 			NotificationsController,
 			"sendCustomNotification",
 		]);
+
+		// Marketplace (admin only)
+		router.post("/marketplace/products", [
+			MarketplaceController,
+			"createProduct",
+		]);
+		router.put("/marketplace/products/:id", [
+			MarketplaceController,
+			"updateProduct",
+		]);
+		router.delete("/marketplace/products/:id", [
+			MarketplaceController,
+			"deleteProduct",
+		]);
+		router.get("/marketplace/products/admin", [
+			MarketplaceController,
+			"getAllProductsAdmin",
+		]);
+		router.get("/marketplace/analytics", [
+			MarketplaceController,
+			"getAnalytics",
+		]);
+		router.get("/marketplace/purchases", [
+			MarketplaceController,
+			"getAllPurchases",
+		]);
+		router.get("/marketplace/claims", [
+			MarketplaceController,
+			"getPendingClaims",
+		]);
+		router.post("/marketplace/claims/:id/claim", [
+			MarketplaceController,
+			"claimPurchase",
+		]);
+		router.post("/marketplace/claims/:id/cancel", [
+			MarketplaceController,
+			"cancelPurchase",
+		]);
 	})
 	.use([
 		middleware.tenant(),
@@ -134,6 +208,21 @@ router
 		router.put("/notifications/preferences", [
 			NotificationsController,
 			"updatePreferences",
+		]);
+
+		// Marketplace (students and admins)
+		router.get("/marketplace/products", [MarketplaceController, "getProducts"]);
+		router.get("/marketplace/products/:id", [
+			MarketplaceController,
+			"getProduct",
+		]);
+		router.post("/marketplace/products/:id/purchase", [
+			MarketplaceController,
+			"purchaseProduct",
+		]);
+		router.get("/marketplace/mypurchases", [
+			MarketplaceController,
+			"getPurchaseHistory",
 		]);
 	})
 	.use([middleware.tenant(), middleware.auth()]);

@@ -1,9 +1,12 @@
 import {
 	IconCheck,
+	IconClipboardCheck,
 	IconClock,
+	IconHistory,
 	IconHome,
 	IconMapPin,
 	IconSchool,
+	IconShoppingBag,
 	IconUsers,
 	IconX,
 } from "@tabler/icons-react";
@@ -16,13 +19,19 @@ export const pageTitles: Record<string, string> = {
 	"/quests/rejected": "Quêtes rejetées",
 	"/quests/approved": "Quêtes validées",
 	"/schools": "Écoles",
+	"/marketplace": "Marketplace",
+	"/claims": "Réclamations",
+	"/purchases": "Historique des achats",
 	"/leaderboard": "Classement",
 };
 
 export const simpleItems = [
-	// { name: "Accueil", url: "/home", icon: IconHome },
-	// { name: "Utilisateurs", url: "/users", icon: IconUsers },
-	// { name: "Écoles", url: "/schools", icon: IconSchool },
+	{ name: "Accueil", url: "/home", icon: IconHome },
+	{ name: "Marketplace", url: "/marketplace", icon: IconShoppingBag },
+	{ name: "Réclamations", url: "/claims", icon: IconClipboardCheck },
+	{ name: "Historique des achats", url: "/purchases", icon: IconHistory },
+	{ name: "Utilisateurs", url: "/users", icon: IconUsers },
+	{ name: "Écoles", url: "/schools", icon: IconSchool },
 ];
 
 export const questsSubmenu = {
@@ -39,6 +48,9 @@ export const questsSubmenu = {
 export const data = [
 	{ name: "Accueil", url: "/home", icon: IconHome },
 	{ name: "Quêtes", url: "/quests", icon: IconMapPin },
+	{ name: "Marketplace", url: "/marketplace", icon: IconShoppingBag },
+	{ name: "Réclamations", url: "/claims", icon: IconClipboardCheck },
+	{ name: "Historique des achats", url: "/purchases", icon: IconHistory },
 	{ name: "Utilisateurs", url: "/users", icon: IconUsers },
 	{ name: "Écoles", url: "/schools", icon: IconSchool },
 ];

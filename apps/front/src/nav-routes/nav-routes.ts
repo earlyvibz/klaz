@@ -1,7 +1,11 @@
 import {
 	IconBell,
+	IconChartBar,
+	IconClipboardCheck,
+	IconHistory,
 	IconHome,
 	IconMapPin,
+	IconReceipt,
 	IconSettings,
 	IconShoppingBag,
 	IconTrophy,
@@ -15,6 +19,17 @@ export const pageTitles: Record<string, string> = {
 	"/schools": "Écoles",
 	"/leaderboard": "Classement",
 	"/notifications": "Notifications",
+	"/marketplace": "Marketplace",
+	"/my-purchases": "Mes achats",
+	"/admin/marketplace": "Marketplace",
+	"/admin/analytics": "Analytics",
+	"/admin/claims": "Réclamations",
+	"/admin/purchases": "Historique des achats",
+	"/admin/home": "Accueil",
+	"/admin/quests": "Quêtes",
+	"/admin/users": "Utilisateurs",
+	"/admin/leaderboard": "Classement",
+	"/admin/settings": "Paramètres école",
 };
 
 export const data = {
@@ -23,6 +38,13 @@ export const data = {
 		{ name: "Quêtes", url: "/admin/quests", icon: IconMapPin },
 		{ name: "Utilisateurs", url: "/admin/users", icon: IconUsers },
 		{ name: "Marketplace", url: "/admin/marketplace", icon: IconShoppingBag },
+		{ name: "Analytics", url: "/admin/analytics", icon: IconChartBar },
+		{ name: "Réclamations", url: "/admin/claims", icon: IconClipboardCheck },
+		{
+			name: "Historique des achats",
+			url: "/admin/purchases",
+			icon: IconHistory,
+		},
 		{ name: "Leaderboard", url: "/admin/leaderboard", icon: IconTrophy },
 		{ name: "Paramètres école", url: "/admin/settings", icon: IconSettings },
 	],
@@ -30,8 +52,9 @@ export const data = {
 	student: [
 		{ name: "Accueil", url: "/home", icon: IconHome },
 		{ name: "Quêtes", url: "/quests", icon: IconMapPin },
-		{ name: "Notifications", url: "/notifications", icon: IconBell },
 		{ name: "Marketplace", url: "/marketplace", icon: IconShoppingBag },
 		{ name: "Classement", url: "/leaderboard", icon: IconTrophy },
+		{ name: "Notifications", url: "/notifications", icon: IconBell },
+		{ name: "Mes achats", url: "/my-purchases", icon: IconReceipt },
 	],
 };

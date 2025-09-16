@@ -30,6 +30,9 @@ export default class extends BaseSchema {
 					"QUEST_REJECTED",
 					"NEW_QUEST",
 					"LEVEL_UP",
+					"NEW_PRODUCT",
+					"PRODUCT_PURCHASED",
+					"LOW_STOCK_ALERT",
 				])
 				.notNullable();
 			table.string("title").notNullable();

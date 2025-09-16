@@ -13,7 +13,10 @@ import { Route as DashboardRouteImport } from './routes/_dashboard'
 import { Route as AuthRouteRouteImport } from './routes/auth/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
+import { Route as DashboardPurchasesRouteImport } from './routes/_dashboard.purchases'
+import { Route as DashboardMarketplaceRouteImport } from './routes/_dashboard.marketplace'
 import { Route as DashboardHomeRouteImport } from './routes/_dashboard.home'
+import { Route as DashboardClaimsRouteImport } from './routes/_dashboard.claims'
 import { Route as DashboardQuestsRejectedRouteImport } from './routes/_dashboard.quests.rejected'
 import { Route as DashboardQuestsPendingRouteImport } from './routes/_dashboard.quests.pending'
 import { Route as DashboardQuestsApprovedRouteImport } from './routes/_dashboard.quests.approved'
@@ -37,9 +40,24 @@ const AuthLoginRoute = AuthLoginRouteImport.update({
   path: '/login',
   getParentRoute: () => AuthRouteRoute,
 } as any)
+const DashboardPurchasesRoute = DashboardPurchasesRouteImport.update({
+  id: '/purchases',
+  path: '/purchases',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardMarketplaceRoute = DashboardMarketplaceRouteImport.update({
+  id: '/marketplace',
+  path: '/marketplace',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const DashboardHomeRoute = DashboardHomeRouteImport.update({
   id: '/home',
   path: '/home',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardClaimsRoute = DashboardClaimsRouteImport.update({
+  id: '/claims',
+  path: '/claims',
   getParentRoute: () => DashboardRoute,
 } as any)
 const DashboardQuestsRejectedRoute = DashboardQuestsRejectedRouteImport.update({
@@ -61,7 +79,10 @@ const DashboardQuestsApprovedRoute = DashboardQuestsApprovedRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteRouteWithChildren
+  '/claims': typeof DashboardClaimsRoute
   '/home': typeof DashboardHomeRoute
+  '/marketplace': typeof DashboardMarketplaceRoute
+  '/purchases': typeof DashboardPurchasesRoute
   '/auth/login': typeof AuthLoginRoute
   '/quests/approved': typeof DashboardQuestsApprovedRoute
   '/quests/pending': typeof DashboardQuestsPendingRoute
@@ -70,7 +91,10 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteRouteWithChildren
+  '/claims': typeof DashboardClaimsRoute
   '/home': typeof DashboardHomeRoute
+  '/marketplace': typeof DashboardMarketplaceRoute
+  '/purchases': typeof DashboardPurchasesRoute
   '/auth/login': typeof AuthLoginRoute
   '/quests/approved': typeof DashboardQuestsApprovedRoute
   '/quests/pending': typeof DashboardQuestsPendingRoute
@@ -81,7 +105,10 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteRouteWithChildren
   '/_dashboard': typeof DashboardRouteWithChildren
+  '/_dashboard/claims': typeof DashboardClaimsRoute
   '/_dashboard/home': typeof DashboardHomeRoute
+  '/_dashboard/marketplace': typeof DashboardMarketplaceRoute
+  '/_dashboard/purchases': typeof DashboardPurchasesRoute
   '/auth/login': typeof AuthLoginRoute
   '/_dashboard/quests/approved': typeof DashboardQuestsApprovedRoute
   '/_dashboard/quests/pending': typeof DashboardQuestsPendingRoute
@@ -92,7 +119,10 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/claims'
     | '/home'
+    | '/marketplace'
+    | '/purchases'
     | '/auth/login'
     | '/quests/approved'
     | '/quests/pending'
@@ -101,7 +131,10 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/claims'
     | '/home'
+    | '/marketplace'
+    | '/purchases'
     | '/auth/login'
     | '/quests/approved'
     | '/quests/pending'
@@ -111,7 +144,10 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/_dashboard'
+    | '/_dashboard/claims'
     | '/_dashboard/home'
+    | '/_dashboard/marketplace'
+    | '/_dashboard/purchases'
     | '/auth/login'
     | '/_dashboard/quests/approved'
     | '/_dashboard/quests/pending'
@@ -154,11 +190,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthLoginRouteImport
       parentRoute: typeof AuthRouteRoute
     }
+    '/_dashboard/purchases': {
+      id: '/_dashboard/purchases'
+      path: '/purchases'
+      fullPath: '/purchases'
+      preLoaderRoute: typeof DashboardPurchasesRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/_dashboard/marketplace': {
+      id: '/_dashboard/marketplace'
+      path: '/marketplace'
+      fullPath: '/marketplace'
+      preLoaderRoute: typeof DashboardMarketplaceRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/_dashboard/home': {
       id: '/_dashboard/home'
       path: '/home'
       fullPath: '/home'
       preLoaderRoute: typeof DashboardHomeRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/_dashboard/claims': {
+      id: '/_dashboard/claims'
+      path: '/claims'
+      fullPath: '/claims'
+      preLoaderRoute: typeof DashboardClaimsRouteImport
       parentRoute: typeof DashboardRoute
     }
     '/_dashboard/quests/rejected': {
@@ -198,14 +255,20 @@ const AuthRouteRouteWithChildren = AuthRouteRoute._addFileChildren(
 )
 
 interface DashboardRouteChildren {
+  DashboardClaimsRoute: typeof DashboardClaimsRoute
   DashboardHomeRoute: typeof DashboardHomeRoute
+  DashboardMarketplaceRoute: typeof DashboardMarketplaceRoute
+  DashboardPurchasesRoute: typeof DashboardPurchasesRoute
   DashboardQuestsApprovedRoute: typeof DashboardQuestsApprovedRoute
   DashboardQuestsPendingRoute: typeof DashboardQuestsPendingRoute
   DashboardQuestsRejectedRoute: typeof DashboardQuestsRejectedRoute
 }
 
 const DashboardRouteChildren: DashboardRouteChildren = {
+  DashboardClaimsRoute: DashboardClaimsRoute,
   DashboardHomeRoute: DashboardHomeRoute,
+  DashboardMarketplaceRoute: DashboardMarketplaceRoute,
+  DashboardPurchasesRoute: DashboardPurchasesRoute,
   DashboardQuestsApprovedRoute: DashboardQuestsApprovedRoute,
   DashboardQuestsPendingRoute: DashboardQuestsPendingRoute,
   DashboardQuestsRejectedRoute: DashboardQuestsRejectedRoute,
