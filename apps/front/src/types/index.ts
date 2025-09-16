@@ -95,3 +95,8 @@ export type AdminPurchase = AdminPurchasesResponse["purchases"][0];
 export type AnalyticsResponse = InferResponseType<
 	typeof tuyau.marketplace.analytics.$get
 >;
+
+// Types pour les claims/réclamations
+export type ClaimsResponse = InferResponseType<
+	typeof tuyau.marketplace.claims.$get
+>;
