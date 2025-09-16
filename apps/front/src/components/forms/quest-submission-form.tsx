@@ -35,13 +35,10 @@ export default function QuestSubmissionForm({
 			setIsSubmitting(true);
 			setError(null);
 
-			const formData = new FormData();
-			formData.append("image", value.file);
-			formData.append("description", value.description);
-
-			const { error } = await tuyau
-				.quests({ id: quest.id })
-				.submit.$post(formData);
+			const { error } = await tuyau.quests({ id: quest.id }).submit.$post({
+				image: value.file,
+				description: value.description,
+			});
 
 			if (error instanceof TuyauHTTPError) {
 				setError(error.message);

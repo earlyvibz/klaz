@@ -18,13 +18,17 @@ import { Route as DashboardUsersRouteImport } from './routes/_dashboard.users'
 import { Route as DashboardSchoolsRouteImport } from './routes/_dashboard.schools'
 import { Route as DashboardQuestsRouteImport } from './routes/_dashboard.quests'
 import { Route as DashboardNotificationsRouteImport } from './routes/_dashboard.notifications'
+import { Route as DashboardMyPurchasesRouteImport } from './routes/_dashboard.my-purchases'
 import { Route as DashboardMarketplaceRouteImport } from './routes/_dashboard.marketplace'
 import { Route as DashboardLeaderboardRouteImport } from './routes/_dashboard.leaderboard'
 import { Route as DashboardHomeRouteImport } from './routes/_dashboard.home'
 import { Route as DashboardAccountRouteImport } from './routes/_dashboard.account'
 import { Route as DashboardAdminQuestsRouteImport } from './routes/_dashboard.admin.quests'
+import { Route as DashboardAdminPurchasesRouteImport } from './routes/_dashboard.admin.purchases'
 import { Route as DashboardAdminMarketplaceRouteImport } from './routes/_dashboard.admin.marketplace'
 import { Route as DashboardAdminHomeRouteImport } from './routes/_dashboard.admin.home'
+import { Route as DashboardAdminClaimsRouteImport } from './routes/_dashboard.admin.claims'
+import { Route as DashboardAdminAnalyticsRouteImport } from './routes/_dashboard.admin.analytics'
 
 const DashboardRoute = DashboardRouteImport.update({
   id: '/_dashboard',
@@ -70,6 +74,11 @@ const DashboardNotificationsRoute = DashboardNotificationsRouteImport.update({
   path: '/notifications',
   getParentRoute: () => DashboardRoute,
 } as any)
+const DashboardMyPurchasesRoute = DashboardMyPurchasesRouteImport.update({
+  id: '/my-purchases',
+  path: '/my-purchases',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const DashboardMarketplaceRoute = DashboardMarketplaceRouteImport.update({
   id: '/marketplace',
   path: '/marketplace',
@@ -95,6 +104,11 @@ const DashboardAdminQuestsRoute = DashboardAdminQuestsRouteImport.update({
   path: '/admin/quests',
   getParentRoute: () => DashboardRoute,
 } as any)
+const DashboardAdminPurchasesRoute = DashboardAdminPurchasesRouteImport.update({
+  id: '/admin/purchases',
+  path: '/admin/purchases',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const DashboardAdminMarketplaceRoute =
   DashboardAdminMarketplaceRouteImport.update({
     id: '/admin/marketplace',
@@ -106,6 +120,16 @@ const DashboardAdminHomeRoute = DashboardAdminHomeRouteImport.update({
   path: '/admin/home',
   getParentRoute: () => DashboardRoute,
 } as any)
+const DashboardAdminClaimsRoute = DashboardAdminClaimsRouteImport.update({
+  id: '/admin/claims',
+  path: '/admin/claims',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardAdminAnalyticsRoute = DashboardAdminAnalyticsRouteImport.update({
+  id: '/admin/analytics',
+  path: '/admin/analytics',
+  getParentRoute: () => DashboardRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -114,14 +138,18 @@ export interface FileRoutesByFullPath {
   '/home': typeof DashboardHomeRoute
   '/leaderboard': typeof DashboardLeaderboardRoute
   '/marketplace': typeof DashboardMarketplaceRoute
+  '/my-purchases': typeof DashboardMyPurchasesRoute
   '/notifications': typeof DashboardNotificationsRoute
   '/quests': typeof DashboardQuestsRoute
   '/schools': typeof DashboardSchoolsRoute
   '/users': typeof DashboardUsersRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/signup': typeof AuthSignupRoute
+  '/admin/analytics': typeof DashboardAdminAnalyticsRoute
+  '/admin/claims': typeof DashboardAdminClaimsRoute
   '/admin/home': typeof DashboardAdminHomeRoute
   '/admin/marketplace': typeof DashboardAdminMarketplaceRoute
+  '/admin/purchases': typeof DashboardAdminPurchasesRoute
   '/admin/quests': typeof DashboardAdminQuestsRoute
 }
 export interface FileRoutesByTo {
@@ -131,14 +159,18 @@ export interface FileRoutesByTo {
   '/home': typeof DashboardHomeRoute
   '/leaderboard': typeof DashboardLeaderboardRoute
   '/marketplace': typeof DashboardMarketplaceRoute
+  '/my-purchases': typeof DashboardMyPurchasesRoute
   '/notifications': typeof DashboardNotificationsRoute
   '/quests': typeof DashboardQuestsRoute
   '/schools': typeof DashboardSchoolsRoute
   '/users': typeof DashboardUsersRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/signup': typeof AuthSignupRoute
+  '/admin/analytics': typeof DashboardAdminAnalyticsRoute
+  '/admin/claims': typeof DashboardAdminClaimsRoute
   '/admin/home': typeof DashboardAdminHomeRoute
   '/admin/marketplace': typeof DashboardAdminMarketplaceRoute
+  '/admin/purchases': typeof DashboardAdminPurchasesRoute
   '/admin/quests': typeof DashboardAdminQuestsRoute
 }
 export interface FileRoutesById {
@@ -150,14 +182,18 @@ export interface FileRoutesById {
   '/_dashboard/home': typeof DashboardHomeRoute
   '/_dashboard/leaderboard': typeof DashboardLeaderboardRoute
   '/_dashboard/marketplace': typeof DashboardMarketplaceRoute
+  '/_dashboard/my-purchases': typeof DashboardMyPurchasesRoute
   '/_dashboard/notifications': typeof DashboardNotificationsRoute
   '/_dashboard/quests': typeof DashboardQuestsRoute
   '/_dashboard/schools': typeof DashboardSchoolsRoute
   '/_dashboard/users': typeof DashboardUsersRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/signup': typeof AuthSignupRoute
+  '/_dashboard/admin/analytics': typeof DashboardAdminAnalyticsRoute
+  '/_dashboard/admin/claims': typeof DashboardAdminClaimsRoute
   '/_dashboard/admin/home': typeof DashboardAdminHomeRoute
   '/_dashboard/admin/marketplace': typeof DashboardAdminMarketplaceRoute
+  '/_dashboard/admin/purchases': typeof DashboardAdminPurchasesRoute
   '/_dashboard/admin/quests': typeof DashboardAdminQuestsRoute
 }
 export interface FileRouteTypes {
@@ -169,14 +205,18 @@ export interface FileRouteTypes {
     | '/home'
     | '/leaderboard'
     | '/marketplace'
+    | '/my-purchases'
     | '/notifications'
     | '/quests'
     | '/schools'
     | '/users'
     | '/auth/login'
     | '/auth/signup'
+    | '/admin/analytics'
+    | '/admin/claims'
     | '/admin/home'
     | '/admin/marketplace'
+    | '/admin/purchases'
     | '/admin/quests'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -186,14 +226,18 @@ export interface FileRouteTypes {
     | '/home'
     | '/leaderboard'
     | '/marketplace'
+    | '/my-purchases'
     | '/notifications'
     | '/quests'
     | '/schools'
     | '/users'
     | '/auth/login'
     | '/auth/signup'
+    | '/admin/analytics'
+    | '/admin/claims'
     | '/admin/home'
     | '/admin/marketplace'
+    | '/admin/purchases'
     | '/admin/quests'
   id:
     | '__root__'
@@ -204,14 +248,18 @@ export interface FileRouteTypes {
     | '/_dashboard/home'
     | '/_dashboard/leaderboard'
     | '/_dashboard/marketplace'
+    | '/_dashboard/my-purchases'
     | '/_dashboard/notifications'
     | '/_dashboard/quests'
     | '/_dashboard/schools'
     | '/_dashboard/users'
     | '/auth/login'
     | '/auth/signup'
+    | '/_dashboard/admin/analytics'
+    | '/_dashboard/admin/claims'
     | '/_dashboard/admin/home'
     | '/_dashboard/admin/marketplace'
+    | '/_dashboard/admin/purchases'
     | '/_dashboard/admin/quests'
   fileRoutesById: FileRoutesById
 }
@@ -286,6 +334,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardNotificationsRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/_dashboard/my-purchases': {
+      id: '/_dashboard/my-purchases'
+      path: '/my-purchases'
+      fullPath: '/my-purchases'
+      preLoaderRoute: typeof DashboardMyPurchasesRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/_dashboard/marketplace': {
       id: '/_dashboard/marketplace'
       path: '/marketplace'
@@ -321,6 +376,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardAdminQuestsRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/_dashboard/admin/purchases': {
+      id: '/_dashboard/admin/purchases'
+      path: '/admin/purchases'
+      fullPath: '/admin/purchases'
+      preLoaderRoute: typeof DashboardAdminPurchasesRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/_dashboard/admin/marketplace': {
       id: '/_dashboard/admin/marketplace'
       path: '/admin/marketplace'
@@ -333,6 +395,20 @@ declare module '@tanstack/react-router' {
       path: '/admin/home'
       fullPath: '/admin/home'
       preLoaderRoute: typeof DashboardAdminHomeRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/_dashboard/admin/claims': {
+      id: '/_dashboard/admin/claims'
+      path: '/admin/claims'
+      fullPath: '/admin/claims'
+      preLoaderRoute: typeof DashboardAdminClaimsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/_dashboard/admin/analytics': {
+      id: '/_dashboard/admin/analytics'
+      path: '/admin/analytics'
+      fullPath: '/admin/analytics'
+      preLoaderRoute: typeof DashboardAdminAnalyticsRouteImport
       parentRoute: typeof DashboardRoute
     }
   }
@@ -357,12 +433,16 @@ interface DashboardRouteChildren {
   DashboardHomeRoute: typeof DashboardHomeRoute
   DashboardLeaderboardRoute: typeof DashboardLeaderboardRoute
   DashboardMarketplaceRoute: typeof DashboardMarketplaceRoute
+  DashboardMyPurchasesRoute: typeof DashboardMyPurchasesRoute
   DashboardNotificationsRoute: typeof DashboardNotificationsRoute
   DashboardQuestsRoute: typeof DashboardQuestsRoute
   DashboardSchoolsRoute: typeof DashboardSchoolsRoute
   DashboardUsersRoute: typeof DashboardUsersRoute
+  DashboardAdminAnalyticsRoute: typeof DashboardAdminAnalyticsRoute
+  DashboardAdminClaimsRoute: typeof DashboardAdminClaimsRoute
   DashboardAdminHomeRoute: typeof DashboardAdminHomeRoute
   DashboardAdminMarketplaceRoute: typeof DashboardAdminMarketplaceRoute
+  DashboardAdminPurchasesRoute: typeof DashboardAdminPurchasesRoute
   DashboardAdminQuestsRoute: typeof DashboardAdminQuestsRoute
 }
 
@@ -371,12 +451,16 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardHomeRoute: DashboardHomeRoute,
   DashboardLeaderboardRoute: DashboardLeaderboardRoute,
   DashboardMarketplaceRoute: DashboardMarketplaceRoute,
+  DashboardMyPurchasesRoute: DashboardMyPurchasesRoute,
   DashboardNotificationsRoute: DashboardNotificationsRoute,
   DashboardQuestsRoute: DashboardQuestsRoute,
   DashboardSchoolsRoute: DashboardSchoolsRoute,
   DashboardUsersRoute: DashboardUsersRoute,
+  DashboardAdminAnalyticsRoute: DashboardAdminAnalyticsRoute,
+  DashboardAdminClaimsRoute: DashboardAdminClaimsRoute,
   DashboardAdminHomeRoute: DashboardAdminHomeRoute,
   DashboardAdminMarketplaceRoute: DashboardAdminMarketplaceRoute,
+  DashboardAdminPurchasesRoute: DashboardAdminPurchasesRoute,
   DashboardAdminQuestsRoute: DashboardAdminQuestsRoute,
 }
 

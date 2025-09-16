@@ -60,3 +60,38 @@ export type Notification = NotificationsResponse["notifications"][0];
 export type NotificationStats = InferResponseType<
 	typeof tuyau.notifications.stats.$get
 >;
+
+// Types pour le marketplace
+export type ProductsResponse = InferResponseType<
+	typeof tuyau.marketplace.products.$get
+>;
+
+export type Product = ProductsResponse["products"][0];
+
+// Types pour le marketplace admin
+export type AdminProductsResponse = InferResponseType<
+	typeof tuyau.marketplace.products.admin.$get
+>;
+export type CreateProductRequest = InferRequestType<
+	typeof tuyau.marketplace.products.$post
+>;
+
+// Types pour l'historique des achats
+export type PurchaseHistoryResponse = InferResponseType<
+	typeof tuyau.marketplace.mypurchases.$get
+>;
+
+export type PurchaseHistory = PurchaseHistoryResponse["purchases"][0];
+export type PurchaseHistoryMeta = PurchaseHistoryResponse["meta"];
+
+// Types pour l'historique admin des achats
+export type AdminPurchasesResponse = InferResponseType<
+	typeof tuyau.marketplace.purchases.$get
+>;
+
+export type AdminPurchase = AdminPurchasesResponse["purchases"][0];
+
+// Types pour les analytics
+export type AnalyticsResponse = InferResponseType<
+	typeof tuyau.marketplace.analytics.$get
+>;

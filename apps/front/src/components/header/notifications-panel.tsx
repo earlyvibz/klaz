@@ -37,9 +37,9 @@ export default function NotificationsPanel() {
 			<PopoverTrigger asChild>
 				<Button variant="ghost" size="icon" className="relative">
 					{unreadCount > 0 ? (
-						<IconBellRinging className="h-5 w-5" />
+						<IconBellRinging className="h-15 w-15" />
 					) : (
-						<IconBell className="h-5 w-5" />
+						<IconBell className="h-15 w-15" />
 					)}
 					{unreadCount > 0 && (
 						<Badge

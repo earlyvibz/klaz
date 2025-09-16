@@ -7,6 +7,7 @@ import {
 import type { BelongsTo } from "@adonisjs/lucid/types/relations";
 import { DateTime } from "luxon";
 import { v4 as uuidv4 } from "uuid";
+import type Product from "#models/product";
 import Quest from "#models/quest";
 import QuestSubmission from "#models/quest_submission";
 import User from "#models/user";
@@ -15,7 +16,10 @@ export type NotificationType =
 	| "QUEST_APPROVED"
 	| "QUEST_REJECTED"
 	| "NEW_QUEST"
-	| "LEVEL_UP";
+	| "LEVEL_UP"
+	| "NEW_PRODUCT"
+	| "PRODUCT_PURCHASED"
+	| "LOW_STOCK_ALERT";
 
 export default class Notification extends BaseModel {
 	@column({ isPrimary: true })
@@ -202,6 +206,103 @@ export default class Notification extends BaseModel {
 				questType: quest.type,
 				questPoints: quest.points,
 				deadline: quest.deadline?.toISO(),
+			},
+			createdAt: DateTime.now(),
+			updatedAt: DateTime.now(),
+		}));
+
+		if (notifications.length > 0) {
+			await Notification.createMany(notifications);
+		}
+	}
+
+	// Marketplace notification methods
+	static async notifyAllStudentsOfNewProduct(
+		product: Product,
+		schoolId: string,
+	): Promise<void> {
+		// Get all active students from the same school
+		const students = await User.query()
+			.where("schoolId", schoolId)
+			.where("role", "STUDENT")
+			.where("isActive", true);
+
+		// Create notifications for all students
+		const notifications = students.map((student) => ({
+			id: uuidv4(),
+			userId: student.id,
+			questId: null,
+			questSubmissionId: null,
+			type: "NEW_PRODUCT" as NotificationType,
+			title: "Nouveau produit disponible ! 🛍️",
+			message: `Un nouveau produit "${product.title}" est maintenant disponible dans la boutique pour ${product.pricePoints} points !`,
+			isRead: false,
+			metadata: {
+				productId: product.id,
+				productTitle: product.title,
+				productPrice: product.pricePoints,
+				productImage: product.image,
+			},
+			createdAt: DateTime.now(),
+			updatedAt: DateTime.now(),
+		}));
+
+		if (notifications.length > 0) {
+			await Notification.createMany(notifications);
+		}
+	}
+
+	static async createProductPurchaseNotification(
+		userId: string,
+		product: Product,
+		quantity: number,
+		totalPoints: number,
+	): Promise<Notification> {
+		return await Notification.create({
+			id: uuidv4(),
+			userId,
+			questId: null,
+			questSubmissionId: null,
+			type: "PRODUCT_PURCHASED" as NotificationType,
+			title: "Achat confirmé ! ✅",
+			message: `Votre achat de ${quantity}x "${product.title}" pour ${totalPoints} points a été confirmé. Vous recevrez votre produit prochainement !`,
+			isRead: false,
+			metadata: {
+				productId: product.id,
+				productTitle: product.title,
+				quantity,
+				totalPoints,
+				pricePerUnit: product.pricePoints,
+			},
+			createdAt: DateTime.now(),
+			updatedAt: DateTime.now(),
+		});
+	}
+
+	static async notifyAdminsOfLowStock(
+		product: Product,
+		schoolId: string,
+	): Promise<void> {
+		// Get all admins from the same school
+		const admins = await User.query()
+			.where("schoolId", schoolId)
+			.where("role", "ADMIN")
+			.where("isActive", true);
+
+		// Create notifications for all admins
+		const notifications = admins.map((admin) => ({
+			id: uuidv4(),
+			userId: admin.id,
+			questId: null,
+			questSubmissionId: null,
+			type: "LOW_STOCK_ALERT" as NotificationType,
+			title: "Stock faible ! ⚠️",
+			message: `Le produit "${product.title}" est bientôt en rupture de stock (${product.supply} restant${product.supply > 1 ? "s" : ""}).`,
+			isRead: false,
+			metadata: {
+				productId: product.id,
+				productTitle: product.title,
+				currentStock: product.supply,
 			},
 			createdAt: DateTime.now(),
 			updatedAt: DateTime.now(),
