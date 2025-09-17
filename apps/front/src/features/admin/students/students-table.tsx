@@ -15,7 +15,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { formatDate } from "@/lib/utils";
 import { tuyau } from "@/main";
-import type { PaginatedStudentsResponse } from "@/types";
+import type { PaginatedStudentsResponse, User } from "@/types";
 
 interface StudentsTableProps {
 	students: PaginatedStudentsResponse["students"];
@@ -131,7 +131,7 @@ export function StudentsTable({
 						</TableRow>
 					</TableHeader>
 					<TableBody>
-						{students.map((student) => (
+						{students.map((student: User) => (
 							<TableRow key={student.id}>
 								<TableCell className="font-medium">
 									{student.lastName || "N/A"}
