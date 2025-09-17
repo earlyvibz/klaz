@@ -31,7 +31,6 @@ export default class SchoolsController {
 		const schools = await School.query()
 			.select("id", "name", "slug", "createdAt", "updatedAt")
 			.withCount("users")
-			.withCount("groups")
 			.orderBy("name", "asc")
 			.paginate(page, limit);
 

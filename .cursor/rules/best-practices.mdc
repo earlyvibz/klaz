@@ -1,0 +1,13 @@
+---
+description: best practices boilerplate
+globs:
+alwaysApply: true
+---
+
+- Always use types generated from tuyau, if you can't find them, look at the backend to verify and if there are not correctly implemented, implement them. Check the DTO et always put toJson() function.
+
+- Always use controllers in the backend, not services
+
+- in the front and super admin, try as much as possible to split the code into components to make it cleaner
+
+- In the front always use components from shacdn and from klaz/ui packages

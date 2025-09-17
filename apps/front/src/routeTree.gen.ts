@@ -23,6 +23,8 @@ import { Route as DashboardMarketplaceRouteImport } from './routes/_dashboard.ma
 import { Route as DashboardLeaderboardRouteImport } from './routes/_dashboard.leaderboard'
 import { Route as DashboardHomeRouteImport } from './routes/_dashboard.home'
 import { Route as DashboardAccountRouteImport } from './routes/_dashboard.account'
+import { Route as DashboardAdminUsersRouteImport } from './routes/_dashboard.admin.users'
+import { Route as DashboardAdminSettingsRouteImport } from './routes/_dashboard.admin.settings'
 import { Route as DashboardAdminQuestsRouteImport } from './routes/_dashboard.admin.quests'
 import { Route as DashboardAdminPurchasesRouteImport } from './routes/_dashboard.admin.purchases'
 import { Route as DashboardAdminMarketplaceRouteImport } from './routes/_dashboard.admin.marketplace'
@@ -99,6 +101,16 @@ const DashboardAccountRoute = DashboardAccountRouteImport.update({
   path: '/account',
   getParentRoute: () => DashboardRoute,
 } as any)
+const DashboardAdminUsersRoute = DashboardAdminUsersRouteImport.update({
+  id: '/admin/users',
+  path: '/admin/users',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardAdminSettingsRoute = DashboardAdminSettingsRouteImport.update({
+  id: '/admin/settings',
+  path: '/admin/settings',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const DashboardAdminQuestsRoute = DashboardAdminQuestsRouteImport.update({
   id: '/admin/quests',
   path: '/admin/quests',
@@ -151,6 +163,8 @@ export interface FileRoutesByFullPath {
   '/admin/marketplace': typeof DashboardAdminMarketplaceRoute
   '/admin/purchases': typeof DashboardAdminPurchasesRoute
   '/admin/quests': typeof DashboardAdminQuestsRoute
+  '/admin/settings': typeof DashboardAdminSettingsRoute
+  '/admin/users': typeof DashboardAdminUsersRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -172,6 +186,8 @@ export interface FileRoutesByTo {
   '/admin/marketplace': typeof DashboardAdminMarketplaceRoute
   '/admin/purchases': typeof DashboardAdminPurchasesRoute
   '/admin/quests': typeof DashboardAdminQuestsRoute
+  '/admin/settings': typeof DashboardAdminSettingsRoute
+  '/admin/users': typeof DashboardAdminUsersRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -195,6 +211,8 @@ export interface FileRoutesById {
   '/_dashboard/admin/marketplace': typeof DashboardAdminMarketplaceRoute
   '/_dashboard/admin/purchases': typeof DashboardAdminPurchasesRoute
   '/_dashboard/admin/quests': typeof DashboardAdminQuestsRoute
+  '/_dashboard/admin/settings': typeof DashboardAdminSettingsRoute
+  '/_dashboard/admin/users': typeof DashboardAdminUsersRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -218,6 +236,8 @@ export interface FileRouteTypes {
     | '/admin/marketplace'
     | '/admin/purchases'
     | '/admin/quests'
+    | '/admin/settings'
+    | '/admin/users'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -239,6 +259,8 @@ export interface FileRouteTypes {
     | '/admin/marketplace'
     | '/admin/purchases'
     | '/admin/quests'
+    | '/admin/settings'
+    | '/admin/users'
   id:
     | '__root__'
     | '/'
@@ -261,6 +283,8 @@ export interface FileRouteTypes {
     | '/_dashboard/admin/marketplace'
     | '/_dashboard/admin/purchases'
     | '/_dashboard/admin/quests'
+    | '/_dashboard/admin/settings'
+    | '/_dashboard/admin/users'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -369,6 +393,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardAccountRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/_dashboard/admin/users': {
+      id: '/_dashboard/admin/users'
+      path: '/admin/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof DashboardAdminUsersRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/_dashboard/admin/settings': {
+      id: '/_dashboard/admin/settings'
+      path: '/admin/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof DashboardAdminSettingsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/_dashboard/admin/quests': {
       id: '/_dashboard/admin/quests'
       path: '/admin/quests'
@@ -444,6 +482,8 @@ interface DashboardRouteChildren {
   DashboardAdminMarketplaceRoute: typeof DashboardAdminMarketplaceRoute
   DashboardAdminPurchasesRoute: typeof DashboardAdminPurchasesRoute
   DashboardAdminQuestsRoute: typeof DashboardAdminQuestsRoute
+  DashboardAdminSettingsRoute: typeof DashboardAdminSettingsRoute
+  DashboardAdminUsersRoute: typeof DashboardAdminUsersRoute
 }
 
 const DashboardRouteChildren: DashboardRouteChildren = {
@@ -462,6 +502,8 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardAdminMarketplaceRoute: DashboardAdminMarketplaceRoute,
   DashboardAdminPurchasesRoute: DashboardAdminPurchasesRoute,
   DashboardAdminQuestsRoute: DashboardAdminQuestsRoute,
+  DashboardAdminSettingsRoute: DashboardAdminSettingsRoute,
+  DashboardAdminUsersRoute: DashboardAdminUsersRoute,
 }
 
 const DashboardRouteWithChildren = DashboardRoute._addFileChildren(

@@ -7,11 +7,11 @@ export default class StudentsController {
 	async getStudents({ request, school }: HttpContext) {
 		const page = request.input("page", 1);
 		const limit = request.input("limit", 10);
+		const search = request.input("search", "");
 
 		let query = User.query()
 			.where("role", "STUDENT")
 			.where("isActive", true)
-			.preload("group")
 			.select([
 				"id",
 				"firstName",
@@ -19,13 +19,22 @@ export default class StudentsController {
 				"email",
 				"level",
 				"points",
-				"groupId",
 				"createdAt",
 				"lastLoginAt",
 			])
 			.orderBy("createdAt", "desc");
 
 		query = query.where("schoolId", school?.id ?? "");
+
+		// Add search functionality
+		if (search) {
+			query = query.where((builder) => {
+				builder
+					.whereILike("firstName", `%${search}%`)
+					.orWhereILike("lastName", `%${search}%`)
+					.orWhereILike("email", `%${search}%`);
+			});
+		}
 
 		const students = await query.paginate(page, limit);
 		const paginationMeta = students.getMeta() as PaginationMeta;
@@ -95,7 +104,6 @@ export default class StudentsController {
 				lastName: student.lastName,
 				isActive: student.isActive,
 				schoolId: student.schoolId,
-				groupId: student.groupId,
 				level: student.level,
 				points: student.points,
 			},

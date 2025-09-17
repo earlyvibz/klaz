@@ -1,6 +1,5 @@
 import { BaseModelDto } from "@adocasts.com/dto/base";
 import type { DateTime } from "luxon";
-import GroupDto from "#dtos/group";
 import QuestSubmissionDto from "#dtos/quest_submission";
 import RewardRedemptionDto from "#dtos/reward_redemption";
 import SchoolDto from "#dtos/school";
@@ -15,7 +14,6 @@ export default class UserDto extends BaseModelDto {
 	declare level: number;
 	declare points: number;
 	declare schoolId: string | null;
-	declare groupId: string | null;
 	declare isActive: boolean;
 	declare resetPasswordExpires: string | null;
 	declare lastLoginAt: string | null;
@@ -24,7 +22,6 @@ export default class UserDto extends BaseModelDto {
 	declare createdAt: DateTime;
 	declare updatedAt: string | null;
 	declare school: SchoolDto | null;
-	declare group: GroupDto | null;
 	declare questSubmissions: QuestSubmissionDto[];
 	declare rewardRedemptions: RewardRedemptionDto[];
 	declare isStudent: boolean;
@@ -44,15 +41,16 @@ export default class UserDto extends BaseModelDto {
 		this.level = user.level;
 		this.points = user.points;
 		this.schoolId = user.schoolId;
-		this.groupId = user.groupId;
 		this.isActive = user.isActive;
 		this.isStudent = user.isStudent();
 		this.isAdmin = user.isAdmin();
 		this.isSuperAdmin = user.isSuperAdmin();
 		this.hasAdminRights = user.hasAdminRights();
 		this.emailVerified = user.emailVerified;
+		this.createdAt = user.createdAt;
+		this.lastLoginAt = user.lastLoginAt?.toISO() || null;
+		this.updatedAt = user.updatedAt?.toISO() || null;
 		this.school = user.school && new SchoolDto(user.school);
-		this.group = user.group && new GroupDto(user.group);
 		this.questSubmissions = QuestSubmissionDto.fromArray(user.questSubmissions);
 		this.rewardRedemptions = RewardRedemptionDto.fromArray(
 			user.rewardRedemptions,
@@ -69,16 +67,14 @@ export default class UserDto extends BaseModelDto {
 			level: this.level,
 			points: this.points,
 			schoolId: this.schoolId,
-			groupId: this.groupId,
 			isActive: this.isActive,
 			resetPasswordExpires: this.resetPasswordExpires,
 			lastLoginAt: this.lastLoginAt,
 			failedLoginAttempts: this.failedLoginAttempts,
 			emailVerified: this.emailVerified,
-			createdAt: this.createdAt,
+			createdAt: this.createdAt?.toISO(),
 			updatedAt: this.updatedAt,
 			school: this.school && this.school,
-			group: this.group && this.group,
 			questSubmissions: this.questSubmissions,
 			rewardRedemptions: this.rewardRedemptions,
 			isStudent: this.isStudent,

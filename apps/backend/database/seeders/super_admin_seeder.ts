@@ -1,5 +1,4 @@
 import { BaseSeeder } from "@adonisjs/lucid/seeders";
-import Group from "#models/group";
 import School from "#models/school";
 import User from "#models/user";
 
@@ -78,31 +77,6 @@ export default class extends BaseSeeder {
 			},
 		);
 
-		// Créer des groupes pour l'école de démo
-		const group6A = await Group.firstOrCreate(
-			{ name: "6A", schoolId: demoSchool.id },
-			{
-				name: "6A",
-				schoolId: demoSchool.id,
-			},
-		);
-
-		const group6B = await Group.firstOrCreate(
-			{ name: "6B", schoolId: demoSchool.id },
-			{
-				name: "6B",
-				schoolId: demoSchool.id,
-			},
-		);
-
-		const group5A = await Group.firstOrCreate(
-			{ name: "5A", schoolId: demoSchool.id },
-			{
-				name: "5A",
-				schoolId: demoSchool.id,
-			},
-		);
-
 		// Créer des étudiants activés
 		const activeStudents = [
 			{
@@ -111,7 +85,6 @@ export default class extends BaseSeeder {
 				lastName: "Dupont",
 				level: 6,
 				points: 1250,
-				groupId: group6A.id,
 			},
 			{
 				email: "pierre.martin@demo-school.com",
@@ -119,7 +92,6 @@ export default class extends BaseSeeder {
 				lastName: "Martin",
 				level: 6,
 				points: 980,
-				groupId: group6A.id,
 			},
 			{
 				email: "sarah.bernard@demo-school.com",
@@ -127,7 +99,6 @@ export default class extends BaseSeeder {
 				lastName: "Bernard",
 				level: 6,
 				points: 1800,
-				groupId: group6A.id,
 			},
 			{
 				email: "lucas.petit@demo-school.com",
@@ -135,7 +106,6 @@ export default class extends BaseSeeder {
 				lastName: "Petit",
 				level: 6,
 				points: 750,
-				groupId: group6A.id,
 			},
 			{
 				email: "emma.rousseau@demo-school.com",
@@ -143,7 +113,6 @@ export default class extends BaseSeeder {
 				lastName: "Rousseau",
 				level: 6,
 				points: 1450,
-				groupId: group6A.id,
 			},
 			{
 				email: "alex.durand@demo-school.com",
@@ -151,7 +120,6 @@ export default class extends BaseSeeder {
 				lastName: "Durand",
 				level: 6,
 				points: 890,
-				groupId: group6B.id,
 			},
 			{
 				email: "chloe.blanc@demo-school.com",
@@ -159,7 +127,6 @@ export default class extends BaseSeeder {
 				lastName: "Blanc",
 				level: 6,
 				points: 1320,
-				groupId: group6B.id,
 			},
 			{
 				email: "noah.lopez@demo-school.com",
@@ -167,7 +134,6 @@ export default class extends BaseSeeder {
 				lastName: "Lopez",
 				level: 6,
 				points: 1100,
-				groupId: group6B.id,
 			},
 			{
 				email: "lea.garcia@demo-school.com",
@@ -175,7 +141,6 @@ export default class extends BaseSeeder {
 				lastName: "Garcia",
 				level: 6,
 				points: 1550,
-				groupId: group6B.id,
 			},
 			{
 				email: "hugo.martinez@demo-school.com",
@@ -183,7 +148,6 @@ export default class extends BaseSeeder {
 				lastName: "Martinez",
 				level: 6,
 				points: 950,
-				groupId: group6B.id,
 			},
 			{
 				email: "jade.rodriguez@demo-school.com",
@@ -191,7 +155,6 @@ export default class extends BaseSeeder {
 				lastName: "Rodriguez",
 				level: 5,
 				points: 1750,
-				groupId: group5A.id,
 			},
 			{
 				email: "mael.hernandez@demo-school.com",
@@ -199,7 +162,6 @@ export default class extends BaseSeeder {
 				lastName: "Hernandez",
 				level: 5,
 				points: 1230,
-				groupId: group5A.id,
 			},
 			{
 				email: "louise.wilson@demo-school.com",
@@ -207,7 +169,6 @@ export default class extends BaseSeeder {
 				lastName: "Wilson",
 				level: 5,
 				points: 1680,
-				groupId: group5A.id,
 			},
 			{
 				email: "arthur.anderson@demo-school.com",
@@ -215,7 +176,6 @@ export default class extends BaseSeeder {
 				lastName: "Anderson",
 				level: 5,
 				points: 1020,
-				groupId: group5A.id,
 			},
 			{
 				email: "camille.thomas@demo-school.com",
@@ -223,7 +183,6 @@ export default class extends BaseSeeder {
 				lastName: "Thomas",
 				level: 5,
 				points: 1490,
-				groupId: group5A.id,
 			},
 		];
 

@@ -6,7 +6,6 @@ export interface StudentCreateData {
 	level?: number;
 	points?: number;
 	schoolId: string;
-	groupId?: string | null;
 	isActive?: boolean;
 }
 
@@ -16,7 +15,6 @@ export interface StudentUpdateData {
 	email?: string;
 	level?: number;
 	points?: number;
-	groupId?: string | null;
 	isActive?: boolean;
 }
 
@@ -30,13 +28,8 @@ export interface StudentResponseData {
 	level: number;
 	points: number;
 	isActive: boolean;
-	groupId: string | null;
 	createdAt: string;
 	lastLoginAt: string | null;
-	group: {
-		id: string;
-		name: string;
-	} | null;
 }
 
 export type PaginationMeta = {

@@ -16,16 +16,15 @@ import Pagination from "@/components/pagination/pagination";
 import Pending from "@/components/pending/pending";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { tuyau } from "@/main";
-import type { PurchaseHistory, PurchaseHistoryResponse } from "@/types";
-
-type SearchParams = {
-	page?: number;
-	limit?: number;
-};
+import type {
+	PaginationSearchParams,
+	PurchaseHistory,
+	PurchaseHistoryResponse,
+} from "@/types";
 
 export const Route = createFileRoute("/_dashboard/my-purchases")({
 	component: MyPurchases,
-	validateSearch: (search: Record<string, unknown>): SearchParams => {
+	validateSearch: (search: Record<string, unknown>): PaginationSearchParams => {
 		return {
 			page: Number(search.page) || 1,
 			limit: Number(search.limit) || 10,

@@ -104,6 +104,7 @@ router
 		// Students
 		router.get("/students", [StudentsController, "getStudents"]);
 		router.get("/students/count", [StudentsController, "getStudentsCount"]);
+		router.delete("/students/:id/detach", [StudentsController, "detach"]);
 
 		// Invitations
 		router.post("/invitations/import", [InvitationsController, "import"]);

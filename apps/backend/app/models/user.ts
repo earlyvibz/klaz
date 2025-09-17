@@ -11,7 +11,6 @@ import {
 import type { BelongsTo, HasMany } from "@adonisjs/lucid/types/relations";
 import { DateTime } from "luxon";
 import { v4 as uuidv4 } from "uuid";
-import Group from "#models/group";
 import Notification from "#models/notification";
 import QuestSubmission from "#models/quest_submission";
 import RewardRedemption from "#models/reward_redemption";
@@ -53,9 +52,6 @@ export default class User extends compose(BaseModel, AuthFinder) {
 	declare schoolId: string | null;
 
 	@column()
-	declare groupId: string | null;
-
-	@column()
 	declare isActive: boolean;
 
 	@column()
@@ -84,9 +80,6 @@ export default class User extends compose(BaseModel, AuthFinder) {
 
 	@belongsTo(() => School, { foreignKey: "schoolId" })
 	declare school: BelongsTo<typeof School>;
-
-	@belongsTo(() => Group)
-	declare group: BelongsTo<typeof Group>;
 
 	@hasMany(() => QuestSubmission)
 	declare questSubmissions: HasMany<typeof QuestSubmission>;
@@ -173,7 +166,6 @@ export default class User extends compose(BaseModel, AuthFinder) {
 
 	async detachFromSchool(): Promise<void> {
 		this.schoolId = null;
-		this.groupId = null;
 		this.level = 1;
 		this.points = 0;
 		await this.save();

@@ -1,5 +1,4 @@
 import { BaseSeeder } from "@adonisjs/lucid/seeders";
-import Group from "#models/group";
 import Quest from "#models/quest";
 import School from "#models/school";
 import User from "#models/user";
@@ -199,31 +198,6 @@ export default class extends BaseSeeder {
 			},
 		);
 
-		// Créer des groupes pour école demo
-		const groupMBA1 = await Group.firstOrCreate(
-			{ name: "MBA 1A", schoolId: demoSchool.id },
-			{
-				name: "MBA 1A",
-				schoolId: demoSchool.id,
-			},
-		);
-
-		const groupMBA2 = await Group.firstOrCreate(
-			{ name: "MBA 2A", schoolId: demoSchool.id },
-			{
-				name: "MBA 2A",
-				schoolId: demoSchool.id,
-			},
-		);
-
-		const groupMSc = await Group.firstOrCreate(
-			{ name: "MSc Finance", schoolId: demoSchool.id },
-			{
-				name: "MSc Finance",
-				schoolId: demoSchool.id,
-			},
-		);
-
 		// Créer des étudiants pour école demo
 		const demoStudents = [
 			{
@@ -232,7 +206,6 @@ export default class extends BaseSeeder {
 				lastName: "Dubois",
 				level: 8,
 				points: 2100,
-				groupId: groupMBA1.id,
 			},
 			{
 				email: "charlotte.moreau@demo.com",
@@ -240,7 +213,6 @@ export default class extends BaseSeeder {
 				lastName: "Moreau",
 				level: 8,
 				points: 1950,
-				groupId: groupMBA1.id,
 			},
 			{
 				email: "maxime.lefevre@demo.com",
@@ -248,7 +220,6 @@ export default class extends BaseSeeder {
 				lastName: "Lefèvre",
 				level: 8,
 				points: 2350,
-				groupId: groupMBA1.id,
 			},
 			{
 				email: "sophie.laurent@demo.com",
@@ -256,7 +227,6 @@ export default class extends BaseSeeder {
 				lastName: "Laurent",
 				level: 8,
 				points: 1800,
-				groupId: groupMBA1.id,
 			},
 			{
 				email: "julien.simon@demo.com",
@@ -264,7 +234,6 @@ export default class extends BaseSeeder {
 				lastName: "Simon",
 				level: 9,
 				points: 2800,
-				groupId: groupMBA2.id,
 			},
 			{
 				email: "camille.michel@demo.com",
@@ -272,7 +241,6 @@ export default class extends BaseSeeder {
 				lastName: "Michel",
 				level: 9,
 				points: 2650,
-				groupId: groupMBA2.id,
 			},
 			{
 				email: "thomas.david@demo.com",
@@ -280,7 +248,6 @@ export default class extends BaseSeeder {
 				lastName: "David",
 				level: 9,
 				points: 2450,
-				groupId: groupMBA2.id,
 			},
 			{
 				email: "marine.petit@demo.com",
@@ -288,7 +255,6 @@ export default class extends BaseSeeder {
 				lastName: "Petit",
 				level: 9,
 				points: 2900,
-				groupId: groupMBA2.id,
 			},
 			{
 				email: "antoine.robert@demo.com",
@@ -296,7 +262,6 @@ export default class extends BaseSeeder {
 				lastName: "Robert",
 				level: 7,
 				points: 1650,
-				groupId: groupMSc.id,
 			},
 			{
 				email: "clara.richard@demo.com",
@@ -304,7 +269,6 @@ export default class extends BaseSeeder {
 				lastName: "Richard",
 				level: 7,
 				points: 1750,
-				groupId: groupMSc.id,
 			},
 			{
 				email: "paul.moreau@demo.com",
@@ -312,7 +276,6 @@ export default class extends BaseSeeder {
 				lastName: "Moreau",
 				level: 7,
 				points: 1580,
-				groupId: groupMSc.id,
 			},
 			{
 				email: "elena.garcia@demo.com",
@@ -320,7 +283,6 @@ export default class extends BaseSeeder {
 				lastName: "Garcia",
 				level: 7,
 				points: 1820,
-				groupId: groupMSc.id,
 			},
 		];
 
@@ -357,31 +319,6 @@ export default class extends BaseSeeder {
 			},
 		);
 
-		// Créer des groupes pour école test
-		const groupMBA1Test = await Group.firstOrCreate(
-			{ name: "MBA 1A", schoolId: testSchool.id },
-			{
-				name: "MBA 1A",
-				schoolId: testSchool.id,
-			},
-		);
-
-		const groupMBA2Test = await Group.firstOrCreate(
-			{ name: "MBA 2A", schoolId: testSchool.id },
-			{
-				name: "MBA 2A",
-				schoolId: testSchool.id,
-			},
-		);
-
-		const groupMScTest = await Group.firstOrCreate(
-			{ name: "MSc Finance", schoolId: testSchool.id },
-			{
-				name: "MSc Finance",
-				schoolId: testSchool.id,
-			},
-		);
-
 		// Créer des étudiants pour école test
 		const testStudents = [
 			{
@@ -390,7 +327,6 @@ export default class extends BaseSeeder {
 				lastName: "Dubois",
 				level: 8,
 				points: 2100,
-				groupId: groupMBA1Test.id,
 			},
 			{
 				email: "charlotte.moreau@test.com",
@@ -398,7 +334,6 @@ export default class extends BaseSeeder {
 				lastName: "Moreau",
 				level: 8,
 				points: 1950,
-				groupId: groupMBA1Test.id,
 			},
 			{
 				email: "maxime.lefevre@test.com",
@@ -406,7 +341,6 @@ export default class extends BaseSeeder {
 				lastName: "Lefèvre",
 				level: 8,
 				points: 2350,
-				groupId: groupMBA1Test.id,
 			},
 			{
 				email: "sophie.laurent@test.com",
@@ -414,7 +348,6 @@ export default class extends BaseSeeder {
 				lastName: "Laurent",
 				level: 8,
 				points: 1800,
-				groupId: groupMBA1Test.id,
 			},
 			{
 				email: "julien.simon@test.com",
@@ -422,7 +355,6 @@ export default class extends BaseSeeder {
 				lastName: "Simon",
 				level: 9,
 				points: 2800,
-				groupId: groupMBA2Test.id,
 			},
 			{
 				email: "camille.michel@test.com",
@@ -430,7 +362,6 @@ export default class extends BaseSeeder {
 				lastName: "Michel",
 				level: 9,
 				points: 2650,
-				groupId: groupMBA2Test.id,
 			},
 			{
 				email: "thomas.david@test.com",
@@ -438,7 +369,6 @@ export default class extends BaseSeeder {
 				lastName: "David",
 				level: 9,
 				points: 2450,
-				groupId: groupMBA2Test.id,
 			},
 			{
 				email: "marine.petit@test.com",
@@ -446,7 +376,6 @@ export default class extends BaseSeeder {
 				lastName: "Petit",
 				level: 9,
 				points: 2900,
-				groupId: groupMBA2Test.id,
 			},
 			{
 				email: "antoine.robert@test.com",
@@ -454,7 +383,6 @@ export default class extends BaseSeeder {
 				lastName: "Robert",
 				level: 7,
 				points: 1650,
-				groupId: groupMScTest.id,
 			},
 			{
 				email: "clara.richard@test.com",
@@ -462,7 +390,6 @@ export default class extends BaseSeeder {
 				lastName: "Richard",
 				level: 7,
 				points: 1750,
-				groupId: groupMScTest.id,
 			},
 			{
 				email: "paul.moreau@test.com",
@@ -470,7 +397,6 @@ export default class extends BaseSeeder {
 				lastName: "Moreau",
 				level: 7,
 				points: 1580,
-				groupId: groupMScTest.id,
 			},
 			{
 				email: "elena.garcia@test.com",
@@ -478,7 +404,6 @@ export default class extends BaseSeeder {
 				lastName: "Garcia",
 				level: 7,
 				points: 1820,
-				groupId: groupMScTest.id,
 			},
 		];
 
@@ -517,31 +442,6 @@ export default class extends BaseSeeder {
 			},
 		);
 
-		// Créer des groupes pour HEC
-		const groupMBA1 = await Group.firstOrCreate(
-			{ name: "MBA 1A", schoolId: hecSchool.id },
-			{
-				name: "MBA 1A",
-				schoolId: hecSchool.id,
-			},
-		);
-
-		const groupMBA2 = await Group.firstOrCreate(
-			{ name: "MBA 2A", schoolId: hecSchool.id },
-			{
-				name: "MBA 2A",
-				schoolId: hecSchool.id,
-			},
-		);
-
-		const groupMSc = await Group.firstOrCreate(
-			{ name: "MSc Finance", schoolId: hecSchool.id },
-			{
-				name: "MSc Finance",
-				schoolId: hecSchool.id,
-			},
-		);
-
 		// Créer des étudiants HEC
 		const hecStudents = [
 			{
@@ -550,7 +450,6 @@ export default class extends BaseSeeder {
 				lastName: "Dubois",
 				level: 8,
 				points: 2100,
-				groupId: groupMBA1.id,
 			},
 			{
 				email: "charlotte.moreau@hec.edu",
@@ -558,7 +457,6 @@ export default class extends BaseSeeder {
 				lastName: "Moreau",
 				level: 8,
 				points: 1950,
-				groupId: groupMBA1.id,
 			},
 			{
 				email: "maxime.lefevre@hec.edu",
@@ -566,7 +464,6 @@ export default class extends BaseSeeder {
 				lastName: "Lefèvre",
 				level: 8,
 				points: 2350,
-				groupId: groupMBA1.id,
 			},
 			{
 				email: "sophie.laurent@hec.edu",
@@ -574,7 +471,6 @@ export default class extends BaseSeeder {
 				lastName: "Laurent",
 				level: 8,
 				points: 1800,
-				groupId: groupMBA1.id,
 			},
 			{
 				email: "julien.simon@hec.edu",
@@ -582,7 +478,6 @@ export default class extends BaseSeeder {
 				lastName: "Simon",
 				level: 9,
 				points: 2800,
-				groupId: groupMBA2.id,
 			},
 			{
 				email: "camille.michel@hec.edu",
@@ -590,7 +485,6 @@ export default class extends BaseSeeder {
 				lastName: "Michel",
 				level: 9,
 				points: 2650,
-				groupId: groupMBA2.id,
 			},
 			{
 				email: "thomas.david@hec.edu",
@@ -598,7 +492,6 @@ export default class extends BaseSeeder {
 				lastName: "David",
 				level: 9,
 				points: 2450,
-				groupId: groupMBA2.id,
 			},
 			{
 				email: "marine.petit@hec.edu",
@@ -606,7 +499,6 @@ export default class extends BaseSeeder {
 				lastName: "Petit",
 				level: 9,
 				points: 2900,
-				groupId: groupMBA2.id,
 			},
 			{
 				email: "antoine.robert@hec.edu",
@@ -614,7 +506,6 @@ export default class extends BaseSeeder {
 				lastName: "Robert",
 				level: 7,
 				points: 1650,
-				groupId: groupMSc.id,
 			},
 			{
 				email: "clara.richard@hec.edu",
@@ -622,7 +513,6 @@ export default class extends BaseSeeder {
 				lastName: "Richard",
 				level: 7,
 				points: 1750,
-				groupId: groupMSc.id,
 			},
 			{
 				email: "paul.moreau@hec.edu",
@@ -630,7 +520,6 @@ export default class extends BaseSeeder {
 				lastName: "Moreau",
 				level: 7,
 				points: 1580,
-				groupId: groupMSc.id,
 			},
 			{
 				email: "elena.garcia@hec.edu",
@@ -638,7 +527,6 @@ export default class extends BaseSeeder {
 				lastName: "Garcia",
 				level: 7,
 				points: 1820,
-				groupId: groupMSc.id,
 			},
 		];
 

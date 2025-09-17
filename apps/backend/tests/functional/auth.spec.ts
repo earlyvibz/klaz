@@ -579,7 +579,6 @@ test.group("User Model", (group) => {
 		await user.refresh();
 
 		assert.isNull(user.schoolId);
-		assert.isNull(user.groupId);
 		assert.equal(user.level, 1);
 		assert.equal(user.points, 0);
 	});
