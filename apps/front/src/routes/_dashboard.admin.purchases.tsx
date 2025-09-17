@@ -24,18 +24,15 @@ import Pagination from "@/components/pagination/pagination";
 import Pending from "@/components/pending/pending";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { tuyau } from "@/main";
-import type { AdminPurchase, AdminPurchasesResponse } from "@/types";
-
-type SearchParams = {
-	page?: number;
-	limit?: number;
-	status?: string;
-	search?: string;
-};
+import type {
+	AdminPurchase,
+	AdminPurchasesResponse,
+	PurchasesSearchParams,
+} from "@/types";
 
 export const Route = createFileRoute("/_dashboard/admin/purchases")({
 	component: AdminPurchases,
-	validateSearch: (search: Record<string, unknown>): SearchParams => {
+	validateSearch: (search: Record<string, unknown>): PurchasesSearchParams => {
 		return {
 			page: Number(search.page) || 1,
 			limit: Number(search.limit) || 20,

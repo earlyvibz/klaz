@@ -9,11 +9,11 @@ import Pending from "@/components/pending/pending";
 import { ClaimsHeader } from "@/features/admin/claims/claims-header";
 import { ClaimsList } from "@/features/admin/claims/claims-list";
 import { tuyau } from "@/main";
-import type { ClaimsResponse, SearchParams } from "@/types/claims";
+import type { ClaimsResponse, PaginationSearchParams } from "@/types";
 
 export const Route = createFileRoute("/_dashboard/admin/claims")({
 	component: AdminClaims,
-	validateSearch: (search: Record<string, unknown>): SearchParams => {
+	validateSearch: (search: Record<string, unknown>): PaginationSearchParams => {
 		return {
 			page: Number(search.page) || 1,
 			limit: Number(search.limit) || 10,

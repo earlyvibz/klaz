@@ -2,7 +2,6 @@ import { BaseModel, beforeCreate, column, hasMany } from "@adonisjs/lucid/orm";
 import type { HasMany } from "@adonisjs/lucid/types/relations";
 import type { DateTime } from "luxon";
 import { v4 as uuidv4 } from "uuid";
-import Group from "#models/group";
 import Invitation from "#models/invitation";
 import Quest from "#models/quest";
 import Reward from "#models/reward";
@@ -42,9 +41,6 @@ export default class School extends BaseModel {
 
 	@column()
 	declare phone: string | null;
-
-	@hasMany(() => Group)
-	declare groups: HasMany<typeof Group>;
 
 	@hasMany(() => User)
 	declare users: HasMany<typeof User>;

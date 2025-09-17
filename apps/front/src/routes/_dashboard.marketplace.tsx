@@ -33,22 +33,17 @@ import Pending from "@/components/pending/pending";
 import PurchaseConfirmationModal from "@/features/students/marketplace/purchase-confirmation-modal";
 import { tuyau } from "@/main";
 import useAuth from "@/stores/auth-store";
-import type { Product, ProductsResponse } from "@/types";
-
-type SearchParams = {
-	page?: number;
-	limit?: number;
-	search?: string;
-	sortBy?: string;
-	sortOrder?: string;
-	minPrice?: number;
-	maxPrice?: number;
-	inStock?: boolean;
-};
+import type {
+	MarketplaceSearchParams,
+	Product,
+	ProductsResponse,
+} from "@/types";
 
 export const Route = createFileRoute("/_dashboard/marketplace")({
 	component: Marketplace,
-	validateSearch: (search: Record<string, unknown>): SearchParams => {
+	validateSearch: (
+		search: Record<string, unknown>,
+	): MarketplaceSearchParams => {
 		return {
 			page: Number(search.page) || 1,
 			limit: Number(search.limit) || 12,

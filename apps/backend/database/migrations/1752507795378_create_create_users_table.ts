@@ -20,7 +20,6 @@ export default class extends BaseSchema {
 				.references("id")
 				.inTable("schools")
 				.onDelete("CASCADE");
-			table.uuid("group_id").nullable().references("id").inTable("groups");
 			table.boolean("is_active").defaultTo(true);
 			table.string("reset_password_token").nullable();
 			table.timestamp("reset_password_expires").nullable();

@@ -103,3 +103,40 @@ export type ClaimsResponse = InferResponseType<
 
 export type Claim = ClaimsResponse["purchases"][0];
 export type ClaimsMeta = ClaimsResponse["meta"];
+
+// Common pagination and search types
+export interface BasePaginationParams {
+	page?: number;
+	limit?: number;
+}
+
+export interface BaseSearchParams extends BasePaginationParams {
+	search?: string;
+}
+
+export interface MarketplaceSearchParams extends BaseSearchParams {
+	sortBy?: string;
+	sortOrder?: string;
+	minPrice?: number;
+	maxPrice?: number;
+	inStock?: boolean;
+}
+
+export interface PurchasesSearchParams extends BaseSearchParams {
+	status?: string;
+}
+
+// For routes that only need pagination
+export type PaginationSearchParams = BasePaginationParams;
+
+// For routes that need pagination + search
+export type SearchPaginationParams = BaseSearchParams;
+
+// Specialized search params for different features
+export interface QuestSearchParams extends BasePaginationParams {
+	status?: string; // QuestFilter type will be inferred from the component
+}
+
+export interface NotificationSearchParams extends BasePaginationParams {
+	filter?: string; // NotificationFilter type will be inferred from the component
+}

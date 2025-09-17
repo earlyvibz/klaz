@@ -45,7 +45,7 @@ export const data = {
 			url: "/admin/purchases",
 			icon: IconHistory,
 		},
-		{ name: "Leaderboard", url: "/admin/leaderboard", icon: IconTrophy },
+		{ name: "Leaderboard", url: "/leaderboard", icon: IconTrophy },
 		{ name: "Paramètres école", url: "/admin/settings", icon: IconSettings },
 	],
 

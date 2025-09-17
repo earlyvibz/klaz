@@ -12,16 +12,15 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import Pagination from "@/components/pagination/pagination";
 import Pending from "@/components/pending/pending";
 import { tuyau } from "@/main";
-import type { LeaderboardResponse, LeaderboardUser } from "@/types";
-
-type SearchParams = {
-	page?: number;
-	limit?: number;
-};
+import type {
+	LeaderboardResponse,
+	LeaderboardUser,
+	PaginationSearchParams,
+} from "@/types";
 
 export const Route = createFileRoute("/_dashboard/leaderboard")({
 	component: Leaderboard,
-	validateSearch: (search: Record<string, unknown>): SearchParams => {
+	validateSearch: (search: Record<string, unknown>): PaginationSearchParams => {
 		return {
 			page: (search.page as number) || 1,
 			limit: (search.limit as number) || 20,

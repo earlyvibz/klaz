@@ -12,16 +12,15 @@ import Pending from "@/components/pending/pending";
 import TableProducts from "@/components/tables/table-products";
 import ProductCreationModal from "@/features/admin/marketplace/product-creation-modal";
 import { tuyau } from "@/main";
-import type { Product, ProductsResponse } from "@/types";
-
-type SearchParams = {
-	page?: number;
-	limit?: number;
-};
+import type {
+	PaginationSearchParams,
+	Product,
+	ProductsResponse,
+} from "@/types";
 
 export const Route = createFileRoute("/_dashboard/admin/marketplace")({
 	component: AdminMarketplace,
-	validateSearch: (search: Record<string, unknown>): SearchParams => {
+	validateSearch: (search: Record<string, unknown>): PaginationSearchParams => {
 		return {
 			page: Number(search.page) || 1,
 			limit: Number(search.limit) || 10,

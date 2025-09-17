@@ -5,6 +5,17 @@ export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs));
 }
 
+export function formatDate(dateString: string | Date | null): string {
+	if (!dateString) return "";
+	const date =
+		typeof dateString === "string" ? new Date(dateString) : dateString;
+	return date.toLocaleDateString("fr-FR", {
+		day: "numeric",
+		month: "short",
+		year: "numeric",
+	});
+}
+
 export const LinkifiedText = ({
 	text,
 }: {

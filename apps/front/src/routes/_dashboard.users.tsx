@@ -3,16 +3,14 @@ import Pagination from "@/components/pagination/pagination";
 import Pending from "@/components/pending/pending";
 import TableUsers from "@/components/tables/table-users";
 import { tuyau } from "@/main";
-import type { PaginatedStudentsResponse } from "@/types";
-
-type SearchParams = {
-	page?: number;
-	limit?: number;
-};
+import type {
+	PaginatedStudentsResponse,
+	PaginationSearchParams,
+} from "@/types";
 
 export const Route = createFileRoute("/_dashboard/users")({
 	component: Users,
-	validateSearch: (search: Record<string, unknown>): SearchParams => {
+	validateSearch: (search: Record<string, unknown>): PaginationSearchParams => {
 		return {
 			page: (search.page as number) || 1,
 			limit: (search.limit as number) || 10,
