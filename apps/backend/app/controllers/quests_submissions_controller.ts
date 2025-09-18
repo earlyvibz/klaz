@@ -115,14 +115,16 @@ export default class QuestsSubmissionsController {
 		submission.feedback = feedback;
 		await submission.save();
 
-		// Attribuer les points avec gamification
+		// Attribuer les points et EXP avec gamification
 		if (submission.user && submission.quest) {
 			const pointsToAward = await submission.quest.calculatePointsForUser(
 				submission.user,
 			);
+			const expToAward = pointsToAward; // Même montant pour les deux
 
 			const oldLevel = submission.user.level;
 			submission.user.points += pointsToAward;
+			submission.user.exp += expToAward;
 			const hasLeveledUp = await submission.user.updateLevel();
 
 			await submission.user.save();
@@ -141,6 +143,22 @@ export default class QuestsSubmissionsController {
 					submission.user.level,
 					oldLevel,
 				);
+			}
+
+			// Check and award badges
+			const newBadges = await submission.user.checkAndAwardBadges();
+			for (const badge of newBadges) {
+				// Créer une notification pour chaque nouveau badge
+				await Notification.create({
+					userId: submission.user.id,
+					type: "BADGE_EARNED",
+					title: "Nouveau badge obtenu !",
+					message: `Félicitations ! Vous avez obtenu le badge "${badge.name}"`,
+					metadata: {
+						badgeId: badge.id,
+						badgeName: badge.name,
+					},
+				});
 			}
 		}
 

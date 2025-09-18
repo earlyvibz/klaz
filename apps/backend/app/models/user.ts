@@ -11,10 +11,12 @@ import {
 import type { BelongsTo, HasMany } from "@adonisjs/lucid/types/relations";
 import { DateTime } from "luxon";
 import { v4 as uuidv4 } from "uuid";
+import Badge from "#models/badge";
 import Notification from "#models/notification";
 import QuestSubmission from "#models/quest_submission";
 import RewardRedemption from "#models/reward_redemption";
 import School from "#models/school";
+import UserBadge from "#models/user_badge";
 
 const AuthFinder = withAuthFinder(() => hash.use("scrypt"), {
 	uids: ["email"],
@@ -47,6 +49,9 @@ export default class User extends compose(BaseModel, AuthFinder) {
 
 	@column()
 	declare points: number;
+
+	@column()
+	declare exp: number;
 
 	@column()
 	declare schoolId: string | null;
@@ -89,6 +94,9 @@ export default class User extends compose(BaseModel, AuthFinder) {
 
 	@hasMany(() => Notification)
 	declare notifications: HasMany<typeof Notification>;
+
+	@hasMany(() => UserBadge)
+	declare userBadges: HasMany<typeof UserBadge>;
 
 	@beforeCreate()
 	public static async assignId(model: User) {
@@ -168,32 +176,32 @@ export default class User extends compose(BaseModel, AuthFinder) {
 		this.schoolId = null;
 		this.level = 1;
 		this.points = 0;
+		this.exp = 0;
 		await this.save();
 	}
 
 	// Gamification methods
 	calculateLevel(): number {
-		// Formule exponentielle douce: niveau = floor(sqrt(points / 100)) + 1
-		return Math.floor(Math.sqrt(this.points / 100)) + 1;
+		// Formule exponentielle douce basée sur EXP: niveau = floor(sqrt(exp / 100)) + 1
+		return Math.floor(Math.sqrt(this.exp / 100)) + 1;
 	}
 
-	getPointsForNextLevel(): number {
+	getExpForNextLevel(): number {
 		const nextLevel = this.level + 1;
 		return (nextLevel - 1) ** 2 * 100;
 	}
 
-	getPointsForCurrentLevel(): number {
+	getExpForCurrentLevel(): number {
 		if (this.level <= 1) return 0;
 		return (this.level - 1) ** 2 * 100;
 	}
 
 	getLevelProgress(): number {
-		const currentLevelPoints = this.getPointsForCurrentLevel();
-		const nextLevelPoints = this.getPointsForNextLevel();
-		if (nextLevelPoints === currentLevelPoints) return 1;
+		const currentLevelExp = this.getExpForCurrentLevel();
+		const nextLevelExp = this.getExpForNextLevel();
+		if (nextLevelExp === currentLevelExp) return 1;
 		const progress =
-			(this.points - currentLevelPoints) /
-			(nextLevelPoints - currentLevelPoints);
+			(this.exp - currentLevelExp) / (nextLevelExp - currentLevelExp);
 		return Math.max(0, Math.min(1, progress));
 	}
 
@@ -207,5 +215,95 @@ export default class User extends compose(BaseModel, AuthFinder) {
 		}
 
 		return hasLeveledUp;
+	}
+
+	// Badge methods
+	async checkAndAwardBadges(): Promise<Badge[]> {
+		const awardedBadges: Badge[] = [];
+
+		// Récupérer tous les badges actifs
+		const availableBadges = await Badge.query().where("isActive", true);
+
+		// Récupérer les badges déjà obtenus par l'utilisateur
+		const existingBadges = await UserBadge.query()
+			.where("userId", this.id)
+			.preload("badge");
+		const existingBadgeIds = existingBadges.map((ub) => ub.badgeId);
+
+		// Compter les quêtes complétées
+		const completedQuests = await QuestSubmission.query()
+			.where("userId", this.id)
+			.where("status", "APPROVED")
+			.count("* as total");
+		const questCount = Number(completedQuests[0].$extras.total);
+
+		for (const badge of availableBadges) {
+			// Vérifier si l'utilisateur a déjà ce badge
+			if (existingBadgeIds.includes(badge.id)) continue;
+
+			let shouldAward = false;
+
+			// Vérifier les conditions du badge
+			if (badge.requiredLevel && this.level >= badge.requiredLevel) {
+				shouldAward = true;
+			}
+			if (badge.requiredQuests && questCount >= badge.requiredQuests) {
+				shouldAward = true;
+			}
+			if (badge.requiredPoints && this.points >= badge.requiredPoints) {
+				shouldAward = true;
+			}
+
+			if (shouldAward) {
+				// Attribuer le badge
+				await UserBadge.create({
+					userId: this.id,
+					badgeId: badge.id,
+					earnedAt: DateTime.now(),
+				});
+				awardedBadges.push(badge);
+			}
+		}
+
+		return awardedBadges;
+	}
+
+	async getBadges(): Promise<Badge[]> {
+		const userBadges = await UserBadge.query()
+			.where("userId", this.id)
+			.preload("badge")
+			.orderBy("earnedAt", "desc");
+
+		return userBadges.map((ub) => ub.badge);
+	}
+
+	async getCurrentBadge(): Promise<Badge | null> {
+		// Get all level badges and find the highest one
+		const userBadges = await UserBadge.query()
+			.where("userId", this.id)
+			.preload("badge")
+			.whereHas("badge", (badgeQuery) => {
+				badgeQuery.whereNotNull("requiredLevel");
+			});
+
+		// Sort by required level and get the highest
+		const highestBadge = userBadges
+			.filter(
+				(ub) => ub.badge.requiredLevel && ub.badge.requiredLevel <= this.level,
+			)
+			.sort(
+				(a, b) => (b.badge.requiredLevel || 0) - (a.badge.requiredLevel || 0),
+			)[0];
+
+		return highestBadge?.badge || null;
+	}
+
+	getCurrentBadgeTitle(): string {
+		// This will be populated when badges are loaded
+		const currentBadge = this.userBadges?.find(
+			(ub) => ub.badge.requiredLevel && ub.badge.requiredLevel <= this.level,
+		)?.badge;
+
+		return currentBadge?.name || "Étudiant";
 	}
 }

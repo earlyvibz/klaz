@@ -3,6 +3,7 @@ import type { DateTime } from "luxon";
 import QuestSubmissionDto from "#dtos/quest_submission";
 import RewardRedemptionDto from "#dtos/reward_redemption";
 import SchoolDto from "#dtos/school";
+import UserBadgeDto from "#dtos/user_badge";
 import type User from "#models/user";
 
 export default class UserDto extends BaseModelDto {
@@ -13,6 +14,7 @@ export default class UserDto extends BaseModelDto {
 	declare role: "STUDENT" | "ADMIN" | "SUPERADMIN";
 	declare level: number;
 	declare points: number;
+	declare exp: number;
 	declare schoolId: string | null;
 	declare isActive: boolean;
 	declare resetPasswordExpires: string | null;
@@ -24,6 +26,8 @@ export default class UserDto extends BaseModelDto {
 	declare school: SchoolDto | null;
 	declare questSubmissions: QuestSubmissionDto[];
 	declare rewardRedemptions: RewardRedemptionDto[];
+	declare userBadges: UserBadgeDto[];
+	declare currentBadgeTitle: string;
 	declare isStudent: boolean;
 	declare isAdmin: boolean;
 	declare isSuperAdmin: boolean;
@@ -40,6 +44,7 @@ export default class UserDto extends BaseModelDto {
 		this.role = user.role;
 		this.level = user.level;
 		this.points = user.points;
+		this.exp = user.exp;
 		this.schoolId = user.schoolId;
 		this.isActive = user.isActive;
 		this.isStudent = user.isStudent();
@@ -55,6 +60,8 @@ export default class UserDto extends BaseModelDto {
 		this.rewardRedemptions = RewardRedemptionDto.fromArray(
 			user.rewardRedemptions,
 		);
+		this.userBadges = UserBadgeDto.fromArray(user.userBadges);
+		this.currentBadgeTitle = user.getCurrentBadgeTitle();
 	}
 
 	toJson() {
@@ -66,6 +73,7 @@ export default class UserDto extends BaseModelDto {
 			role: this.role,
 			level: this.level,
 			points: this.points,
+			exp: this.exp,
 			schoolId: this.schoolId,
 			isActive: this.isActive,
 			resetPasswordExpires: this.resetPasswordExpires,
@@ -77,6 +85,8 @@ export default class UserDto extends BaseModelDto {
 			school: this.school && this.school,
 			questSubmissions: this.questSubmissions,
 			rewardRedemptions: this.rewardRedemptions,
+			userBadges: this.userBadges,
+			currentBadgeTitle: this.currentBadgeTitle,
 			isStudent: this.isStudent,
 			isAdmin: this.isAdmin,
 			isSuperAdmin: this.isSuperAdmin,

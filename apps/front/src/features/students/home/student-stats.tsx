@@ -2,14 +2,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@klaz/ui";
 import {
 	formatLevel,
 	formatPoints,
+	getExpToNextLevel,
 	getLevelProgress,
-	getPointsToNextLevel,
 } from "@/lib/gamification";
 import type { User } from "@/types";
 
 export default function StudentStats({ user }: { user: User }) {
 	const levelProgress = getLevelProgress(user);
-	const pointsToNext = getPointsToNextLevel(user);
+	const expToNext = getExpToNextLevel(user);
 
 	return (
 		<div className="space-y-6">
@@ -34,8 +34,8 @@ export default function StudentStats({ user }: { user: User }) {
 						/>
 					</div>
 					<div className="text-sm opacity-90 text-center">
-						{pointsToNext > 0
-							? `${pointsToNext} points jusqu'au prochain niveau`
+						{expToNext > 0
+							? `${expToNext} EXP jusqu'au prochain niveau`
 							: "Niveau max atteint !"}
 					</div>
 				</div>
@@ -63,8 +63,8 @@ export default function StudentStats({ user }: { user: User }) {
 							{user.points.toLocaleString()}
 						</div>
 						<p className="text-sm text-muted-foreground mt-1">
-							{pointsToNext > 0
-								? `${pointsToNext} pour level up`
+							{expToNext > 0
+								? `${expToNext} EXP pour level up`
 								: "Niveau max !"}
 						</p>
 					</CardContent>

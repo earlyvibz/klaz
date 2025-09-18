@@ -19,7 +19,8 @@ export type NotificationType =
 	| "LEVEL_UP"
 	| "NEW_PRODUCT"
 	| "PRODUCT_PURCHASED"
-	| "LOW_STOCK_ALERT";
+	| "LOW_STOCK_ALERT"
+	| "BADGE_EARNED";
 
 export default class Notification extends BaseModel {
 	@column({ isPrimary: true })

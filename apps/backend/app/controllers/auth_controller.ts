@@ -49,7 +49,13 @@ export default class AuthController {
 	}
 
 	async me({ auth }: HttpContext) {
-		return new UserDto(auth.user);
+		const user = auth.user;
+		if (user) {
+			await user.load("userBadges", (query) => {
+				query.preload("badge");
+			});
+		}
+		return new UserDto(user);
 	}
 
 	async signup({ request, response, school }: HttpContext) {
