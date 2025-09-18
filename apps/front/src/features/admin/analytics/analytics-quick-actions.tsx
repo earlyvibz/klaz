@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@klaz/ui";
 import { IconClock, IconPackage, IconShoppingCart } from "@tabler/icons-react";
+import { Link } from "@tanstack/react-router";
 import type { AnalyticsResponse } from "@/types";
 
 interface AnalyticsQuickActionsProps {
@@ -14,8 +15,8 @@ export function AnalyticsQuickActions({ data }: AnalyticsQuickActionsProps) {
 			</CardHeader>
 			<CardContent>
 				<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-					<a
-						href="/admin/marketplace"
+					<Link
+						to="/admin/marketplace"
 						className="flex items-center gap-3 p-4 rounded-lg border hover:bg-muted/50 transition-colors"
 					>
 						<IconPackage className="h-5 w-5 text-blue-600" />
@@ -25,9 +26,9 @@ export function AnalyticsQuickActions({ data }: AnalyticsQuickActionsProps) {
 								Ajouter, modifier ou supprimer des produits
 							</p>
 						</div>
-					</a>
-					<a
-						href="/admin/claims"
+					</Link>
+					<Link
+						to="/admin/claims"
 						className="flex items-center gap-3 p-4 rounded-lg border hover:bg-muted/50 transition-colors"
 					>
 						<IconClock className="h-5 w-5 text-yellow-600" />
@@ -37,9 +38,9 @@ export function AnalyticsQuickActions({ data }: AnalyticsQuickActionsProps) {
 								{data.overview.pendingClaims} en attente
 							</p>
 						</div>
-					</a>
-					<a
-						href="/admin/purchases"
+					</Link>
+					<Link
+						to="/admin/purchases"
 						className="flex items-center gap-3 p-4 rounded-lg border hover:bg-muted/50 transition-colors"
 					>
 						<IconShoppingCart className="h-5 w-5 text-purple-600" />
@@ -49,7 +50,7 @@ export function AnalyticsQuickActions({ data }: AnalyticsQuickActionsProps) {
 								Voir tous les achats
 							</p>
 						</div>
-					</a>
+					</Link>
 				</div>
 			</CardContent>
 		</Card>
