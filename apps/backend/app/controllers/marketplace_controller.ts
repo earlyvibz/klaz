@@ -1,5 +1,6 @@
 import type { HttpContext } from "@adonisjs/core/http";
 import { DateTime } from "luxon";
+import { v4 as uuidv4 } from "uuid";
 import ProductDto from "#dtos/product";
 import ProductPurchaseDto from "#dtos/product_purchase";
 import Notification from "#models/notification";
@@ -1042,7 +1043,6 @@ export default class MarketplaceController {
 		}
 
 		// Generate unique filename with UUID for better cache busting
-		const { v4: uuidv4 } = require("uuid");
 		const timestamp = DateTime.now().toFormat("yyyyMMdd");
 		const uniqueId = uuidv4().substring(0, 8);
 		const key = `uploads/products/${schoolSlug}/${timestamp}/${uniqueId}.${image.extname}`;
